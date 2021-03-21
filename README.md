@@ -14,6 +14,8 @@ curl -sSL https://dotfiles.krd.sh/get | sh -s
 - vim (very naive)
 - gdb (ditto)
 
+files are stored in separate branch (`main`)
+
 ## license
 
 BSD 3-Clause
