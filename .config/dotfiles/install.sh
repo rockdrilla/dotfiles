@@ -20,7 +20,7 @@ main() {
     umask 0077
 
     if git_avail ; then
-        if [ -s "${HOME}/${d_repo}/packed-refs" ] ; then
+        if [ -s "${HOME}/${d_repo}/info/refs" ] ; then
             dot_update
         else
             dot_install
@@ -42,14 +42,12 @@ dot_install() {
     git_env
     mkdir -p "${GIT_DIR}"
     git init -b ${gh_br}
-    git remote add origin "${u_repo}"
     git_config
     git_update
 }
 
 dot_update() {
     git_env
-    git_config
     git_update
 }
 
@@ -104,6 +102,7 @@ git_env() {
 
 git_config() {
     ## remote
+    git remote add origin "${u_repo}"
     git config remote.origin.fetch "+refs/heads/${gh_br}:refs/remotes/origin/${gh_br}"
     git config remote.origin.tagopt '--no-tags'
     git config "branch.${gh_br}.remote" origin
@@ -119,6 +118,7 @@ git_config() {
 git_update() {
     git remote update -p
     git pull
+    git gc --aggressive --prune=all --force
 }
 
 tar_test() {
