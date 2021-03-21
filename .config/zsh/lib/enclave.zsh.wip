@@ -1,0 +1,63 @@
+#!/bin/zsh
+
+if autoload -Uz add-zsh-hook ; then
+
+ZSHU[f_enclave]="${ZSHU[d_var]}/enclave"
+[ -f "${ZSHU[f_enclave]}" ] || touch "${ZSHU[f_enclave]}"
+[ -s "${ZSHU[f_enclave]}" ] && . "${ZSHU[f_enclave]}"
+
+## <test data>
+test_enclave_enter() { echo "you are in $1 enclave" 1>&2 ; }
+test_enclave_leave() { echo "you are left $1 enclave" 1>&2 ; }
+
+zstyle ":enclave:box1:path:${HOME}/prj/*" ''
+zstyle ":enclave:box1:path:${HOME}/prj/_stale/*" exclude
+zstyle ':enclave:box1:env:unset' 'var2'
+zstyle ':enclave:box1:env:set' 'var1' 1
+zstyle ':enclave:box1:on_enter' test_enclave_enter
+zstyle ':enclave:box1:on_leave' test_enclave_leave
+
+zstyle ":enclave:box2:path:${HOME}/doc/*" ''
+zstyle ":enclave:box2:path:${HOME}/doc/work/*" exclude
+zstyle ':enclave:box2:env:unset' 'var1'
+zstyle ':enclave:box2:env:set' 'var2' 1
+zstyle ':enclave:box2:on_enter' test_enclave_enter
+zstyle ':enclave:box2:on_leave' test_enclave_leave
+
+typeset -g var1=0
+typeset -g var2=0
+## </test data>
+
+__z_enclave_list() {
+    local -aU list=( $(zstyle -L ':enclave:*' \
+                       | sed -En "/^zstyle '?:enclave:([^:]+):.*\$/{s//\1/;p;}") )
+    printf '%s' "${(j: :)list}"
+}
+
+__z_chpwd_enclave() {
+    [ -z "${PWD}" ] && return
+    ## enclave changed? if no - do nothing
+    [ -z "${OLDPWD}" ] && return
+    [ "${PWD}" = "${OLDPWD}" ] && return
+
+    local a
+    zstyle -s ":enclave:*:path:$PWD" '' a && \
+    declare -p a
+
+    ## call on_leave()
+    ## unset previously set
+    ## set previously set
+
+    env > /tmp/env
+}
+
+# zstyle -L ':enclave:*'
+# echo
+
+
+    add-zsh-hook chpwd __z_chpwd_enclave
+    __z_chpwd_enclave
+
+else
+    echo "enclaves are disabled due to missing hook support" 1>&2
+fi

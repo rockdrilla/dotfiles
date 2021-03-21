@@ -1,0 +1,11 @@
+[credential]
+	helper = cache --timeout=86400
+[gc]
+	auto = 0
+[push]
+	default = simple
+	gpgSign = false
+[commit]
+	gpgSign = false
+[pack]
+	writeReverseIndex = true
