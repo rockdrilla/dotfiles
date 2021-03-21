@@ -42,6 +42,7 @@ dot_install() {
     git_env
     mkdir -p "${GIT_DIR}"
     git init -b ${gh_br}
+    git remote add origin "${u_repo}"
     git_config
     git_update
 }
@@ -103,8 +104,6 @@ git_env() {
 
 git_config() {
     ## remote
-    git remote add origin "${u_repo}" || \
-    git remote set-url origin "${u_repo}"
     git config remote.origin.fetch "+refs/heads/${gh_br}:refs/remotes/origin/${gh_br}"
     git config remote.origin.tagopt '--no-tags'
     git config "branch.${gh_br}.remote" origin
