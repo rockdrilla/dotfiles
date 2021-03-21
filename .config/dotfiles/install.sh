@@ -38,6 +38,7 @@ git_avail() {
 }
 
 dot_install() {
+    backup_unconditionally
     git_env
     mkdir -p "${GIT_DIR}"
     git init -b ${gh_br}
@@ -88,7 +89,7 @@ dot_install_raw() {
     n_bak=$(find "${td_backup}/" -mindepth 1 | wc -l)
     if [ "${n_bak}" != 0 ] ; then
         echo "backed-up files are here: ${td_backup}/"
-        ls -lghAG "${td_backup}/"
+        find "${td_backup}/" -mindepth 1 -ls
     else
         rmdir "${td_backup}"
     fi
@@ -140,6 +141,32 @@ tar_try_extract() {
 
 cmp_files() {
     cmp -s "$1/$3" "$2/$3" >/dev/null 2>/dev/null
+}
+
+backup_unconditionally() {
+    tf_list=$(mktemp)
+    curl -sSL "${u_gitignore}" | \
+    sed -En '/^!\/(.+)$/{s//\1/;p;}' > "${tf_list}"
+
+    td_backup=$(mktemp -d)
+    while read f ; do
+        if [ -f "${HOME}/$f" ] ; then
+            d=$(dirname "$f")
+            if [ -n "$d" ] ; then
+                mkdir -p "${td_backup}/$d"
+            fi
+            mv -f "${HOME}/$f" "${td_backup}/$f"
+        fi
+    done < "${tf_list}"
+    rm -f "${tf_list}"
+
+    n_bak=$(find "${td_backup}/" -mindepth 1 | wc -l)
+    if [ "${n_bak}" != 0 ] ; then
+        echo "backed-up files are here: ${td_backup}/"
+        find "${td_backup}/" -mindepth 1 -ls
+    else
+        rmdir "${td_backup}"
+    fi
 }
 
 main "$@"
