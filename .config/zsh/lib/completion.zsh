@@ -4,7 +4,7 @@ ZSHU[f_compdump]="${ZSHU[d_cache]}/compdump"
 ZSHU[d_compcache]="${ZSHU[d_cache]}/compcache"
 [ -d "${ZSHU[d_compcache]}" ] || mkdir -p "${ZSHU[d_compcache]}"
 
-fpath=( "${ZSHU[d_compcache]}" $fpath )
+fpath=( "${ZSHU[d_cache]}/completion" $fpath )
 
 __z_compdump_print() { printf '#zshu %s %s\n' "$1" "${(P)1}" ; }
 
@@ -56,14 +56,13 @@ __z_comp_bash() {
     return 0
 }
 
-__z_comp_test() {
+__z_comp_external() {
     (( ${+commands[$1]} )) || return 1
-    (( ${+_comps[$1]} )) && return 2
-    [ -s "${ZSHU[d_compcache]}/_$1" ] && return 3
-    return 0
-}
-
-__z_comp_write() {
-    cat > "${ZSHU[d_compcache]}/_$1"
+    (( ${+_comps[$1]} ))   && return 2
+    local f="${ZSHU[d_cache]}/completion/_$1"
+    if ! [ -s "$f" ] ; then
+        "$2" > "$f" || return 3
+    fi
+    autoload -Uz "_$1"
     return 0
 }

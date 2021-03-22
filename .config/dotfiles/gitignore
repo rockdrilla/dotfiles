@@ -1,6 +1,7 @@
 *
 !/.cache/zsh/.keep
 !/.cache/zsh/compcache/.keep
+!/.cache/zsh/completion/.keep
 !/.config/dotfiles/bin/.keep
 !/.config/dotfiles/gen-gitignore.sh
 !/.config/dotfiles/gitignore
@@ -38,7 +39,6 @@
 !/.config/zsh/lib/starship.zsh.sample
 !/.config/zsh/lib/time.zsh
 !/.config/zsh/local/.keep
-!/.config/zsh/local/completion/.keep
 !/.config/zsh/opt.zsh
 !/.config/zsh/opt/chase.zsh
 !/.config/zsh/opt/completion.zsh
