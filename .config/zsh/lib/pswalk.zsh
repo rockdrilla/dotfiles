@@ -38,5 +38,6 @@ z-run-test() {
 }
 
 z-run-test gui       konsole xterm x-terminal-emulator
-z-run-test nested    screen tmux
+z-run-test nested    screen tmux mc
+z-run-test nested1   mc
 z-run-test elevated  sudo su

@@ -75,10 +75,6 @@ function {
     ZSHU_PS[ps1_1L]="${(j::)line}"
 }
 
-ZSHU_PS[ps1_standard]=${ZSHU_PS[ps1_3L]}
-ZSHU_PS[ps1_nested]=${ZSHU_PS[ps1_2L]}
-
-if [ "${ZSHU_RUN[nested]}" = 0 ]
-then PS1=${ZSHU_PS[ps1_standard]}
-else PS1=${ZSHU_PS[ps1_nested]}
-fi
+PS1=${ZSHU_PS[ps1_3L]}
+[ "${ZSHU_RUN[nested]}"  = 1 ] && PS1=${ZSHU_PS[ps1_2L]}
+[ "${ZSHU_RUN[nested1]}" = 1 ] && PS1=${ZSHU_PS[ps1_1L]}
