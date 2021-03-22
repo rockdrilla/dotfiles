@@ -41,7 +41,8 @@ dot_install() {
     backup_unconditionally
     git_env
     mkdir -p "${GIT_DIR}"
-    git init -b ${gh_br}
+    git init
+    git branch -M ${gh_br} || true
     git_config
     git_update
 }
@@ -118,7 +119,7 @@ git_config() {
 git_update() {
     git remote update -p
     git pull
-    git gc --aggressive --prune=all --force
+    git gc --aggressive --prune=all --force || git gc || true
 }
 
 tar_test() {
