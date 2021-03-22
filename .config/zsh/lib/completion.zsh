@@ -45,14 +45,14 @@ __z_comp_bash() {
     (( ${+_comps[$1]} )) && return 2
     (( ${+ZSHU[compdump_bash]} )) || return 3
     (( ${+2} )) && return 0
-    local f p
+    local f p x
     f=0
     for p ( /usr/share/bash-completion/completions ) ; do
-        [ -s "$p/$1" ]  && f=1 && break
-        [ -s "$p/_$1" ] && f=1 && break
+        x="_$1" ; [ -s "$p/$x" ] && f=1 && break
+        x="$1"  ; [ -s "$p/$x" ] && f=1 && break
     done
-    [ "$f" = 0 ] && return 1
-    complete -C "$1" "$1"
+    [ "$f" = 0 ] && return 4
+    complete -C "$x" "$1"
     return 0
 }
 
