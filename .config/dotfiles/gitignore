@@ -12,6 +12,7 @@
 !/.config/zsh/alias/grep.zsh
 !/.config/zsh/alias/history.zsh
 !/.config/zsh/alias/idle.zsh
+!/.config/zsh/alias/kconfig.zsh
 !/.config/zsh/alias/ls.zsh
 !/.config/zsh/alias/sudo.zsh
 !/.config/zsh/alias/telnet.zsh
