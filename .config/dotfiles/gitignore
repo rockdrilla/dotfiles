@@ -7,6 +7,7 @@
 !/.config/dotfiles/gitignore
 !/.config/dotfiles/install.sh
 !/.config/zsh/alias.zsh
+!/.config/zsh/alias/buildah.zsh
 !/.config/zsh/alias/diff.zsh
 !/.config/zsh/alias/directories.zsh
 !/.config/zsh/alias/grep.zsh
