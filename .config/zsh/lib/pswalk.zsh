@@ -10,6 +10,8 @@ function {
         i=$(ps -o ppid= -p $i 2>/dev/null || : )
         i=${i//[^0-9]}
         [[ "$i" =~ '^[1-9][0-9]*$' ]] || break
+        ## don't deal with PID1
+        [ "$i" = 1 ] && continue
         ZSHU_PARENTS_PID+=( $i )
     done
 
