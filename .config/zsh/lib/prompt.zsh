@@ -14,8 +14,8 @@ ZSHU_PM[cmd_user]='%K{white}$'
 ZSHU_PM[cmd_root]='%K{red}#'
 ZSHU_PS[cmd]="%F{black}%(!.${ZSHU_PM[cmd_root]}.${ZSHU_PM[cmd_user]})${ZSHU_PM[rst]} "
 
-ZSHU_PM[user]='%(!.%F{red}.%F{green})%n%f'
-ZSHU_PM[host]="%B%F{blue}${ZSHU[host]}%f%b"
+ZSHU_PM[user]='%(!.%F{magenta}.%F{green})%n%f'
+ZSHU_PM[host]="%B%(!.%F{red}.%F{blue})${ZSHU[host]}%f%b"
 
 if autoload -Uz add-zsh-hook ; then
 
