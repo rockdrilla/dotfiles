@@ -52,6 +52,7 @@
 !/.config/zsh/rc/keyboard.zsh
 !/.config/zsh/rc/pager.zsh
 !/.config/zsh/rc/prompt.zsh
+!/.config/zsh/rc/terminal.zsh
 !/.config/zsh/var/.keep
 !/.gdbinit
 !/.gitconfig
