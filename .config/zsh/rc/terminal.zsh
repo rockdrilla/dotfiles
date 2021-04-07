@@ -1,8 +1,6 @@
 #!/bin/zsh
 
 function {
-    [ "${ZSHU_RUN[nested]}" = 1 ] || return
-
     local -a a
     local x
     for i ( ${ZSHU_PARENTS_PID} ) ; do
@@ -12,7 +10,4 @@ function {
         a+=( "$x" )
     done
     export ORIG_TERM="${a[-1]}"
-    echo "${TERM}" | grep -Fq "${ORIG_TERM}" && return
-
-    export TERM="${TERM}.${ORIG_TERM}"
 }

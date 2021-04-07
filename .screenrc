@@ -1,4 +1,6 @@
 startup_message off
+term screen-256color-s
+bce off
 defutf8 on
 utf8 on on
 defscrollback 262144
