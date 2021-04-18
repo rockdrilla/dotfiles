@@ -37,6 +37,7 @@
 !/.config/zsh/lib/history.zsh
 !/.config/zsh/lib/prompt.zsh
 !/.config/zsh/lib/pswalk.zsh
+!/.config/zsh/lib/say-my.zsh
 !/.config/zsh/lib/selfservice.zsh
 !/.config/zsh/lib/starship.zsh.sample
 !/.config/zsh/lib/time.zsh

@@ -1,0 +1,15 @@
+#!/bin/zsh
+
+say_my_name() {
+    GIT_COMMITTER_NAME="$1"
+    GIT_AUTHOR_NAME="$1"
+    DEBFULLNAME="$1"
+    export GIT_COMMITTER_NAME GIT_AUTHOR_NAME DEBFULLNAME
+}
+
+say_my_email() {
+    GIT_COMMITTER_EMAIL="$1"
+    GIT_AUTHOR_EMAIL="$1"
+    DEBEMAIL="$1"
+    export GIT_COMMITTER_EMAIL GIT_AUTHOR_EMAIL DEBEMAIL
+}
