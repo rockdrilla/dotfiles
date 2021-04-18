@@ -1,10 +1,10 @@
 startup_message off
-term screen-256color-s
+# term screen-256color-s
 bce off
 defutf8 on
 utf8 on on
 defscrollback 262144
 defflow off
 deflogin off
-#defshell -zsh
+# defshell -zsh
 hardstatus alwaysfirstline "%{= ky}%y.%m.%d%{= kK}|%{= kY}%c:%s%{= kK}|%{= kB}%H%{= kK}|%{= kG}%S%{= kK}|%{= kM}#%w%{-}%= %{= kK}|%{= kr}%l%{= kG}"
