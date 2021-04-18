@@ -118,7 +118,7 @@ git_config() {
 
 git_update() {
     git remote update -p
-    git pull
+    git pull || git reset --hard origin/main
     git gc --aggressive --prune=all --force || git gc || true
 }
 
