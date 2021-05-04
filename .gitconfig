@@ -1,7 +1,10 @@
 [credential]
 	helper = cache --timeout=86400
 [gc]
+	aggressiveDepth = 100
+	aggressiveWindow = 400
 	auto = 0
+	pruneExpire = now
 [push]
 	default = simple
 	gpgSign = false
@@ -9,3 +12,5 @@
 	gpgSign = false
 [pack]
 	writeReverseIndex = true
+[receive]
+	autogc = false
