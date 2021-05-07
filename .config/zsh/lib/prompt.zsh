@@ -10,9 +10,9 @@ ZSHU_PS[lastcmd]="%B%(?.%F{green}.%F{red})${ZSHU_PM[status]}%f%b"
 
 ZSHU_PS[pwd_std]='%F{cyan}%B%~%f%b'
 
-ZSHU_PM[cmd_user]='%K{white}$'
-ZSHU_PM[cmd_root]='%K{red}#'
-ZSHU_PS[cmd]="%F{black}%(!.${ZSHU_PM[cmd_root]}.${ZSHU_PM[cmd_user]})${ZSHU_PM[rst]} "
+ZSHU_PM[cmd_user]='%F{white}$'
+ZSHU_PM[cmd_root]='%F{red}#'
+ZSHU_PS[cmd]="%k%B%(!.${ZSHU_PM[cmd_root]}.${ZSHU_PM[cmd_user]})${ZSHU_PM[rst]} "
 
 ZSHU_PM[user]='%(!.%F{magenta}.%F{green})%n%f'
 ZSHU_PM[host]="%B%(!.%F{red}.%F{blue})${ZSHU[host]}%f%b"
