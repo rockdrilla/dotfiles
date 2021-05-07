@@ -10,6 +10,7 @@ function {
     line+="%B%F{black}┌[%b"
     line+="%F{yellow}%D{%y.%m.%d} %B%D{%H:%M:%S}%f%b"
     line+="%B%F{black}|%b"
+    line+='${ZSHU_PM[id]:+"%B%F{white}${ZSHU_PM[id]}${ZSHU_PM[rst]}%B%F{black}|%b%f"}'
     line+="${ZSHU_PM[user]}%F{white}@${ZSHU_PM[host]}"
     line+='${ZSHU_PS[elapsed]}'
     line+='${ZSHU_PS[status_extra]}'
@@ -38,6 +39,7 @@ function {
 
     line+="${ZSHU_PM[rst]}"
     line+="%B%F{black}┌[%b"
+    line+='${ZSHU_PM[id]:+"%B%F{white}${ZSHU_PM[id]}${ZSHU_PM[rst]}%B%F{black}|%b%f"}'
     line+="${ZSHU_PM[user]}%F{white}@${ZSHU_PM[host]}"
     line+="%B%F{black}|%b"
     line+='${ZSHU_PS[pwd]:-${ZSHU_PS[pwd_std]}}'
@@ -65,6 +67,7 @@ function {
     line+="%B%F{black}|%b"
     line+="${ZSHU_PM[user]}"
     line+="%B%F{black}|%b"
+    line+='${ZSHU_PM[id]:+"%B%F{white}${ZSHU_PM[id]}${ZSHU_PM[rst]}%B%F{black}|%b%f"}'
     line+='${ZSHU_PS[pwd]:-${ZSHU_PS[pwd_std]}}'
     line+='${ZSHU_PS[pwd_extra]}'
     line+='${ZSHU_PS[elapsed]}'
