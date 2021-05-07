@@ -35,7 +35,6 @@ function {
 ## two-line prompt
 function {
     local -a line
-    local r
 
     line+="${ZSHU_PM[rst]}"
     line+="%B%F{black}┌[%b"
