@@ -1,23 +1,7 @@
 #!/bin/zsh
 
-typeset -Uga ZSHU_TERM_MISSING
 typeset -A ZSHU_TI_KEYS
 typeset -A ZSHU_FB_KEYS
-
-z-ti-test() {
-    local r i
-    r=0
-
-    for i ; do
-        [ -z "$i" ] && continue
-        if ! (( ${+terminfo[$i]} )) ; then
-            ZSHU_TERM_MISSING+=( "$1" )
-            r=1
-        fi
-    done
-
-    return $r
-}
 
 if z-ti-test smkx rmkx ; then
     zle-line-init()   { emulate -L zsh ; echoti smkx ; }
