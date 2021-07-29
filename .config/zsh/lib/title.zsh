@@ -16,7 +16,7 @@ z-title-tab() {
         print -Pn "\ek${1:q}\e\\"
     ;;
     *)
-        z-ti-test fsl tsl || break
+        z-ti-test fsl tsl || return
 
         echoti tsl
         print -Pn "$1"
