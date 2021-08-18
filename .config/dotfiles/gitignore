@@ -40,7 +40,9 @@
 !/.config/zsh/lib/say-my.zsh
 !/.config/zsh/lib/selfservice.zsh
 !/.config/zsh/lib/starship.zsh.sample
+!/.config/zsh/lib/term.zsh
 !/.config/zsh/lib/time.zsh
+!/.config/zsh/lib/title.zsh
 !/.config/zsh/local/.keep
 !/.config/zsh/opt.zsh
 !/.config/zsh/opt/chase.zsh
