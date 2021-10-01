@@ -66,3 +66,11 @@ __z_comp_external() {
     autoload -Uz "_$1"
     return 0
 }
+
+## reload or new session are required to regenerate compcache
+z-comp-invalidate() {
+    [ -n "$1" ] || return 1
+    local f="${ZSHU[d_cache]}/completion/_$1"
+    [ -f "$f" ] || return 2
+    command rm -f "$f" || return 3
+}
