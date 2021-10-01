@@ -17,9 +17,9 @@ z-alt-find() {
         c=$(which "${a[1]}")
         [ -z "$c" ] && continue
 
-        # r=$(readlink -f "$c" 2>/dev/null)
-        # [ -z "$r" ] && continue
-        # a[1]="$r"
+    #   r=$(readlink -f "$c" 2>/dev/null)
+    #   [ -z "$r" ] && continue
+    #   a[1]="$r"
 
         if [ -n "$2" ] ; then
             t="$a $2"

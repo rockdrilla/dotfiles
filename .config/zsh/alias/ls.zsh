@@ -17,8 +17,8 @@ __z_alt_ls() {
     case "$n" in
     0) : do nothing ;;
     *) z-alt-set-static 'ls|-d .' "$1" "LS_OPTIONS='' " ;;
-    # 1) z-alt-set-static  'ls|-d .' "$1" "LS_OPTIONS='' " ;;
-    # *) z-alt-set-dynamic 'ls|-d .' "$1" "LS_OPTIONS='' " ;;
+#   1) z-alt-set-static  'ls|-d .' "$1" "LS_OPTIONS='' " ;;
+#   *) z-alt-set-dynamic 'ls|-d .' "$1" "LS_OPTIONS='' " ;;
     esac
 }
 
@@ -34,8 +34,7 @@ darwin*)   alt="gls ${LS_GNU}|ls -G|ls" ;;
 esac
 
 __z_alt_ls "${alt}"
-
-unfunction __z_alt_ls
+unset -f __z_alt_ls
 unset alt LS_GNU
 
 [ -n "${LS_COLORS}" ] && zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"

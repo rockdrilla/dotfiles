@@ -21,7 +21,7 @@ ZSHU_PS[cmd_threshold]=3
 
 __z_cmdtime_precmd() {
     local t=${EPOCHREALTIME}
-    # local t=${(%):-%D{%s.%9.}}
+#   local t=${(%):-%D{%s.%9.}}
 
     ZSHU_PS[elapsed]=''
     (( ${+ZSHU_PS[cmd_ts]} )) || return
@@ -41,7 +41,7 @@ __z_cmdtime_precmd() {
 
 __z_cmdtime_preexec() {
     ZSHU_PS[cmd_ts]=${EPOCHREALTIME}
-    # ZSHU_PS[cmd_ts]=${(%):-%D{%s.%9.}}
+#   ZSHU_PS[cmd_ts]=${(%):-%D{%s.%9.}}
 }
 
 add-zsh-hook precmd  __z_cmdtime_precmd

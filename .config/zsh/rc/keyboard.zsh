@@ -6,8 +6,8 @@ typeset -A ZSHU_FB_KEYS
 if z-ti-test smkx rmkx ; then
     zle-line-init()   { emulate -L zsh ; echoti smkx ; }
     zle-line-finish() { emulate -L zsh ; echoti rmkx ; }
-    # zle-line-init()   { echoti smkx ; }
-    # zle-line-finish() { echoti rmkx ; }
+#   zle-line-init()   { echoti smkx ; }
+#   zle-line-finish() { echoti rmkx ; }
     zle -N zle-line-init
     zle -N zle-line-finish
 fi
@@ -74,7 +74,7 @@ z-bind () {
     done
     shift
 
-    # sequence="$1"
+#   sequence="$1"
     widget="$2"
 
     local -Ua keys
