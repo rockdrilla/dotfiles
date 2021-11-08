@@ -1,16 +1,22 @@
+[commit]
+	gpgSign = false
 [credential]
 	helper = cache --timeout=86400
 [gc]
 	aggressiveDepth = 100
-	aggressiveWindow = 400
+	aggressiveWindow = 500
 	auto = 0
 	pruneExpire = now
+[fetch]
+	writeCommitGraph = true
+[maintainance]
+	auto = false
+[pack]
+	writeReverseIndex = true
+	useSaprse = true
 [push]
 	default = simple
 	gpgSign = false
-[commit]
-	gpgSign = false
-[pack]
-	writeReverseIndex = true
 [receive]
 	autogc = false
+	writeBitmaps = true
