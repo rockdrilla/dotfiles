@@ -13,7 +13,7 @@
 	auto = false
 [pack]
 	writeReverseIndex = true
-	useSaprse = true
+	useSparse = true
 [push]
 	default = simple
 	gpgSign = false
