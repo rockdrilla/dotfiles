@@ -1,5 +1,7 @@
 [commit]
 	gpgSign = false
+[core]
+	compression = 1
 [credential]
 	helper = cache --timeout=86400
 [gc]
@@ -14,6 +16,8 @@
 [pack]
 	writeReverseIndex = true
 	useSparse = true
+[pull]
+	ff = only
 [push]
 	default = simple
 	gpgSign = false
