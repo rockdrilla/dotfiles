@@ -1,4 +1,4 @@
 #!/bin/zsh
 
-run() { command podman run ${TERM:+-e "TERM=$TERM"} --network host --rm -it "$@" ; }
-run-sh() { run --entrypoint='["/bin/sh"]' --user=0:0 "$@" ; }
+alias run='podman run -e "TERM=$TERM" --network host --rm -it '
+alias run-sh="run --entrypoint='[\"/bin/sh\"]' --user=0:0 "

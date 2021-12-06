@@ -5,10 +5,13 @@ zshu_modules+=(
     complete
     complist
     computil
+    datetime
     langinfo
     main
+    mathfunc
     parameter
     stat
+    system
     terminfo
     zle
     zutil

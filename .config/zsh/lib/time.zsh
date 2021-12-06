@@ -1,8 +1,5 @@
 #!/bin/zsh
 
-zmodload -i zsh/datetime
-zmodload -i zsh/mathfunc
-
 z-ts-to-human() {
     local t=$1
     local s=$(( int(t) ))

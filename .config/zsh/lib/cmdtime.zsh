@@ -1,7 +1,5 @@
 #!/bin/zsh
 
-zmodload -i zsh/datetime
-
 z-time() {
     local a b elapsed result
     a=${EPOCHREALTIME}

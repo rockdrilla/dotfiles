@@ -16,6 +16,7 @@ z-alt-find() {
 
         c=$(which "${a[1]}")
         [ -z "$c" ] && continue
+        a[1]="$c"
 
     #   r=$(readlink -f "$c" 2>/dev/null)
     #   [ -z "$r" ] && continue
@@ -50,8 +51,8 @@ z-alt-set-static() {
     if [ -n "$a" ] ; then
         r=0
         [ -n "$4" ] && s+=( "$4 ;" )
-        [ -n "$3" ] && s+=( "$3" )
-        s+=( "command $a \"\$@\" || return 127" )
+        s+=( "${3:-command}" )
+        s+=( "$a \"\$@\" || return 127" )
         [ -n "$5" ] && s+=( "; $5" )
     else
         r=127
@@ -76,8 +77,8 @@ z-alt-set-dynamic() {
     fi
     [ -n "$4" ] && s+=( "$4 ;" )
     s+=( 'local a=$(z-alt-find' "${(qq)2}" "${t:+' $t'} ) ;" )
-    [ -n "$3" ] && s+=( "$3" )
-    s+=( 'command ${(@s: :)a} "$@" || return 127' )
+    s+=( "${3:-command}" )
+    s+=( '${(@s: :)a} "$@" || return 127' )
     [ -n "$5" ] && s+=( "; $5" )
     eval "$n () { ${s[@]} ; } ; typeset -g $n"
 }

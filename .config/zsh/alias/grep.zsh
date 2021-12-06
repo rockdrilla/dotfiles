@@ -7,8 +7,12 @@ z-alt-grep() {
     local n=${#a}
     [ -z "$1" ] && n=0
     case "$n" in
-    0) : do nothing ;;
-    *) z-alt-set-static "grep|-q -e ' ' ${ZSHU[d_zdot]}/.zshenv" "$1" "GREP_OPTIONS='' " ;;
+    0) ;;
+    *) z-alt-set-static \
+         "grep|-q -e ' ' ${ZSHU[d_zdot]}/.zshenv" \
+         "$1" \
+         "GREP_OPTIONS='' command" \
+    ;;
     esac
 }
 
@@ -16,9 +20,8 @@ z-alt-grep() {
 GREP_GNU='--color=auto'
 
 z-alt-grep "grep ${GREP_GNU}|grep"
-
 unfunction z-alt-grep
 unset GREP_GNU
 
-egrep() { grep -E "$@" ; }
-fgrep() { grep -F "$@" ; }
+alias egrep='grep -E '
+alias fgrep='grep -F '

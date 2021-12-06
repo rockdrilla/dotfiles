@@ -2,5 +2,4 @@
 
 fc() { builtin fc -i "$@" ; }
 
-# alias history='z-history '
-history() { builtin fc -il "$@" ; }
+# history() { builtin fc -il "$@" ; }

@@ -9,3 +9,8 @@ z-history() {
         [[ ${@[-1]-} = *[0-9]* ]] && builtin fc -il "$@" || builtin fc -il "$@" 1
     fi
 }
+
+z-grephist() {
+    local what=$1 ; shift
+    z-history -m "*${what}*" "$@"
+}

@@ -1,5 +1,5 @@
 #!/bin/zsh
 
-# alias which-command='whence -p '
-# alias which='whence -p '
-# alias zsh-which='whence -c '
+alias which='whence -p '
+alias which-command='whence -p '
+alias zsh-which='whence -c '

@@ -8,17 +8,19 @@ case "${ZSHU[os_family]}" in
 bsd|darwin) export LSCOLORS="Gxfxcxdxbxegedabagacad" ;;
 esac
 
-__z_alt_ls() {
+z-alt-ls() {
     local -a a
     a=( ${(@s:|:)1} )
     [ ${#a} = 0 ] && a=( "$1" )
     local n=${#a}
     [ -z "$1" ] && n=0
     case "$n" in
-    0) : do nothing ;;
-    *) z-alt-set-static 'ls|-d .' "$1" "LS_OPTIONS='' " ;;
-#   1) z-alt-set-static  'ls|-d .' "$1" "LS_OPTIONS='' " ;;
-#   *) z-alt-set-dynamic 'ls|-d .' "$1" "LS_OPTIONS='' " ;;
+    0) ;;
+    *) z-alt-set-static \
+        'ls|-d .' \
+        "$1" \
+        "LS_OPTIONS='' command"
+    ;;
     esac
 }
 
@@ -33,8 +35,8 @@ darwin*)   alt="gls ${LS_GNU}|ls -G|ls" ;;
 *)         alt="ls ${LS_GNU}|ls" ;;
 esac
 
-__z_alt_ls "${alt}"
-unset -f __z_alt_ls
+z-alt-ls "${alt}"
+unset -f z-alt-ls
 unset alt LS_GNU
 
 [ -n "${LS_COLORS}" ] && zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
