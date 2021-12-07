@@ -1,3 +1,3 @@
 #!/bin/zsh
 
-alias bud='buildah build --isolation chroot --network host --format docker -f '
+alias bud='buildah bud --isolation chroot --network host --format docker -f '
