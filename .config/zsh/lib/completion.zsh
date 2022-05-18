@@ -67,6 +67,17 @@ __z_comp_external() {
     return 0
 }
 
+__z_comp_system() {
+    (( ${+commands[$1]} )) || return 1
+    (( ${+_comps[$1]} ))   && return 2
+    for d ( $fpath ) ; do
+        [ -s "$d/_$1" ] || continue
+        autoload -Uz "_$1"
+        return 0
+    done ; unset d
+    return 3
+}
+
 ## reload or new session are required to regenerate compcache
 z-comp-invalidate() {
     [ -n "$1" ] || return 1
