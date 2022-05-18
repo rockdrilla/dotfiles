@@ -19,3 +19,8 @@ z-reload() {
     exec -a "${ZSH_ARGZERO}" "${ZSH_NAME}" "${argv[@]}"
     echo "unable to reload (something went wrong), code $?" 1>&2
 }
+
+## reload or new session are required to regenerate compcache
+z-cache-flush() {
+    find "${ZSHU[d_cache]}/" -xdev -mindepth 1 -type f '!' -name '.keep' -delete
+}
