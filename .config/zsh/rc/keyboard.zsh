@@ -129,3 +129,8 @@ z-bind emacs viins vicmd -- Esc-w            kill-region
 
 ## use emacs key bindings
 bindkey -e
+
+for i ( /usr/share/doc/fzf/examples/key-bindings.zsh ) ; do
+    [ -s "$i" ] || continue
+    source "$i"
+done ; unset i
