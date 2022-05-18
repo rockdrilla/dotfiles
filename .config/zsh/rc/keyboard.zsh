@@ -74,7 +74,6 @@ z-bind () {
     done
     shift
 
-#   sequence="$1"
     widget="$2"
 
     local -Ua keys
