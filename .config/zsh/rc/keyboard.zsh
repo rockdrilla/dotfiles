@@ -16,6 +16,7 @@ fi
 z-kseq-ti() {
     [ -z "$1" ] && return
     [ -z "$2" ] && return
+
     z-ti-test "$2" && ZSHU_TI_KEYS[${terminfo[$2]}]=$1
 }
 
@@ -23,6 +24,7 @@ z-kseq-ti() {
 z-kseq-fb() {
     [ -z "$1" ] && return
     [ -z "$2" ] && return
+
     ZSHU_FB_KEYS[$2]=$1
 }
 
@@ -65,8 +67,9 @@ z-kseq-fb Ctrl-LeftArrow   '^[[1;5D'
 z-kseq-fb Esc-w            '\ew'
 
 z-bind () {
-    local i sequence widget
     local -a maps
+    local -Ua keys
+    local widget i k
 
     while [ "$1" != "--" ] ; do
         maps+=( "$1" )
@@ -76,7 +79,6 @@ z-bind () {
 
     widget="$2"
 
-    local -Ua keys
     keys+=( ${(k)ZSHU_TI_KEYS[(r)$1]} )
     keys+=( ${(k)ZSHU_FB_KEYS[(r)$1]} )
 

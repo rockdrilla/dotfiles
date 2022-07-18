@@ -2,10 +2,11 @@
 
 function {
     local -a a
-    local x
+    local i x
+
     for i ( ${ZSHU_PARENTS_PID} ) ; do
-        [ -r /proc/$i/environ ] || continue
-        x=$(tr '\0' '\n' < /proc/$i/environ | sed -En '/^TERM=(.+)$/{s//\1/;p;}')
+        [ -r "/proc/$i/environ" ] || continue
+        x=$(sed -zEn '/^TERM=(.+)$/{s//\1/;p;}' "/proc/$i/environ")
         [ -n "$x" ] || continue
         a+=( "$x" )
     done

@@ -2,6 +2,7 @@
 
 idle() {
     local f
+
     f=$(type "$1")
     case "$f" in
     "$1 is /"*) z-idle-ext "$@" ;;
@@ -11,6 +12,7 @@ idle() {
 
 z-idle-ext() {
     local -a s
+
     s+=( $(z-alt-find 'nice -n +40') )
     s+=( $(z-alt-find 'chrt -i 0'  ) )
     s+=( $(z-alt-find 'ionice -c 3') )

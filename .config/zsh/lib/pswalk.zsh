@@ -27,7 +27,8 @@ function {
 typeset -gA ZSHU_RUN
 
 z-run-test() {
-    local key i
+    local key v i
+
     key=$1 ; shift
     v=0
     for i ( ${ZSHU_PARENTS_NAME} ) ; do

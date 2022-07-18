@@ -5,5 +5,5 @@ __z_comp__podman() { command podman completion zsh ; }
 
 for i ( kubectl podman ) ; do
     __z_comp_external $i "__z_comp__$i"
-done
+done ; unset i
 unset -fm '__z_comp__*'

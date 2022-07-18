@@ -21,10 +21,12 @@ z-git-test() {
 }
 
 __z_git_pwd() {
+    local p s last pfx
+
     z-git-test || return
-    local p=${(%):-%~}
+
+    p=${(%):-%~}
     [[ "$p" =~ '/.+' ]] || return
-    local s pfx last
     s=$(__z_git rev-parse --show-prefix)
     s="${s%%/}"
     if [ -n "$s" ] ; then

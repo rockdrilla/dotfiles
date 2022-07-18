@@ -30,14 +30,11 @@ fi
 autoload -Uz +X compinit && \
 compinit -i -C -d "${ZSHU[f_compdump]}"
 
-function {
-    local i
-    for i ( ${ZSHU[d_conf]}/completion/*.zsh(N.r) ) ; do
-        source "$i"
-    done
-    for i ( ${ZSHU[d_conf]}/local/completion/*.zsh(N.r) ) ; do
-        source "$i"
-    done
-}
+for i ( ${ZSHU[d_conf]}/completion/*.zsh(N.r) ) ; do
+    source "$i"
+done ; unset i
+for i ( ${ZSHU[d_conf]}/local/completion/*.zsh(N.r) ) ; do
+    source "$i"
+done ; unset i
 
 __z_compdump_finalize

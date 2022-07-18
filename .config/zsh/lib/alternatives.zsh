@@ -6,8 +6,8 @@
 ## $1 - alternatives list
 ## $2 - arguments to test command (USE WITH CAUTION!)
 z-alt-find() {
-    local i c r t
     local -a v a
+    local i c r t
 
     v=( ${(@s:|:)1} )
     [ ${#v} = 0 ] && v=( "$1" )
@@ -41,8 +41,9 @@ z-alt-find() {
 ## $4 - function prologue
 ## $5 - function epilogue
 z-alt-set-static() {
-    local n t a r
     local -a s
+    local n t a r
+
     n="$1" ; t=''
     if [[ "$n" =~ '\|' ]] ; then
         t=${n:${MBEGIN}} ; n=${n:0:${MBEGIN}-1}
@@ -59,6 +60,7 @@ z-alt-set-static() {
         s+=( 'return 127' )
     fi
     eval "$n () { ${s[@]} ; } ; typeset -g $n"
+
     return $r
 }
 
@@ -69,8 +71,9 @@ z-alt-set-static() {
 ## $4 - function prologue
 ## $5 - function epilogue
 z-alt-set-dynamic() {
-    local n t
     local -a s
+    local n t
+
     n="$1" ; t=''
     if [[ "$n" =~ '\|' ]] ; then
         t=${n:${MBEGIN}} ; n=${n:0:${MBEGIN}-1}

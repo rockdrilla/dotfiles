@@ -10,9 +10,11 @@ esac
 
 z-alt-ls() {
     local -a a
+    local n
+
     a=( ${(@s:|:)1} )
     [ ${#a} = 0 ] && a=( "$1" )
-    local n=${#a}
+    n=${#a}
     [ -z "$1" ] && n=0
     case "$n" in
     0) ;;

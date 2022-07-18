@@ -2,13 +2,15 @@
 
 z-time() {
     local a b elapsed result
+
     a=${EPOCHREALTIME}
     "$@"
     result=$?
-    b=$(( ${EPOCHREALTIME} - a ))
+    b=$(( EPOCHREALTIME - a ))
     elapsed=$(z-ts-to-human "$b" 6)
     echo 1>&2
     echo "time took: ${elapsed}" 1>&2
+
     return ${result}
 }
 
@@ -18,8 +20,10 @@ typeset -gA ZSHU_PS
 ZSHU_PS[cmd_threshold]=3
 
 __z_cmdtime_precmd() {
-    local t=${EPOCHREALTIME}
-#   local t=${(%):-%D{%s.%9.}}
+    local t x elapsed
+
+    t=${EPOCHREALTIME}
+#   t=${(%):-%D{%s.%9.}}
 
     ZSHU_PS[elapsed]=''
     (( ${+ZSHU_PS[cmd_ts]} )) || return
@@ -27,13 +31,13 @@ __z_cmdtime_precmd() {
     t=$(( t - ${ZSHU_PS[cmd_ts]} ))
     unset "ZSHU_PS[cmd_ts]"
 
-    local x=$(( ${ZSHU_PS[cmd_threshold]} + 0 ))
+    x=$(( ${ZSHU_PS[cmd_threshold]} + 0 ))
     [ "$x" = '0' ] && return
 
     x=$(( t - x ))
     [ "${x:0:1}" = '-' ] && return
 
-    local elapsed=$(z-ts-to-human "$t")
+    elapsed=$(z-ts-to-human "$t")
     ZSHU_PS[elapsed]=" %f[%B%F{yellow}+${elapsed}%b%f] "
 }
 

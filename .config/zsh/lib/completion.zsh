@@ -15,9 +15,10 @@ __z_compdump_invalidate() {
 }
 
 __z_compdump_verify() {
+    local i s
+
     unset "ZSHU[compdump_refresh]"
     ZSHU[compdump_meta]='ZSH_VERSION ZSH_PATCHLEVEL FPATH PATH'
-    local i s
     for i ( ${(s: :)ZSHU[compdump_meta]} ) ; do
         s=$(__z_compdump_print "$i")
         command grep -Fx -e "$s" "${ZSHU[f_compdump]}" &>/dev/null && continue
@@ -28,6 +29,7 @@ __z_compdump_verify() {
 
 __z_compdump_finalize() {
     local i
+
     if (( ${+ZSHU[compdump_refresh]} )) ; then
         {
             echo
@@ -41,11 +43,13 @@ __z_compdump_finalize() {
 }
 
 __z_comp_bash() {
+    local f p x
+
     (( ${+commands[$1]} )) || return 1
     (( ${+_comps[$1]} )) && return 2
     (( ${+ZSHU[compdump_bash]} )) || return 3
     (( ${+2} )) && return 0
-    local f p x
+
     f=0
     for p ( /usr/share/bash-completion/completions ) ; do
         x="_$1" ; [ -s "$p/$x" ] && f=1 && break
@@ -53,35 +57,47 @@ __z_comp_bash() {
     done
     [ "$f" = 0 ] && return 4
     complete -C "$x" "$1"
+
     return 0
 }
 
 __z_comp_external() {
+    local f
+
     (( ${+commands[$1]} )) || return 1
     (( ${+_comps[$1]} ))   && return 2
-    local f="${ZSHU[d_cache]}/completion/_$1"
+
+    f="${ZSHU[d_cache]}/completion/_$1"
     if ! [ -s "$f" ] ; then
         "$2" > "$f" || return 3
     fi
     autoload -Uz "_$1"
+
     return 0
 }
 
 __z_comp_system() {
+    local d
+
     (( ${+commands[$1]} )) || return 1
     (( ${+_comps[$1]} ))   && return 2
+
     for d ( $fpath ) ; do
         [ -s "$d/_$1" ] || continue
         autoload -Uz "_$1"
         return 0
-    done ; unset d
+    done
+
     return 3
 }
 
 ## reload or new session are required to regenerate compcache
 z-comp-invalidate() {
+    local f
+
     [ -n "$1" ] || return 1
-    local f="${ZSHU[d_cache]}/completion/_$1"
+
+    f="${ZSHU[d_cache]}/completion/_$1"
     [ -f "$f" ] || return 2
     command rm -f "$f" || return 3
 }

@@ -2,8 +2,10 @@
 
 ## sort-n-fill PATH
 function {
-    local -a p=( $path )
+    local -a p
     local -aU t npath games
+
+    p=( $path )
 
     ## strip "games" first :)
     t=( ${(@)p:#*games*} )

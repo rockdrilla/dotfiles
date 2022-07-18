@@ -2,6 +2,7 @@
 
 z-history() {
     local list
+
     zparseopts -E l=list
     if [[ -n "$list" ]]; then
         builtin fc "$@"
@@ -11,6 +12,8 @@ z-history() {
 }
 
 z-grephist() {
-    local what=$1 ; shift
-    z-history -m "*${what}*" "$@"
+    local x
+
+    x=$1 ; shift
+    z-history -m "*${x}*" "$@"
 }

@@ -20,16 +20,20 @@ ZSHU_PM[host]="%B%(!.%F{red}.%F{blue})${ZSHU[host]}%f%b"
 if autoload -Uz add-zsh-hook ; then
 
 __z_pwd() {
-    local p=${(%):-%~}
+    local p pfx last
+
+    p=${(%):-%~}
     [[ "$p" =~ '/.+' ]] || return
-    local pfx="${p:h}"
+    pfx="${p:h}"
     pfx="${pfx%%/}"
-    local last="${p:t}"
+    last="${p:t}"
     ZSHU_PS[pwd]="%F{cyan}${pfx}/%B${last}%f%b"
 }
 
 # ZSHU[pwd_hook]=''
 __z_pwd_hook() {
+    local i
+
     unset "ZSHU_PS[pwd]"
     for i ( ${(s: :)ZSHU[pwd_hook]} __z_pwd ) ; do
         "$i"
