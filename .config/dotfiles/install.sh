@@ -6,12 +6,12 @@ gh_repo='rockdrilla/dotfiles'
 gh_br='main'
 
 f_gitignore='.config/dotfiles/gitignore'
-u_gitignore="https://raw.githubusercontent.com/${gh_repo}/${gh_br}/${f_gitignore}"
+u_gitignore="${GITHUB_RAW:-https://raw.githubusercontent.com}/${gh_repo}/${gh_br}/${f_gitignore}"
 
 u_repo="https://github.com/${gh_repo}.git"
 d_repo='.config/dotfiles/repo.git'
 
-u_tarball="https://github.com/${gh_repo}/archive/refs/heads/${gh_br}.tar.gz"
+u_tarball="${GITHUB:-https://github.com}/${gh_repo}/archive/refs/heads/${gh_br}.tar.gz"
 
 main() {
     ## dry run to test connectivity
