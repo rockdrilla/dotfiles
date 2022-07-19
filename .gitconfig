@@ -11,6 +11,8 @@
 	aggressiveWindow = 500
 	auto = 0
 	pruneExpire = now
+[init]
+	defaultBranch = main
 [maintainance]
 	auto = false
 [pack]
