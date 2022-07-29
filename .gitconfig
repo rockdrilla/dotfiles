@@ -1,6 +1,7 @@
 [commit]
 	gpgSign = false
 [core]
+	abbrev = 8
 	compression = 1
 [credential]
 	helper = cache --timeout=86400
