@@ -17,8 +17,9 @@
 [maintainance]
 	auto = false
 [pack]
-	writeReverseIndex = true
+	threads = 4
 	useSparse = true
+	writeReverseIndex = true
 [pull]
 	ff = only
 [push]
