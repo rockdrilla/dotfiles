@@ -10,7 +10,7 @@ __z_compdump_print() { printf '#zshu %s %s\n' "$1" "${(P)1}" ; }
 
 __z_compdump_invalidate() {
     command rm -f "${ZSHU[f_compdump]}"
-    find "${ZSHU[d_compcache]}/" -xdev -mindepth 1 -type f '!' -name '.keep' -delete
+    find "${ZSHU[d_compcache]}/" -xdev -type f '!' -name '.keep' -delete
     ZSHU[compdump_refresh]=1
 }
 
