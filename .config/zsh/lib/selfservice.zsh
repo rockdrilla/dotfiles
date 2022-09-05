@@ -13,13 +13,13 @@ dotfiles-git() { (
 
 z-zwc-gen() {
     local i
-    for i ( $(find "${ZSHU[d_conf]}/" -xdev -type f -name '*.zsh') ) ; do
+    for i ( "${ZSHU[d_conf]}"/**/*.zsh(N.r) ) ; do
         zcompile -U "$i"
     done
 }
 
 z-zwc-flush() {
-    find "${ZSHU[d_conf]}/" -xdev -type f -name '*.zwc' -delete
+    rm -f "${ZSHU[d_conf]}"/**/*.zwc(N.r)
 }
 
 z-update() {
