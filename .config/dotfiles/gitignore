@@ -1,11 +1,11 @@
 *
-!/.cache/zsh/.keep
 !/.cache/zsh/compcache/.keep
 !/.cache/zsh/completion/.keep
 !/.config/dotfiles/bin/.keep
 !/.config/dotfiles/gen-gitignore.sh
 !/.config/dotfiles/gitignore
 !/.config/dotfiles/install.sh
+!/.config/htop/htoprc.example
 !/.config/zsh/alias.zsh
 !/.config/zsh/alias/buildah.zsh
 !/.config/zsh/alias/diff.zsh
@@ -21,9 +21,9 @@
 !/.config/zsh/alias/sudo.zsh
 !/.config/zsh/alias/telnet.zsh
 !/.config/zsh/completion/.keep
-!/.config/zsh/completion/buildah.zsh
-!/.config/zsh/completion/k8s.zsh
-!/.config/zsh/completion/podman.zsh
+!/.config/zsh/completion/bash.zsh
+!/.config/zsh/completion/external.zsh
+!/.config/zsh/completion/system.zsh
 !/.config/zsh/env.zsh
 !/.config/zsh/env/aux.zsh
 !/.config/zsh/env/history.zsh
