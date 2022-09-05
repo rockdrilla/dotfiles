@@ -14,9 +14,8 @@ dotfiles-git() { (
 z-update() {
     dotfiles-update
     for i ( $(find "${ZSHU[d_conf]}/" -xdev -type f -name '*.zsh') ) ; do
-        zcompile "$i"
+        zcompile -U "$i"
     done ; unset i
-
 }
 
 z-reload() {
