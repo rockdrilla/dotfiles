@@ -2,6 +2,7 @@
 	gpgSign = false
 [core]
 	abbrev = 8
+	bigFileThreshold = 16m
 	compression = 1
 [credential]
 	helper = cache --timeout=86400
@@ -11,12 +12,14 @@
 	aggressiveDepth = 100
 	aggressiveWindow = 500
 	auto = 0
+	bigPackThreshold = 512m
 	pruneExpire = now
 [init]
 	defaultBranch = main
 [maintainance]
 	auto = false
 [pack]
+	packSizeLimit = 1g
 	threads = 4
 	useSparse = true
 	writeReverseIndex = true
