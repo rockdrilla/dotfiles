@@ -1,14 +1,11 @@
 #!/bin/sh
-set -f -e 
-set -o noglob errexit
-
-GIT_OPTIONAL_LOCKS=0
-export GIT_OPTIONAL_LOCKS
+set -ef
 
 path_gitignore='.config/dotfiles/gitignore'
 
 gen_gitignore() {
-    git rev-parse --git-dir >/dev/null 2>/dev/null
+    git rev-parse --git-dir >/dev/null 2>&1
+    touch "$1"
     {
         echo '*'
         git ls-files | sed -E 's:^:!/:'
@@ -20,18 +17,18 @@ me=$(readlink -e "$0")
 topdir=$(printf '%s' "${me}" | sed -E 's:/[^/]+/[^/]+/[^/]+$::')
 cd "${topdir}"
 
-## end-point installation
-dir=$(dirname "${me}")'/repo.git'
-if [ -s "${dir}/packed-refs" ] ; then
+export GIT_OPTIONAL_LOCKS=0
+
+dir="${me%/*}/repo.git"
+if [ -d "${dir}" ] ; then
+    ## end-point installation
     GIT_DIR="${dir}"
     GIT_WORK_TREE="${topdir}"
     export GIT_DIR GIT_WORK_TREE
-    gen_gitignore "${GIT_WORK_TREE}/${path_gitignore}" || true
-fi
-
-## development tree
-if [ -s '.git/packed-refs' ] ; then
-    gen_gitignore "${path_gitignore}" || true
+    gen_gitignore "${GIT_WORK_TREE}/${path_gitignore}"
+else
+    ## development tree
+    gen_gitignore "${path_gitignore}"
 fi
 
 exit 1

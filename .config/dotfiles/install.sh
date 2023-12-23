@@ -1,6 +1,5 @@
 #!/bin/sh
-set -f -e
-set -o noglob errexit
+set -ef
 
 gh_repo='rockdrilla/dotfiles'
 gh_br='main'
@@ -13,28 +12,61 @@ d_repo='.config/dotfiles/repo.git'
 
 u_tarball="${GITHUB:-https://github.com}/${gh_repo}/archive/refs/heads/${gh_br}.tar.gz"
 
+have_cmd() {
+    command -v "$1" >/dev/null 2>&1
+}
+
+fetch() {
+    if have_cmd curl ; then
+        curl -sSL ${2:+ -o "$2" } "$1"
+        return
+    fi
+    if have_cmd wget ; then
+        if [ -n "$2" ] ; then
+            wget -q -O - "$1" > "$2"
+        else
+            wget -q -O - "$1"
+        fi
+        return
+    fi
+    if have_cmd /usr/lib/apt/apt-helper ; then
+        if [ -n "$2" ] ; then
+            /usr/lib/apt/apt-helper download-file "$1" "$2"
+            return
+        fi
+        __fetch_t=$(mktemp) || return 1
+        set +e
+        (
+            set -e
+            /usr/lib/apt/apt-helper download-file "$1" "${__fetch_t}"
+            cat "${__fetch_t}"
+        )
+        __fetch_r=$?
+        rm -f "${__fetch_t}" ; unset __fetch_t
+        return ${__fetch_r}
+    fi
+    echo 'no method is available to fetch URLs' >&2
+    return 1
+}
+
 main() {
     ## dry run to test connectivity
-    curl -sSL "${u_gitignore}" >/dev/null
+    fetch "${u_gitignore}" >/dev/null
 
     umask 0077
 
-    if git_avail ; then
+    if have_cmd git ; then
         if [ -s "${HOME}/${d_repo}/info/refs" ] ; then
             dot_update
         else
             dot_install
         fi
     else
-        echo 'git is missing, proceed "raw" installation.'
+        echo 'git is missing, proceed "raw" installation.' >&2
         dot_install_raw
     fi
 
-    echo 'installed.'
-}
-
-git_avail() {
-    command git --version >/dev/null 2>/dev/null
+    echo 'installed.' >&2
 }
 
 dot_install() {
@@ -42,7 +74,7 @@ dot_install() {
     git_env
     mkdir -p "${GIT_DIR}"
     git init
-    git branch -M ${gh_br} || true
+    git branch -M "${gh_br}" || true
     git_config
     git_update
 }
@@ -52,9 +84,13 @@ dot_update() {
     git_update
 }
 
+find_fast() {
+    find "$@" -printf . -quit | grep -Fq .
+}
+
 dot_install_raw() {
     tf_tar=$(mktemp)
-    curl -sSL "${u_tarball}" > "${tf_tar}"
+    fetch "${u_tarball}" "${tf_tar}"
 
     td_tree=$(mktemp -d)
 
@@ -65,11 +101,12 @@ dot_install_raw() {
     rm -f "${tf_tar}"
 
     tf_list=$(mktemp)
-    curl -sSL "${u_gitignore}" | \
-    sed -En '/^!\/(.+)$/{s//\1/;p;}' > "${tf_list}"
+    fetch "${u_gitignore}" \
+    | sed -En '/^!\/(.+)$/{s//\1/;p;}' \
+    > "${tf_list}"
 
     td_backup=$(mktemp -d)
-    while read f ; do
+    while read -r f ; do
         if [ -f "${HOME}/$f" ] ; then
             if cmp_files "${td_tree}" "${HOME}" "$f" ; then
                 continue
@@ -86,8 +123,7 @@ dot_install_raw() {
     tar -C "${td_tree}" -cf . - | tar -C "${HOME}" -xf -
     rm -rf "${td_tree}"
 
-    n_bak=$(find "${td_backup}/" -mindepth 1 | wc -l)
-    if [ "${n_bak}" != 0 ] ; then
+    if find_fast "${td_backup}/" -mindepth 1 ; then
         echo "backed-up files are here: ${td_backup}/"
         find "${td_backup}/" -mindepth 1 -ls
     else
@@ -118,12 +154,12 @@ git_config() {
 
 git_update() {
     git remote update -p
-    git pull || git reset --hard origin/main
+    git pull || git reset --hard "origin/${gh_br}"
     git gc --aggressive --prune=all --force || git gc || true
 }
 
 tar_test() {
-    tar --wildcards -tf "$@" >/dev/null 2>/dev/null
+    tar --wildcards -tf "$@" >/dev/null 2>&1
 }
 
 tar_try_extract() {
@@ -140,16 +176,17 @@ tar_try_extract() {
 }
 
 cmp_files() {
-    cmp -s "$1/$3" "$2/$3" >/dev/null 2>/dev/null
+    cmp -s "$1/$3" "$2/$3" >/dev/null 2>&1
 }
 
 backup_unconditionally() {
     tf_list=$(mktemp)
-    curl -sSL "${u_gitignore}" | \
-    sed -En '/^!\/(.+)$/{s//\1/;p;}' > "${tf_list}"
+    fetch "${u_gitignore}" \
+    | sed -En '/^!\/(.+)$/{s//\1/;p;}' \
+    > "${tf_list}"
 
     td_backup=$(mktemp -d)
-    while read f ; do
+    while read -r f ; do
         if [ -f "${HOME}/$f" ] ; then
             d=$(dirname "$f")
             if [ -n "$d" ] ; then
@@ -160,8 +197,7 @@ backup_unconditionally() {
     done < "${tf_list}"
     rm -f "${tf_list}"
 
-    n_bak=$(find "${td_backup}/" -mindepth 1 | wc -l)
-    if [ "${n_bak}" != 0 ] ; then
+    if find_fast "${td_backup}/" -mindepth 1 ; then
         echo "backed-up files are here: ${td_backup}/"
         find "${td_backup}/" -mindepth 1 -ls
     else

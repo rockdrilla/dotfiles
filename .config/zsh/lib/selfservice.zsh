@@ -31,6 +31,7 @@ z-update() {
 z-reload() {
     exec -a "${ZSH_ARGZERO}" "${ZSH_NAME}" "${argv[@]}"
     echo "unable to reload (something went wrong), code $?" 1>&2
+    return 1
 }
 
 ## reload or new session are required to regenerate compcache
