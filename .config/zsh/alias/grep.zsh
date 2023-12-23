@@ -11,7 +11,7 @@ z-alt-grep() {
     case "$n" in
     0) ;;
     *) z-alt-set-static \
-         "grep|-q -e ' ' ${ZSHU[d_zdot]}/.zshenv" \
+         "grep|-q -e ' ' ${ZSHU[d_conf]}/_.zsh" \
          "$1" \
          "GREP_OPTIONS='' command" \
     ;;
