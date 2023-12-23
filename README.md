@@ -1,9 +1,15 @@
 personal dotfiles.
 
-## installation:
+## installation
 
 ```sh
 curl -sSL https://dotfiles.krd.sh/get | sh -s
+```
+
+or
+
+```sh
+wget -q -O - https://dotfiles.krd.sh/get | sh -s
 ```
 
 ## contents
