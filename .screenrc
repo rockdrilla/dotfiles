@@ -3,7 +3,7 @@ startup_message off
 bce off
 defutf8 on
 utf8 on on
-defscrollback 262144
+defscrollback 8192
 defflow off
 deflogin off
 # defshell -zsh
