@@ -6,6 +6,7 @@
 !/.config/dotfiles/gitignore
 !/.config/dotfiles/install.sh
 !/.config/htop/htoprc.example
+!/.config/zsh/_.zsh
 !/.config/zsh/alias.zsh
 !/.config/zsh/alias/buildah.zsh
 !/.config/zsh/alias/diff.zsh
@@ -26,6 +27,7 @@
 !/.config/zsh/completion/system.zsh
 !/.config/zsh/env.zsh
 !/.config/zsh/env/aux.zsh
+!/.config/zsh/env/containers.zsh
 !/.config/zsh/env/history.zsh
 !/.config/zsh/env/ld.so.zsh
 !/.config/zsh/env/pager.zsh
