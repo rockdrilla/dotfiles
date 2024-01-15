@@ -1,11 +1,12 @@
 #!/bin/zsh
 
 z-ts-to-human() {
-    local t s ns d h m f x
+    local t s n d h m f x
 
     t=$1
+    t=$(( float(t) ))
     s=$(( int(t) ))
-    ns=$(( int((t - s) * (10**9)) ))
+    n=$(( int((t - s) * (10**9)) ))
     t=$s
 
     d=0 h=0 m=0
@@ -22,15 +23,13 @@ z-ts-to-human() {
         t=$(( t % 60 ))
     fi
 
-    f='%s.%6.'
-    f=$(strftime "$f" $t $ns)
-
-    x=3
+    ## strftime does desired rounding for $n/(10**9) internally
+    f=$(strftime '%s.%6.' $t $n)
     ## keep math in sync with format above
+    x=3
     case "$2" in
     0)     x=7 ;;
-    [1-5]) x=$(( 6 - $2 )) ;;
-    6)     x=0 ;;
+    [1-6]) x=$(( 6 - $2 )) ;;
     esac
     [ $x -gt 0 ] && f="${f:0:-$x}s"
 

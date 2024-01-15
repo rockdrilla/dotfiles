@@ -17,7 +17,7 @@ __z_compdump_invalidate() {
 __z_compdump_verify() {
     local i s
 
-    unset "ZSHU[compdump_refresh]"
+    unset 'ZSHU[compdump_refresh]'
     ZSHU[compdump_meta]='ZSH_VERSION ZSH_PATCHLEVEL FPATH PATH'
     for i ( ${(s: :)ZSHU[compdump_meta]} ) ; do
         s=$(__z_compdump_print "$i")
@@ -37,9 +37,9 @@ __z_compdump_finalize() {
                 __z_compdump_print "$i"
             done
         } | tee -a "${ZSHU[f_compdump]}" &>/dev/null
-        unset "ZSHU[compdump_refresh]"
+        unset 'ZSHU[compdump_refresh]'
     fi
-    unset "ZSHU[compdump_meta]"
+    unset 'ZSHU[compdump_meta]'
 }
 
 __z_comp_bash() {

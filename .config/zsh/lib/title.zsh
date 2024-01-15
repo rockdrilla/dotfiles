@@ -1,6 +1,5 @@
 #!/bin/zsh
 
-typeset -gA ZSHU
 ZSHU[title_tab]='%15<..<%~%<<'
 ZSHU[title_window]='%n@%m:%~'
 

@@ -1,54 +1,53 @@
 #!/bin/zsh
 
 z-time() {
-    local a b elapsed result
+    local a r
 
     a=${EPOCHREALTIME}
-    "$@"
-    result=$?
-    b=$(( EPOCHREALTIME - a ))
-    elapsed=$(z-ts-to-human "$b" 6)
-    echo 1>&2
-    echo "time took: ${elapsed}" 1>&2
+    "$@" ; r=$?
+    a=$(( EPOCHREALTIME - a ))
+    a=$(z-ts-to-human "$a" 6)
+    echo >&2
+    echo "time took: $a" >&2
 
-    return ${result}
+    return $r
 }
 
 if autoload -Uz add-zsh-hook ; then
 
 typeset -gA ZSHU_PS
-ZSHU_PS[cmd_threshold]=3
+ZSHU_PS[cmd_threshold]=1
 
-__z_cmdtime_precmd() {
-    local t x elapsed
+__z_cmdtime_measure() {
+    local t x
 
-    t=${EPOCHREALTIME}
-#   t=${(%):-%D{%s.%9.}}
+    x=${EPOCHREALTIME}
 
-    ZSHU_PS[elapsed]=''
-    (( ${+ZSHU_PS[cmd_ts]} )) || return
+    unset 'ZSHU[cmd_dt]' 'ZSHU_PS[elapsed]'
+    (( ${+ZSHU[cmd_ts]} )) || return
 
-    t=$(( t - ${ZSHU_PS[cmd_ts]} ))
-    unset "ZSHU_PS[cmd_ts]"
+    t=$(( x - ${ZSHU[cmd_ts]} ))
+    ZSHU[cmd_ts]=$x
 
-    x=$(( ${ZSHU_PS[cmd_threshold]} + 0 ))
-    [ "$x" = '0' ] && return
+    x=${ZSHU_PS[cmd_threshold]}
+    x=$(( x + 0 )) || x=0
+    [ "$x" = 0 ] && return
 
     x=$(( t - x ))
     [ "${x:0:1}" = '-' ] && return
 
-    elapsed=$(z-ts-to-human "$t")
-    ZSHU_PS[elapsed]=" %f[%B%F{yellow}+${elapsed}%b%f] "
+    t=$(z-ts-to-human "$t")
+    ZSHU[cmd_dt]=$t
+    ZSHU_PS[elapsed]=" %f[%B%F{yellow}+$t%b%f]"
 }
 
-__z_cmdtime_preexec() {
-    ZSHU_PS[cmd_ts]=${EPOCHREALTIME}
-#   ZSHU_PS[cmd_ts]=${(%):-%D{%s.%9.}}
+__z_cmdtime_set() {
+    ZSHU[cmd_ts]=${EPOCHREALTIME}
 }
 
-add-zsh-hook precmd  __z_cmdtime_precmd
-add-zsh-hook preexec __z_cmdtime_preexec
+add-zsh-hook precmd  __z_cmdtime_measure
+add-zsh-hook preexec __z_cmdtime_set
 
 else
-    echo "cmd time measurement is disabled due to missing hook support" 1>&2
+    echo "cmd time measurement is disabled due to missing hook support" >&2
 fi

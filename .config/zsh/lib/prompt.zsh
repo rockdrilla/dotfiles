@@ -5,6 +5,8 @@ typeset -gA ZSHU_PM ZSHU_PS
 ZSHU_PM[rst]='%b%k%u%s%f'
 ZSHU_PM[crlf]=$'\n'
 
+ZSHU_PS[shlvl]='%(2L.%B%F{white}|%F{cyan}%L%b%f.)'
+
 ZSHU_PM[status]='▪'
 ZSHU_PS[lastcmd]="%B%(?.%F{green}.%F{red})${ZSHU_PM[status]}%f%b"
 
@@ -34,8 +36,9 @@ __z_pwd() {
 __z_pwd_hook() {
     local i
 
-    unset "ZSHU_PS[pwd]"
+    unset 'ZSHU_PS[pwd]'
     for i ( ${(s: :)ZSHU[pwd_hook]} __z_pwd ) ; do
+        unset 'ZSHU_PS[pwd_extra]'
         "$i"
         (( ${+ZSHU_PS[pwd]} )) && return
     done
@@ -44,5 +47,5 @@ __z_pwd_hook() {
 add-zsh-hook precmd __z_pwd_hook
 
 else
-    echo "shiny pwd's are disabled due to missing hook support" 1>&2
+    echo "shiny pwd's are disabled due to missing hook support" >&2
 fi

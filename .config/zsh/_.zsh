@@ -20,7 +20,7 @@ for i ( d_zdot d_cache d_conf d_bin d_var ) ; do
 done ; unset i d
 
 ## early escape
-unsetopt GLOBAL_RCS
+unsetopt global_rcs
 
 ## safety measure:
 ## redirect all following activity within ZDOTDIR to cache
@@ -56,4 +56,4 @@ ZSHU[t_end]=${(%):-%D{%s.%6.}}
 ZSHU[t_load]=$(( ZSHU[t_end] - ZSHU[t_begin] ))
 ZSHU[t_load]=${ZSHU[t_load]:0:6}
 
-unset "ZSHU[t_begin]" "ZSHU[t_end]"
+unset 'ZSHU[t_begin]' 'ZSHU[t_end]'

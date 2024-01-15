@@ -4,10 +4,10 @@ typeset -Uga ZSHU_PARENTS_PID
 typeset -ga ZSHU_PARENTS_NAME
 
 function {
-    local i cmd
+    local i c
 
     i=$$ ; while : ; do
-        i=$(ps -o ppid= -p $i 2>/dev/null || : )
+        i=$(ps -o ppid= -p $i 2>/dev/null) || :
         i=${i//[^0-9]}
         [[ "$i" =~ '^[1-9][0-9]*$' ]] || break
         ## don't deal with PID1
@@ -16,8 +16,9 @@ function {
     done
 
     for i ( ${ZSHU_PARENTS_PID} ) ; do
-        cmd=$(ps -o comm= -p $i 2>/dev/null || : )
-        [ -n "${cmd}" ] && ZSHU_PARENTS_NAME+=( "${cmd##*/}" )
+        c=$(ps -o comm= -p $i 2>/dev/null) || :
+        [ -n "$c" ] || continue
+        ZSHU_PARENTS_NAME+=( "${c##*/}" )
     done
 
     typeset -r ZSHU_PARENTS_PID
@@ -27,20 +28,19 @@ function {
 typeset -gA ZSHU_RUN
 
 z-run-test() {
-    local key v i
+    local k i
 
-    key=$1 ; shift
-    v=0
+    k=$1 ; shift
     for i ( ${ZSHU_PARENTS_NAME} ) ; do
-        if (( ${+argv[(r)$i]} )) ; then
-            ZSHU_RUN[${key}]=1
-            return
-        fi
+        (( ${+argv[(r)$i]} )) || continue
+
+        ZSHU_RUN[$k]=1
+        return
     done
-    ZSHU_RUN[${key}]=0
+    ZSHU_RUN[$k]=0
 }
 
 z-run-test gui       konsole xterm x-terminal-emulator
 z-run-test nested    screen tmux mc
-z-run-test nested1   mc
+z-run-test nested1L  mc
 z-run-test elevated  sudo su

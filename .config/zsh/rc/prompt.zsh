@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-# z-starship-init
+typeset -gA ZSHU_PS1
 
 ## three-line prompt
 function {
@@ -13,7 +13,6 @@ function {
     line+='${ZSHU_PM[id]:+"%B%F{white}${ZSHU_PM[id]}${ZSHU_PM[rst]}%B%F{black}|%b%f"}'
     line+="${ZSHU_PM[user]}%F{white}@${ZSHU_PM[host]}"
     line+='${ZSHU_PS[elapsed]}'
-    line+='${ZSHU_PS[status_extra]}'
     line+="${ZSHU_PM[rst]}"
 
     line+="${ZSHU_PM[crlf]}"
@@ -27,10 +26,11 @@ function {
 
     line+="%B%F{black}└[%f%b"
     line+="${ZSHU_PS[lastcmd]}"
+    line+='${ZSHU_PS[shlvl]}'
     line+="%B%F{black}|%b%f"
     line+="${ZSHU_PS[cmd]}"
 
-    ZSHU_PS[ps1_3L]="${(j::)line}"
+    ZSHU_PS1[3L]="${(j::)line}"
 }
 
 ## two-line prompt
@@ -51,11 +51,11 @@ function {
 
     line+="%B%F{black}└[%f%b"
     line+="${ZSHU_PS[lastcmd]}"
+    line+='${ZSHU_PS[shlvl]}'
     line+="%B%F{black}|%b%f"
-    line+='${ZSHU_PS[status_extra]}'
     line+="${ZSHU_PS[cmd]}"
 
-    ZSHU_PS[ps1_2L]="${(j::)line}"
+    ZSHU_PS1[2L]="${(j::)line}"
 }
 
 ## one-line prompt
@@ -64,6 +64,7 @@ function {
 
     line+="${ZSHU_PM[rst]}"
     line+="${ZSHU_PS[lastcmd]}"
+    line+='${ZSHU_PS[shlvl]}'
     line+="%B%F{black}|%b"
     line+="${ZSHU_PM[user]}"
     line+="%B%F{black}|%b"
@@ -74,9 +75,26 @@ function {
     line+="%B%F{black}|%b"
     line+="${ZSHU_PS[cmd]}"
 
-    ZSHU_PS[ps1_1L]="${(j::)line}"
+    ZSHU_PS1[1L]="${(j::)line}"
 }
 
-PS1=${ZSHU_PS[ps1_3L]}
-[ "${ZSHU_RUN[nested]}"  = 1 ] && PS1=${ZSHU_PS[ps1_2L]}
-[ "${ZSHU_RUN[nested1]}" = 1 ] && PS1=${ZSHU_PS[ps1_1L]}
+z-ps() {
+    [ -n "$1" ] || {
+        echo "${ZSHU_PS[ps1]}"
+        return
+    }
+
+    local k
+    for k ( "$1" "${1}L" ) ; do
+        (( ${+ZSHU_PS1[$k]} )) || continue
+
+        ZSHU_PS[ps1]=$k
+        PS1=${ZSHU_PS1[$k]}
+        return
+    done
+    return 1
+}
+
+z-ps 3
+[ "${ZSHU_RUN[nested]}"   = 1 ] && z-ps 2
+[ "${ZSHU_RUN[nested1L]}" = 1 ] && z-ps 1
