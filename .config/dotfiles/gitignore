@@ -11,6 +11,7 @@
 !/.config/zsh/alias/buildah.zsh
 !/.config/zsh/alias/diff.zsh
 !/.config/zsh/alias/directories.zsh
+!/.config/zsh/alias/git.zsh
 !/.config/zsh/alias/gpg.zsh
 !/.config/zsh/alias/grep.zsh
 !/.config/zsh/alias/history.zsh
