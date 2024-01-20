@@ -4,6 +4,8 @@
 typeset -gA ZSHU_GIT ZSHU_PM ZSHU_PS
 ZSHU_PS[git]=0
 ZSHU_PM[git_branch]='🞷'
+ZSHU_PM[git_ahead]='↱'
+ZSHU_PM[git_behind]='↴'
 ZSHU_PM[git_detach]='☈'
 ZSHU_PM[git_tag]='🗹'
 ZSHU_PM[git_commit]='⌽'
@@ -29,9 +31,10 @@ z-git-test() {
 __z_git_pwd() {
     local x
 
-    unset 'ZSHU_PS[git_ref]' 'ZSHU_PS[git_tag]'
+    unset 'ZSHU_PS[git_ref]' 'ZSHU_PS[git_changes]' 'ZSHU_PS[git_tag]'
     unset 'ZSHU_GIT[path_root]' 'ZSHU_GIT[path_mid]' 'ZSHU_GIT[path_last]'
-    unset 'ZSHU_GIT[commit]' 'ZSHU_GIT[detached]' 'ZSHU_GIT[ref]' 'ZSHU_GIT[tag]'
+    unset 'ZSHU_GIT[commit]' 'ZSHU_GIT[detached]' 'ZSHU_GIT[ref]' 'ZSHU_GIT[remote]' 'ZSHU_GIT[tag]'
+    unset 'ZSHU_GIT[ref_behind]' 'ZSHU_GIT[ref_ahead]' 'ZSHU_GIT[ref_changes]'
 
     z-git-test || return
 
@@ -50,16 +53,36 @@ __z_git_pwd() {
             break
         fi
 
-        x=$(__z_git for-each-ref --format='%(refname)' --count=1 --points-at=${ZSHU_GIT[commit]} refs/heads/ refs/remotes/)
+        x=$(__z_git for-each-ref --format='%(refname:short)' --count=1 --points-at=${ZSHU_GIT[commit]} refs/heads/ refs/remotes/)
         if [ -n "$x" ] ; then
             ZSHU_GIT[detached]=0
-            ZSHU_GIT[ref]=${x#refs/*/}
+            ZSHU_GIT[ref]=$x
             ZSHU_PS[git_ref]="%F{yellow}%B${ZSHU_PM[git_branch]}%b ${ZSHU_GIT[ref]}%f"
             break
         fi
 
         ZSHU_GIT[ref]=${ZSHU_GIT[commit]}
         ZSHU_PS[git_ref]="%F{red}%B${ZSHU_PM[git_detach]}%b ${ZSHU_GIT[ref]}%f"
+
+        break
+    done
+
+    ## local<->remote changes
+    while [ ${ZSHU_GIT[detached]} = 0 ] ; do
+        x=$(__z_git for-each-ref --format='%(upstream:short)' --count=1 --points-at=${ZSHU_GIT[commit]} refs/heads/ refs/remotes/)
+        [ -n "$x" ] || break
+        ZSHU_GIT[remote]=$x
+
+        x=$(__z_git rev-list --left-right "${ZSHU_GIT[ref]}...${ZSHU_GIT[remote]}" 2>/dev/null) || break
+        ZSHU_GIT[ref_ahead]=$(echo "$x" | grep -Ec '^<')
+        ZSHU_GIT[ref_behind]=$(echo "$x" | grep -Ec '^>')
+        ZSHU_GIT[ref_changes]=$[ ZSHU_GIT[ref_ahead] + ZSHU_GIT[ref_behind] ]
+        [ ${ZSHU_GIT[ref_changes]} -eq 0 ] && break
+
+        x=''
+        [ ${ZSHU_GIT[ref_ahead]} -eq 0 ]  || x="$x${x:+ }%B%F{green}${ZSHU_PM[git_ahead]} ${ZSHU_GIT[ref_ahead]}%b"
+        [ ${ZSHU_GIT[ref_behind]} -eq 0 ] || x="$x${x:+ }%B%F{red}${ZSHU_PM[git_behind]} ${ZSHU_GIT[ref_behind]}%b"
+        ZSHU_PS[git_changes]=$x
 
         break
     done
@@ -112,8 +135,12 @@ __z_git_pwd() {
     x="$x%B${ZSHU_GIT[path_last]:gs/%/%%}%f%b"
     ZSHU_PS[pwd]=$x
 
-    x="${ZSHU_PS[git_tag]}"
-    ZSHU_PS[pwd_extra]=" ${ZSHU_PS[git_ref]}${x:+ }$x"
+    local -a ary
+    ary+="${ZSHU_PS[git_ref]}"
+    ary+="${ZSHU_PS[git_changes]}"
+    ary+="${ZSHU_PS[git_tag]}"
+    x="${(j: :)ary}"
+    [ -z "$x" ] || ZSHU_PS[pwd_extra]=" $x"
 }
 
 z-git-enable()  { ZSHU_PS[git]=1 ; }
