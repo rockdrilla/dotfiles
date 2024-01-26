@@ -7,14 +7,14 @@ z-title-tab() {
     emulate -L zsh
 
     case "${TERM}" in
-    cygwin|xterm*|putty*|rxvt*|konsole*|ansi|mlterm*|alacritty|st*)
+    cygwin | xterm* | putty* | rxvt* | konsole* | ansi | mlterm* | alacritty | st* )
         print -Pn "\e]1;${1:q}\a"
     ;;
-    screen*|tmux*)
+    screen* | tmux* )
         ## hardstatus
         print -Pn "\ek${1:q}\e\\"
     ;;
-    *)
+    * )
         z-ti-test fsl tsl || return
 
         echoti tsl
@@ -28,7 +28,7 @@ z-title-window() {
     emulate -L zsh
 
     case "${TERM}" in
-    cygwin|xterm*|putty*|rxvt*|konsole*|ansi|mlterm*|alacritty|st*)
+    cygwin | xterm* | putty* | rxvt* | konsole* | ansi | mlterm* | alacritty | st* )
         print -Pn "\e]2;${1:q}\a"
     ;;
     esac

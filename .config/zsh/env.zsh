@@ -14,7 +14,7 @@ function {
 
     ## process in-home part
     t=( ${(@)p:#${HOME}/*} )
-    npath+=( "${ZSHU[d_bin]}" "${HOME}/bin" )
+    npath+=( "${ZSHU[d_scripts]}" "${ZSHU[d_bin]}" "${HOME}/bin" )
     npath+=( ${(@)p:|t} )
     p=( $t )
 
@@ -65,16 +65,16 @@ ZSHU[uname]=${ZSHU[uname]:l}
 ZSHU[mach]=$(uname -m 2>/dev/null)
 ZSHU[mach]=${ZSHU[mach]:l}
 case "${ZSHU[mach]}" in
-amd64) ZSHU[mach]=x86_64 ;;
-arm64) ZSHU[mach]=aarch64 ;;
-armv*) ZSHU[mach]=arm ;;
+amd64 ) ZSHU[mach]=x86_64 ;;
+arm64 ) ZSHU[mach]=aarch64 ;;
+armv* ) ZSHU[mach]=arm ;;
 esac
 
 ZSHU[os_type]=${OSTYPE:l}
 
 ZSHU[os_family]=${ZSHU[uname]:l}
 case "${ZSHU[os_family]}" in
-*bsd) ZSHU[os_family]=bsd ;;
+*bsd ) ZSHU[os_family]=bsd ;;
 esac
 
 ZSHU[host_name]=${(%):-%m}

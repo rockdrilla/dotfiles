@@ -9,7 +9,7 @@ fpath=( "${ZSHU[d_cache]}/completion" $fpath )
 __z_compdump_print() { printf '#zshu %s %s\n' "$1" "${(P)1}" ; }
 
 __z_compdump_invalidate() {
-    command rm -f "${ZSHU[f_compdump]}"
+    rm -f "${ZSHU[f_compdump]}"
     find "${ZSHU[d_compcache]}/" -xdev -type f '!' -name '.keep' -delete
     ZSHU[compdump_refresh]=1
 }
@@ -99,5 +99,5 @@ z-comp-invalidate() {
 
     f="${ZSHU[d_cache]}/completion/_$1"
     [ -f "$f" ] || return 2
-    command rm -f "$f" || return 3
+    rm -f "$f" || return 3
 }

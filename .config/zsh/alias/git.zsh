@@ -10,14 +10,16 @@ git-dir-usage() {
     else
         d=$(__z_git rev-parse --path-format=absolute --git-dir)
     fi
+
     case "$d" in
-    */* ) p=${d%/*} ; d=${d##*/} ;;
+    */* ) p=${d%/*} ; d=${d:t} ;;
     esac
-    ## ${p:+ env -C "$p" } du -cd2 "$d"
+
+    ## ${p:+ env -C "$p" } du -d2 "$d"
     if [ -n "$p" ] ; then
-        env -C "$p" du -cd2 "$d"
+        env -C "$p" du -d2 "$d"
     else
-        du -cd2 "$d"
+        du -d2 "$d"
     fi | grep -Ev '^[0-9]\s' | sort -Vk2
 }
 

@@ -5,6 +5,7 @@
 !/.config/dotfiles/gen-gitignore.sh
 !/.config/dotfiles/gitignore
 !/.config/dotfiles/install.sh
+!/.config/dotfiles/scripts/.keep
 !/.config/htop/htoprc.example
 !/.config/zsh/_.zsh
 !/.config/zsh/alias.zsh
@@ -20,6 +21,8 @@
 !/.config/zsh/alias/kconfig.zsh
 !/.config/zsh/alias/ls.zsh
 !/.config/zsh/alias/podman.zsh
+!/.config/zsh/alias/quilt.zsh
+!/.config/zsh/alias/sbuild.zsh
 !/.config/zsh/alias/sudo.zsh
 !/.config/zsh/alias/telnet.zsh
 !/.config/zsh/completion/.keep

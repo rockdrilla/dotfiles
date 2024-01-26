@@ -85,7 +85,7 @@ z-bind () {
     [ ${#keys} -eq 0 ] && return 1
 
     case "${widget}" in
-    /*)
+    /* )
         widget=${widget:1}
         emulate zsh -c "autoload -RUz ${widget}"
         zle -N "${widget}"

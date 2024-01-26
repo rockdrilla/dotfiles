@@ -18,7 +18,7 @@ function {
     for i ( ${ZSHU_PARENTS_PID} ) ; do
         c=$(ps -o comm= -p $i 2>/dev/null) || :
         [ -n "$c" ] || continue
-        ZSHU_PARENTS_NAME+=( "${c##*/}" )
+        ZSHU_PARENTS_NAME+=( "${c:t}" )
     done
 
     typeset -r ZSHU_PARENTS_PID

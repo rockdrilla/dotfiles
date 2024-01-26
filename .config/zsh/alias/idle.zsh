@@ -1,16 +1,24 @@
 #!/bin/zsh
 
 idle() {
+    [ -n "${1:?}" ] || return 1
+
     local f
 
     f=$(type "$1")
     case "$f" in
-    "$1 is /"*) z-idle-ext "$@" ;;
-    *) z-idle-int "$@" ;;
+    "$1 is /"* )
+        z-idle-ext "$@"
+    ;;
+    * )
+        z-idle-int "$@"
+    ;;
     esac
 }
 
 z-idle-ext() {
+    [ -n "${1:?}" ] || return 1
+
     local -a s
 
     s+=( $(z-alt-find 'nice -n +40') )
@@ -20,6 +28,8 @@ z-idle-ext() {
 }
 
 z-idle-int() {
+    [ -n "${1:?}" ] || return 1
+
     ## execute in subshell
     (
         {

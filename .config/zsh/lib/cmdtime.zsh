@@ -5,7 +5,7 @@ z-time() {
 
     a=${EPOCHREALTIME}
     "$@" ; r=$?
-    a=$(( EPOCHREALTIME - a ))
+    a=$[ EPOCHREALTIME - a ]
     a=$(z-ts-to-human "$a" 6)
     echo >&2
     echo "time took: $a" >&2
@@ -16,7 +16,7 @@ z-time() {
 if autoload -Uz add-zsh-hook ; then
 
 typeset -gA ZSHU_PS
-ZSHU_PS[cmd_threshold]=1
+ZSHU_PS[cmd_threshold]=3
 
 __z_cmdtime_measure() {
     local t x
@@ -26,14 +26,14 @@ __z_cmdtime_measure() {
     unset 'ZSHU[cmd_dt]' 'ZSHU_PS[elapsed]'
     (( ${+ZSHU[cmd_ts]} )) || return
 
-    t=$(( x - ${ZSHU[cmd_ts]} ))
+    t=$[ x - ZSHU[cmd_ts] ]
     ZSHU[cmd_ts]=$x
 
     x=${ZSHU_PS[cmd_threshold]}
-    x=$(( x + 0 )) || x=0
+    x=$[ x + 0 ] || x=0
     [ "$x" = 0 ] && return
 
-    x=$(( t - x ))
+    x=$[ t - x ]
     [ "${x:0:1}" = '-' ] && return
 
     t=$(z-ts-to-human "$t")

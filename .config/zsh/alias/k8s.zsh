@@ -1,3 +1,3 @@
 #!/bin/zsh
 
-alias k=kubectl
+alias k='kubectl '
