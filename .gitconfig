@@ -3,7 +3,7 @@
 [core]
 	abbrev = 8
 	bigFileThreshold = 16m
-	compression = 1
+	compression = 5
 [credential]
 	helper = cache --timeout=86400
 [fetch]
@@ -19,6 +19,7 @@
 [maintainance]
 	auto = false
 [pack]
+	compression = 7
 	packSizeLimit = 1g
 	threads = 4
 	useSparse = true
