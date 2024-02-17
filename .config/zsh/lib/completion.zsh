@@ -42,6 +42,7 @@ __z_compdump_finalize() {
     unset 'ZSHU[compdump_meta]'
 }
 
+## TODO: refactor (e.g. buildah completion is a "bit" broken)
 __z_comp_bash() {
     local f p x
 
@@ -62,16 +63,25 @@ __z_comp_bash() {
 }
 
 __z_comp_external() {
-    local f
+    local c f
+    c="$1" ; shift
 
-    (( ${+commands[$1]} )) || return 1
-    (( ${+_comps[$1]} ))   && return 2
+    [ $# -gt 0 ] || return 1
 
-    f="${ZSHU[d_cache]}/completion/_$1"
-    if ! [ -s "$f" ] ; then
-        "$2" > "$f" || return 3
+    (( ${+commands[$c]} )) || return 2
+
+    if ! (( ${+ZSHU_COMP_FORCE[$c]} )) ; then
+        (( ${+_comps[$c]} )) && return
     fi
-    autoload -Uz "_$1"
+
+    f="${ZSHU[d_cache]}/completion/_$c"
+    if ! [ -s "$f" ] ; then
+        if ! "$@" > "$f" ; then
+            rm -f "$f"
+            return 3
+        fi
+    fi
+    autoload -Uz "_$c"
 
     return 0
 }

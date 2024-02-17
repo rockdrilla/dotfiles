@@ -9,7 +9,7 @@
 !/.config/htop/htoprc.example
 !/.config/zsh/_.zsh
 !/.config/zsh/alias.zsh
-!/.config/zsh/alias/buildah.zsh
+!/.config/zsh/alias/containers.zsh
 !/.config/zsh/alias/diff.zsh
 !/.config/zsh/alias/directories.zsh
 !/.config/zsh/alias/git.zsh
@@ -20,7 +20,6 @@
 !/.config/zsh/alias/k8s.zsh
 !/.config/zsh/alias/kconfig.zsh
 !/.config/zsh/alias/ls.zsh
-!/.config/zsh/alias/podman.zsh
 !/.config/zsh/alias/quilt.zsh
 !/.config/zsh/alias/sbuild.zsh
 !/.config/zsh/alias/sudo.zsh
@@ -53,6 +52,7 @@
 !/.config/zsh/lib/term.zsh
 !/.config/zsh/lib/time.zsh
 !/.config/zsh/lib/title.zsh
+!/.config/zsh/local.zsh.example
 !/.config/zsh/local/.keep
 !/.config/zsh/opt.zsh
 !/.config/zsh/opt/chase.zsh

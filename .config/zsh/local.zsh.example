@@ -1,0 +1,4 @@
+#!/bin/zsh
+
+typeset -gA ZSHU_COMP_FORCE
+ZSHU_COMP_FORCE[podman]=1
