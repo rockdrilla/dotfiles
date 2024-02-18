@@ -1,5 +1,7 @@
 #!/bin/zsh
 
+typeset -gA ZSHU_COMP_FORCE
+
 ZSHU[f_compdump]="${ZSHU[d_cache]}/compdump"
 ZSHU[d_compcache]="${ZSHU[d_cache]}/compcache"
 [ -d "${ZSHU[d_compcache]}" ] || mkdir -p "${ZSHU[d_compcache]}"
@@ -110,4 +112,22 @@ z-comp-invalidate() {
     f="${ZSHU[d_cache]}/completion/_$1"
     [ -f "$f" ] || return 2
     rm -f "$f" || return 3
+}
+
+## reload or new session are required to regenerate completions
+z-comp-flush() {
+    find "${ZSHU[d_cache]}/completion/" -xdev -type f '!' -name '.keep' -delete
+}
+
+z-comp-auto() {
+    local c f
+
+    for c ( ${(k)ZSHU_COMP_EXTERNAL} ) ; do
+        __z_comp_external "$c" "${(@s: :)ZSHU_COMP_EXTERNAL[$c]}" && unset "ZSHU_COMP_EXTERNAL[$c]"
+    done
+
+    for f ( ${functions[(I)__z_comp_ext__*]} ) ; do
+        c=${f#__z_comp_ext__}
+        __z_comp_external $c $f && unset -f "$f"
+    done
 }

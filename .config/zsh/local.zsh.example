@@ -1,4 +1,10 @@
 #!/bin/zsh
 
-typeset -gA ZSHU_COMP_FORCE
+## skip system-wide podman completion and produce own
 ZSHU_COMP_FORCE[podman]=1
+
+## systemctl status podman.socket
+export DOCKER_HOST=/run/podman/podman.sock
+
+## systemctl --user status podman.socket
+export DOCKER_HOST=${XDG_RUNTIME_DIR}/podman/podman.sock
