@@ -7,6 +7,7 @@
 !/.config/dotfiles/install.sh
 !/.config/dotfiles/scripts/.keep
 !/.config/htop/htoprc.example
+!/.config/mc/ini.example
 !/.config/zsh/_.zsh
 !/.config/zsh/alias.zsh
 !/.config/zsh/alias/containers.zsh
