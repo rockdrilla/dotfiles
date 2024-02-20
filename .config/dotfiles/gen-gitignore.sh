@@ -30,5 +30,3 @@ else
     ## development tree
     gen_gitignore "${path_gitignore}"
 fi
-
-exit 1
