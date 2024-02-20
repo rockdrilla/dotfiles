@@ -14,7 +14,13 @@ dotfiles-git() { (
 z-zwc-gen() {
     local i
     for i ( "${ZSHU[d_conf]}"/**/*.zsh(N.r) ) ; do
-        zcompile -U "$i"
+        zcompile -UR "$i"
+    done
+    for i ( "${ZSHU[d_cache]}/completion"/*(N.r) ) ; do
+        case "$i" in
+        *.zwc ) continue ;;
+        esac
+        zcompile -zUR "$i"
     done
 }
 

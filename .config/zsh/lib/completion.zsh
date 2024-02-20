@@ -83,6 +83,7 @@ __z_comp_external() {
             return 3
         fi
     fi
+    zcompile -zUR "$f" || return 4
     autoload -Uz "_$c"
 
     return 0
@@ -110,8 +111,9 @@ z-comp-invalidate() {
     [ -n "$1" ] || return 1
 
     f="${ZSHU[d_cache]}/completion/_$1"
+    rm -f "$f.zwc"
     [ -f "$f" ] || return 2
-    rm -f "$f" || return 3
+    rm -f "$f"
 }
 
 ## reload or new session are required to regenerate completions
