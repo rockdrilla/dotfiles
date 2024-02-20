@@ -1,0 +1,34 @@
+steps:
+  - name: check
+    image: debian:bookworm-slim
+    environment:
+      DEBCONF_NONINTERACTIVE_SEEN: "true"
+      DEBIAN_FRONTEND: noninteractive
+      DEBIAN_PRIORITY: critical
+      TERM: linux
+      MALLOC_ARENA_MAX: "4"
+    commands:
+      - |
+        : # install required packages
+        apt-get -y update
+        apt-get -y install file findutils git shellcheck zsh
+        apt-get -y clean
+      - |
+        : # verify that repo doesn't contain "garbage"
+        find_fast() {
+            find "$@" -printf . -quit | grep -Fq .
+        }
+        if find_fast ./ -type f -name '*.zwc' ; then
+          echo 'found *.zwc' >&2
+          find ./ -type f -name '*.zwc'
+          exit 1
+        fi
+      - |
+        : # try zsh compile
+        git ls-files | sort -uV | xargs -r file -N -i | grep text/x-shellscript | cut -d: -f1 \
+        | xargs -r -n1 zsh -efc 'zcompile -UR "$@"' --
+        find ./ -type f -name '*.zwc' -delete
+      - |
+        : # try shellcheck (except for *.zsh)
+        git ls-files | grep -Fv '.zsh' | sort -uV | xargs -r file -N -i | grep text/x-shellscript | cut -d: -f1 \
+        | xargs -r -n1 shellcheck

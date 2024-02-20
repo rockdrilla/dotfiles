@@ -6,6 +6,7 @@
 !/.config/dotfiles/gitignore
 !/.config/dotfiles/install.sh
 !/.config/dotfiles/scripts/.keep
+!/.config/dotfiles/woodpecker.yml
 !/.config/htop/htoprc.example
 !/.config/mc/ini.example
 !/.config/zsh/_.zsh
