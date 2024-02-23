@@ -15,11 +15,6 @@ ZSHU[d_var]="${ZSHU[d_conf]}/var"
 ZSHU[d_bin]="${ZDOTDIR}/.config/dotfiles/bin"
 ZSHU[d_scripts]="${ZDOTDIR}/.config/dotfiles/scripts"
 
-for i ( d_zdot d_cache d_conf d_bin d_scripts d_var ) ; do
-    d=${ZSHU[$i]}
-    [ -d "$d" ] || mkdir -p "$d"
-done ; unset i d
-
 ## early escape
 unsetopt global_rcs
 
@@ -45,10 +40,10 @@ done ; unset n f
 for n ( ${zshu_parts} ) ; do
     d="${ZSHU[d_conf]}/$n"
     [ -d "$d" ] || continue
-    for i ( $d/*.zsh(N.r) ) ; do
+    for i ( "$d"/*.zsh(N.r) ) ; do
         source "$i"
-    done ; unset i
-done ; unset n d
+    done
+done ; unset i n d
 
 unset zshu_parts
 

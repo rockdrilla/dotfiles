@@ -5,7 +5,7 @@ function {
     local -a p
     local -aU t npath games
 
-    p=( $path )
+    p=( ${path} )
 
     ## strip "games" first :)
     t=( ${(@)p:#*games*} )
@@ -36,9 +36,9 @@ function {
 
     ## finally... games! xD
     npath+=( /usr/local/games /usr/games )
-    npath+=( $games )
+    npath+=( ${games} )
 
-    path=( $npath )
+    path=( ${npath} )
     hash -f
 }
 

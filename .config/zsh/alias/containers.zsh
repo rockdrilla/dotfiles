@@ -2,23 +2,29 @@
 
 alias bud='buildah bud --isolation chroot --network host --format docker -f '
 
-alias pod-run='podman run -e "TERM=${TERM:-linux}" --network host --rm -it '
-alias pod-run-sh="pod-run --entrypoint='[\"/bin/sh\"]' --user=0:0 "
+alias pod-run='podman run -e "TERM=${TERM:-linux}" --rm -it '
+alias pod-run-sh="pod-run --network host --entrypoint='[\"/bin/sh\"]' --user=0:0 "
 alias pod-ps='podman ps '
 alias pod-images='podman images --format "table {{.ID}} {{.Repository}}:{{.Tag}} {{.Size}} {{.Created}} |{{.CreatedAt}}" '
 alias pod-inspect='podman inspect '
 alias pod-logs='podman logs '
 
 sko-inspect() {
-    command skopeo inspect "docker://${1:?}"
+    local i
+    i="${1:?}" ; shift
+    command skopeo inspect "docker://$i" "$@"
 }
 
 sko-list-tags() {
-    command skopeo list-tags "docker://${1:?}"
+    local i
+    i="${1:?}" ; shift
+    command skopeo list-tags "docker://$i" "$@"
 }
 
 pod-dive() {
-    command dive "podman://${1:?}"
+    local i
+    i="${1:?}" ; shift
+    command dive "podman://$i" "$@"
 }
 
 jq-visual() {

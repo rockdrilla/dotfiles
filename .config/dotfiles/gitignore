@@ -1,6 +1,7 @@
 *
 !/.cache/zsh/compcache/.keep
 !/.cache/zsh/completion/.keep
+!/.cache/zsh/compzwc/.keep
 !/.config/dotfiles/bin/.keep
 !/.config/dotfiles/gen-gitignore.sh
 !/.config/dotfiles/gitignore
@@ -56,6 +57,7 @@
 !/.config/zsh/lib/title.zsh
 !/.config/zsh/local.zsh.example
 !/.config/zsh/local/.keep
+!/.config/zsh/local/completion/.keep
 !/.config/zsh/opt.zsh
 !/.config/zsh/opt/chase.zsh
 !/.config/zsh/opt/completion.zsh

@@ -134,5 +134,5 @@ bindkey -e
 
 for i ( /usr/share/doc/fzf/examples/key-bindings.zsh ) ; do
     [ -s "$i" ] || continue
-    source "$i"
+    source $i
 done ; unset i

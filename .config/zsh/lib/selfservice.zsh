@@ -16,12 +16,17 @@ z-zwc-gen() {
     for i ( "${ZSHU[d_conf]}"/**/*.zsh(N.r) ) ; do
         zcompile -UR "$i"
     done
-    for i ( "${ZSHU[d_cache]}/completion"/*(N.r) ) ; do
-        case "$i" in
-        *.zwc ) continue ;;
-        esac
-        zcompile -zUR "$i"
-    done
+    # for i ( "${ZSHU[d_completion]}"/*(N.r) ) ; do
+    #     case "$i" in
+    #     *.zwc )
+    #         # likely a remnant
+    #         rm -f "$i"
+    #         continue
+    #     ;;
+    #     esac
+    #     zcompile -UR "$i"
+    #     mv -f "$i.zwc" "${ZSHU[d_compzwc]}/"
+    # done
 }
 
 z-zwc-flush() {
@@ -30,8 +35,7 @@ z-zwc-flush() {
 
 z-update() {
     dotfiles-update
-    z-zwc-flush
-    z-zwc-gen
+    z-cache-flush
 }
 
 z-reload() {
@@ -42,7 +46,7 @@ z-reload() {
 
 ## reload or new session are required to regenerate compcache
 z-cache-flush() {
-    find "${ZSHU[d_cache]}/" "${ZSHU[d_compcache]}/" -xdev -type f '!' -name '.keep' -delete
+    find "${ZSHU[d_cache]}/" -xdev -type f '!' -name '.keep' -delete
     z-zwc-flush
     z-zwc-gen
 }

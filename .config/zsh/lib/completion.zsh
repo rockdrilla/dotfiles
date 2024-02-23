@@ -3,10 +3,12 @@
 typeset -gA ZSHU_COMP_FORCE
 
 ZSHU[f_compdump]="${ZSHU[d_cache]}/compdump"
+ZSHU[d_completion]="${ZSHU[d_cache]}/completion"
+ZSHU[d_compzwc]="${ZSHU[d_cache]}/compzwc"
 ZSHU[d_compcache]="${ZSHU[d_cache]}/compcache"
-[ -d "${ZSHU[d_compcache]}" ] || mkdir -p "${ZSHU[d_compcache]}"
 
-fpath=( "${ZSHU[d_cache]}/completion" $fpath )
+typeset -a ZSHU_SYS_FPATH=( ${fpath} )
+fpath=( "${ZSHU[d_compzwc]}" "${ZSHU[d_completion]}" ${fpath} )
 
 __z_compdump_print() { printf '#zshu %s %s\n' "$1" "${(P)1}" ; }
 
@@ -73,17 +75,19 @@ __z_comp_external() {
     (( ${+commands[$c]} )) || return 2
 
     if ! (( ${+ZSHU_COMP_FORCE[$c]} )) ; then
-        (( ${+_comps[$c]} )) && return
+        (( ${+_comps[$c]} )) && return 0
     fi
 
-    f="${ZSHU[d_cache]}/completion/_$c"
+    f="${ZSHU[d_completion]}/_$c"
     if ! [ -s "$f" ] ; then
         if ! "$@" > "$f" ; then
             rm -f "$f"
             return 3
         fi
     fi
-    zcompile -zUR "$f" || return 4
+    # zcompile -zR "$f"
+    # mv -f "$f.zwc" "${ZSHU[d_compzwc]}/$c.zwc"
+    # emulate zsh -c "autoload -Uz _$c"
     autoload -Uz "_$c"
 
     return 0
@@ -95,30 +99,34 @@ __z_comp_system() {
     (( ${+commands[$1]} )) || return 1
     (( ${+_comps[$1]} ))   && return 2
 
-    for d ( $fpath ) ; do
+    (( ${+ZSHU_COMP_FORCE[$c]} )) && return 0
+
+    local -a _fpath
+    _fpath=( ${fpath} )
+    fpath=( ${ZSHU_SYS_FPATH} )
+
+    for d ( ${fpath} ) ; do
         [ -s "$d/_$1" ] || continue
+        # emulate zsh -c "autoload -Uz _$1"
         autoload -Uz "_$1"
+        fpath=( ${_fpath} )
         return 0
     done
-
+    fpath=( ${_fpath} )
     return 3
 }
 
 ## reload or new session are required to regenerate compcache
 z-comp-invalidate() {
-    local f
-
     [ -n "$1" ] || return 1
 
-    f="${ZSHU[d_cache]}/completion/_$1"
-    rm -f "$f.zwc"
-    [ -f "$f" ] || return 2
-    rm -f "$f"
+    # rm -f "${ZSHU[d_completion]}/_$1" "${ZSHU[d_compzwc]}/_$1.zwc" "${ZSHU[d_compzwc]}/$1.zwc"
+    rm -f "${ZSHU[d_completion]}/_$1"
 }
 
 ## reload or new session are required to regenerate completions
 z-comp-flush() {
-    find "${ZSHU[d_cache]}/completion/" -xdev -type f '!' -name '.keep' -delete
+    find "${ZSHU[d_completion]}/" "${ZSHU[d_compzwc]}/" -xdev -type f '!' -name '.keep' -delete
 }
 
 z-comp-auto() {
