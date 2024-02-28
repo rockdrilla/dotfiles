@@ -54,5 +54,5 @@ __z_title_precmd() {
 add-zsh-hook precmd  __z_title_precmd
 
 else
-    echo "tab/window title handling is disabled due to missing hook support" 1>&2
+    echo "tab/window title handling is disabled due to missing hook support" >&2
 fi

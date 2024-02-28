@@ -10,7 +10,7 @@ dotfiles-git() { (
     GIT_DIR="${ZSHU[d_dotfiles]}/repo.git"
     GIT_WORK_TREE="${ZSHU[d_zdot]}"
     set +a
-    zsh -i
+    z-reload
 ) }
 
 dotfiles-gen-gitignore() {
@@ -54,8 +54,9 @@ z-update() {
 }
 
 z-reload() {
+    export ZDOTDIR="${ZSHU[d_zdot]}"
     exec -a "${ZSH_ARGZERO}" "${ZSH_NAME}" "${argv[@]}"
-    echo "unable to reload (something went wrong), code $?" 1>&2
+    echo "unable to reload (something went wrong), code $?" >&2
     return 1
 }
 
