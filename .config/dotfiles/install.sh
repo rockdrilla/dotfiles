@@ -154,8 +154,8 @@ git_config() {
     ## repo-specific
     git config core.attributesfile .config/dotfiles/gitattributes
     ## migration (remove later)
-    git config --unset gc.auto
-    git config --unset pull.ff
+    git config --unset gc.auto || :
+    git config --unset pull.ff || :
     ## size optimization
     git config core.compression 9
     git config pack.compression 9
