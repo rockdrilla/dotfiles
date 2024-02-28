@@ -63,6 +63,7 @@ z-reload() {
 ## reload or new session are required to regenerate compcache
 z-cache-flush() {
     find "${ZSHU[d_cache]}/" -xdev -type f '!' -name '.keep' -delete
+    find "${ZSHU[d_zdot]}/.config/zsh.dots/" -xdev -type f '!' -name '.zshenv' -delete
     z-zwc-flush
     z-zwc-gen
 }

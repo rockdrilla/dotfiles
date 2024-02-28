@@ -2,7 +2,6 @@
 !/.cache/zsh/compcache/.keep
 !/.cache/zsh/completion/.keep
 !/.cache/zsh/compzwc/.keep
-!/.cache/zsh/dots/.keep
 !/.config/dotfiles/bin/.keep
 !/.config/dotfiles/gen-gitignore.sh
 !/.config/dotfiles/gitattributes
@@ -12,6 +11,7 @@
 !/.config/dotfiles/woodpecker.yml
 !/.config/htop/htoprc.dist
 !/.config/mc/ini.dist
+!/.config/zsh.dots/.zshenv
 !/.config/zsh/_.zsh
 !/.config/zsh/_wip/enclave.zsh.wip
 !/.config/zsh/_wip/starship.zsh.sample

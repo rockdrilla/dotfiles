@@ -18,7 +18,7 @@ unsetopt global_rcs
 
 ## safety measure:
 ## redirect all following activity within ZDOTDIR to cache
-export ZDOTDIR="${ZSHU[d_cache]}/dots"
+export ZDOTDIR="${ZDOTDIR}/.config/zsh.dots"
 
 ## cleanup: start from scratch
 for i ( a s f d ) ; do unhash -$i -m '*' ; done ; unset i
