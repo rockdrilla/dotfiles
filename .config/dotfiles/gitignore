@@ -10,8 +10,8 @@
 !/.config/dotfiles/install.sh
 !/.config/dotfiles/scripts/.keep
 !/.config/dotfiles/woodpecker.yml
-!/.config/htop/htoprc.example
-!/.config/mc/ini.example
+!/.config/htop/htoprc.dist
+!/.config/mc/ini.dist
 !/.config/zsh/_.zsh
 !/.config/zsh/_wip/enclave.zsh.wip
 !/.config/zsh/_wip/starship.zsh.sample
