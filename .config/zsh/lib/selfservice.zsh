@@ -1,15 +1,30 @@
 #!/bin/zsh
 
 dotfiles-update() {
-    "${ZSHU[d_zdot]}/.config/dotfiles/install.sh"
+    "${ZSHU[d_dotfiles]}/install.sh" "$@"
 }
 
 dotfiles-git() { (
     cd "${ZSHU[d_zdot]}/"
-    export GIT_DIR="${ZSHU[d_zdot]}/.config/dotfiles/repo.git"
-    export GIT_WORK_TREE="${ZSHU[d_zdot]}"
+    set -a
+    GIT_DIR="${ZSHU[d_dotfiles]}/repo.git"
+    GIT_WORK_TREE="${ZSHU[d_zdot]}"
+    set +a
     zsh -i
 ) }
+
+dotfiles-gen-gitignore() {
+    local x='.config/dotfiles/gen-gitignore.sh'
+    [ -x "$x" ] || {
+        echo "${x:t} is somewhere else" >&2
+        return 1
+    }
+    if [ -d .config/dotfiles/repo.git ] ; then
+        echo "NOT going to change dotfiles installation" >&2
+        return 1
+    fi
+    "$x" "$@"
+}
 
 z-zwc-gen() {
     local i

@@ -23,12 +23,12 @@ zstyle ':completion:*:*:*:*:processes' command "ps -u ${USER} -o pid,user,comm -
 zstyle ':completion:*:*:kill:*:processes' list-colors '=(#b) #([0-9]#) ([0-9a-z-]#)*=01;34=0=01'
 zstyle ':completion:*:kill:*' command 'ps -u ${USER} -o pid,%cpu,tty,cputime,cmd'
 
+autoload -Uz +X compinit && \
+compinit -i -C -d "${ZSHU[f_compdump]}"
+
 if autoload -Uz +X bashcompinit ; then
     bashcompinit && ZSHU[compdump_bash]=1
 fi
-
-autoload -Uz +X compinit && \
-compinit -i -C -d "${ZSHU[f_compdump]}"
 
 for i ( "${ZSHU[d_conf]}"/completion/*.zsh(N.r) ) ; do
     source "$i"

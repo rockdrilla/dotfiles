@@ -4,25 +4,20 @@ typeset -Uga ZSHU_PARENTS_PID
 typeset -ga ZSHU_PARENTS_NAME
 
 function {
-    local i c
+    local i c g
 
-    i=$$ ; while : ; do
-        i=$(ps -o ppid= -p $i 2>/dev/null) || :
-        i=${i//[^0-9]}
-        [[ "$i" =~ '^[1-9][0-9]*$' ]] || break
+    i=${PPID}
+    while : ; do
+        [ -n "$i" ] || break
         ## don't deal with PID1
-        [ "$i" = 1 ] && continue
+        [ "$i" = 1 ] && break
+
         ZSHU_PARENTS_PID+=( $i )
+        read -r i c g <<< $(ps -o 'ppid=,comm=' -p "$i" 2>/dev/null)
+        [ -n "$c" ] && ZSHU_PARENTS_NAME+=( "${c:t}" )
     done
 
-    for i ( ${ZSHU_PARENTS_PID} ) ; do
-        c=$(ps -o comm= -p $i 2>/dev/null) || :
-        [ -n "$c" ] || continue
-        ZSHU_PARENTS_NAME+=( "${c:t}" )
-    done
-
-    typeset -r ZSHU_PARENTS_PID
-    typeset -r ZSHU_PARENTS_NAME
+    typeset -r ZSHU_PARENTS_PID ZSHU_PARENTS_NAME
 }
 
 typeset -gA ZSHU_RUN

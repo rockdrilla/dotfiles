@@ -1,6 +1,8 @@
 #!/bin/zsh
 
-export NO_AT_BRIDGE=1
-export QT_ACCESSIBILITY=0
+set -a
+NO_AT_BRIDGE=1
+QT_ACCESSIBILITY=0
 
-export MENUCONFIG_COLOR=blackbg
+MENUCONFIG_COLOR=blackbg
+set +a

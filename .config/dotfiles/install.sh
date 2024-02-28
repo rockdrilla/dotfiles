@@ -56,7 +56,7 @@ main() {
     umask 0077
 
     if have_cmd git ; then
-        if [ -s "${HOME}/${d_repo}/info/refs" ] ; then
+        if [ -s "${HOME}/${d_repo}/HEAD" ] ; then
             dot_update
         else
             dot_install
@@ -65,6 +65,8 @@ main() {
         echo 'git is missing, proceed "raw" installation.' >&2
         dot_install_raw
     fi
+
+    propagate_dist_files
 
     echo 'installed.' >&2
 }
@@ -75,7 +77,7 @@ dot_install() {
     mkdir -p "${GIT_DIR}"
     git init
     git branch -M "${gh_br}" || true
-    git_config
+    git_config_init
     git_update
 }
 
@@ -118,7 +120,7 @@ dot_install_raw() {
             cat < "${HOME}/$f" > "${td_backup}/$f"
         fi
     done < "${tf_list}"
-    rm -f "${tf_list}"
+    rm -f "${tf_list}" ; unset tf_list
 
     tar -C "${td_tree}" -cf . - | tar -C "${HOME}" -xf -
     rm -rf "${td_tree}"
@@ -137,7 +139,7 @@ git_env() {
     export GIT_DIR GIT_WORK_TREE
 }
 
-git_config() {
+git_config_init() {
     ## remote
     git remote add origin "${u_repo}"
     git config remote.origin.fetch "+refs/heads/${gh_br}:refs/remotes/origin/${gh_br}"
@@ -146,13 +148,23 @@ git_config() {
     ## repo-specific
     git config core.worktree "${GIT_WORK_TREE}"
     git config core.excludesfile "${f_gitignore}"
+}
+
+git_config() {
+    ## repo-specific
+    git config core.attributesfile .config/dotfiles/gitattributes
+    ## migration (remove later)
+    git config --unset gc.auto
+    git config --unset pull.ff
+    ## size optimization
+    git config core.compression 9
+    git config pack.compression 9
     ## generic
-    git config gc.auto 0
-    git config pull.ff only
     git config receive.denyNonFastForwards true
 }
 
 git_update() {
+    git_config
     git remote update -p
     git pull || git reset --hard "origin/${gh_br}"
     git gc --aggressive --prune=all --force || git gc || true
@@ -195,7 +207,7 @@ backup_unconditionally() {
             mv -f "${HOME}/$f" "${td_backup}/$f"
         fi
     done < "${tf_list}"
-    rm -f "${tf_list}"
+    rm -f "${tf_list}" ; unset tf_list
 
     if find_fast "${td_backup}/" -mindepth 1 ; then
         echo "backed-up files are here: ${td_backup}/"
@@ -203,6 +215,22 @@ backup_unconditionally() {
     else
         rmdir "${td_backup}"
     fi
+}
+
+propagate_dist_files() {
+    tf_list=$(mktemp)
+    sed -En '/^!\/(.+\.dist)$/{s//\1/;p;}' < "${HOME}/${f_gitignore}" > "${tf_list}"
+
+    while read -r f_dist ; do
+        [ -n "${f_dist}" ] || continue
+        [ -f "${f_dist}" ] || continue
+
+        f=${f_dist%.dist}
+        if [ -f "$f" ] ; then continue ; fi
+
+        cp "${f_dist}" "$f"
+    done < "${tf_list}"
+    rm -f "${tf_list}" ; unset tf_list
 }
 
 main "$@"

@@ -5,6 +5,5 @@ if [ -n "${PAGER}" ] ; then
     export PAGER
     READNULLCMD=$(which "${PAGER}" | xargs -r readlink -e)
 else
-    unset READNULLCMD
-    unset NULLCMD
+    unset PAGER READNULLCMD NULLCMD
 fi

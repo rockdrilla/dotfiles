@@ -1,28 +1,24 @@
 #!/bin/zsh
 
-: "${ZDOTDIR:=${HOME}}"
-
 typeset -gA ZSHU
 
 ZSHU[t_begin]=${(%):-%D{%s.%6.}}
 
 ZSHU[d_zdot]="${ZDOTDIR}"
-ZSHU[d_cache]="${ZDOTDIR}/.cache/zsh"
+ZSHU[d_dotfiles]="${ZDOTDIR}/.config/dotfiles"
 ZSHU[d_conf]="${ZDOTDIR}/.config/zsh"
+ZSHU[d_cache]="${ZDOTDIR}/.cache/zsh"
 
 ZSHU[d_var]="${ZSHU[d_conf]}/var"
-
-ZSHU[d_bin]="${ZDOTDIR}/.config/dotfiles/bin"
-ZSHU[d_scripts]="${ZDOTDIR}/.config/dotfiles/scripts"
+ZSHU[d_bin]="${ZSHU[d_dotfiles]}/bin"
+ZSHU[d_scripts]="${ZSHU[d_dotfiles]}/scripts"
 
 ## early escape
 unsetopt global_rcs
 
 ## safety measure:
 ## redirect all following activity within ZDOTDIR to cache
-## (probably) these files are safe to remove
-ZDOTDIR="${ZSHU[d_cache]}"
-rm -f "${ZDOTDIR}/.zshrc" "${ZDOTDIR}/.zlogin"
+export ZDOTDIR="${ZSHU[d_cache]}/dots"
 
 ## cleanup: start from scratch
 for i ( a s f d ) ; do unhash -$i -m '*' ; done ; unset i
@@ -33,23 +29,24 @@ umask 0022
 zshu_parts=( env opt lib rc alias local )
 
 for n ( ${zshu_parts} ) ; do
-    f="${ZSHU[d_conf]}/$n.zsh"
-    [ -s "$f" ] && source "$f"
-done ; unset n f
+    [ -s "${ZSHU[d_conf]}/$n.zsh" ] || continue
+    source "${ZSHU[d_conf]}/$n.zsh"
+done ; unset n
 
 for n ( ${zshu_parts} ) ; do
-    d="${ZSHU[d_conf]}/$n"
-    [ -d "$d" ] || continue
-    for i ( "$d"/*.zsh(N.r) ) ; do
+    [ -d "${ZSHU[d_conf]}/$n" ] || continue
+    for i ( "${ZSHU[d_conf]}/$n"/*.zsh(N.r) ) ; do
         source "$i"
     done
-done ; unset i n d
+done ; unset i n
 
 unset zshu_parts
 
-ZSHU[t_end]=${(%):-%D{%s.%6.}}
+hash -f
 
-ZSHU[t_load]=$[ ZSHU[t_end] - ZSHU[t_begin] ]
-ZSHU[t_load]=${ZSHU[t_load]:0:6}
-
-unset 'ZSHU[t_begin]' 'ZSHU[t_end]'
+t=${(%):-%D{%s.%6.}}
+t=$[ t - ZSHU[t_begin] ]
+unset 'ZSHU[t_begin]'
+n=${t#*.}
+ZSHU[t_load]=${t%.*}.${n:0:4}
+unset n t

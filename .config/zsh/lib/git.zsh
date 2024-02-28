@@ -29,12 +29,12 @@ z-git-test() {
 }
 
 __z_git_pwd() {
-    local x
-
-    unset 'ZSHU_PS[git_ref]' 'ZSHU_PS[git_changes]' 'ZSHU_PS[git_tag]' 'ZSHU_GIT[path_root]' 'ZSHU_GIT[path_mid]' 'ZSHU_GIT[path_last]' 'ZSHU_GIT[commit]' 'ZSHU_GIT[detached]' 'ZSHU_GIT[ref]' 'ZSHU_GIT[remote]' 'ZSHU_GIT[tag]' 'ZSHU_GIT[ref_behind]' 'ZSHU_GIT[ref_ahead]' 'ZSHU_GIT[ref_changes]'
-
+    unset 'ZSHU_PS[git_ref]' 'ZSHU_PS[git_changes]' 'ZSHU_PS[git_tag]'
+    ZSHU_GIT=()
     z-git-test || return
 
+
+    local x
     x=$(__z_git rev-parse --short HEAD 2>/dev/null)
     [ -n "$x" ] || return
     ZSHU_GIT[commit]=$x

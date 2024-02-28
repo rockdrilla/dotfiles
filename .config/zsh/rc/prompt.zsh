@@ -78,7 +78,7 @@ function {
     ZSHU_PS1[1L]="${(j::)line}"
 }
 
-z-ps() {
+z-ps1() {
     [ -n "$1" ] || {
         echo "${ZSHU_PS[ps1]}"
         return
@@ -95,6 +95,6 @@ z-ps() {
     return 1
 }
 
-z-ps 3
-[ "${ZSHU_RUN[nested]}"   = 1 ] && z-ps 2
-[ "${ZSHU_RUN[nested1L]}" = 1 ] && z-ps 1
+z-ps1 3
+[ "${ZSHU_RUN[nested]}"   = 1 ] && z-ps1 2
+[ "${ZSHU_RUN[nested1L]}" = 1 ] && z-ps1 1
