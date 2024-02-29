@@ -1,5 +1,8 @@
 #!/bin/zsh
 
+## early module load
+zmodload -s zsh/zprof
+
 typeset -gA ZSHU
 
 ZSHU[t_begin]=${(%):-%D{%s.%6.}}

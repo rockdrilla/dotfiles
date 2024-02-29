@@ -21,7 +21,7 @@ for i ( ${zshu_modules} ) ; do
     */* ) ;;
     * ) i="zsh/$i" ;;
     esac
-    zmodload -i "$i"
+    zmodload "$i"
 done
 unset i zshu_modules
 
