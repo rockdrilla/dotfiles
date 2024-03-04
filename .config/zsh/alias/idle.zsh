@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 idle() {
-    [ -n "${1:?}" ] || return 1
+    [ -n "${1:?}" ]
 
     local f
 
@@ -17,7 +17,7 @@ idle() {
 }
 
 z-idle-ext() {
-    [ -n "${1:?}" ] || return 1
+    [ -n "${1:?}" ]
 
     local -a s
 
@@ -28,7 +28,7 @@ z-idle-ext() {
 }
 
 z-idle-int() {
-    [ -n "${1:?}" ] || return 1
+    [ -n "${1:?}" ]
 
     ## execute in subshell
     (

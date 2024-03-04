@@ -1,7 +1,9 @@
 #!/bin/zsh
 
 krd-debsrc() {
-    [ -n "${1:?}" ] || return 1
+    (( $+commands[deb-src-export] )) || return 127
+
+    [ -n "${1:?}" ]
 
     local dstdir
     case "$1" in
@@ -13,21 +15,21 @@ krd-debsrc() {
 }
 
 krd-sbuild() {
-    [ -n "${1:?}" ] || return 1
-    [ -n "${2:?}" ] || return 1
+    (( $+commands[sbuild] )) || return 127
+    (( $+commands[xz] ))     || return 127
 
-    (( $+commands[sbuild] )) || return 2
-    (( $+commands[xz] ))     || return 2
+    [ -n "${1:?}" ]
+    [ -n "${2:?}" ]
 
     local topdir
     case "$1" in
     */* ) topdir="$1" ;;
     * )   topdir="/tmp/$1" ;;
     esac
-    [ -d "${topdir}" ] || return 3
+    [ -d "${topdir}" ] || return 1
 
     local srcdir="${topdir}/src"
-    [ -d "${srcdir}" ] || return 3
+    [ -d "${srcdir}" ] || return 2
 
     arch="$2"
 

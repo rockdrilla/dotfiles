@@ -21,7 +21,7 @@ dotfiles-gen-gitignore() {
     }
     if [ -d .config/dotfiles/repo.git ] ; then
         echo "NOT going to change dotfiles installation" >&2
-        return 1
+        return 2
     fi
     "$x" "$@"
 }
@@ -55,9 +55,11 @@ z-update() {
 
 z-reload() {
     export ZDOTDIR="${ZSHU[d_zdot]}"
+    local r
     exec -a "${ZSH_ARGZERO}" "${ZSH_NAME}" "${argv[@]}"
-    echo "unable to reload (something went wrong), code $?" >&2
-    return 1
+    r=$?
+    echo "unable to reload (something went wrong), code $r" >&2
+    return $r
 }
 
 ## reload or new session are required to regenerate compcache

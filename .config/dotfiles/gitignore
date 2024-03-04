@@ -2,6 +2,7 @@
 !/.cache/zsh/compcache/.keep
 !/.cache/zsh/completion/.keep
 !/.cache/zsh/compzwc/.keep
+!/.cache/zsh/ssh/.keep
 !/.config/dotfiles/bin/.keep
 !/.config/dotfiles/gen-gitignore.sh
 !/.config/dotfiles/gitattributes
@@ -48,13 +49,16 @@
 !/.config/zsh/lib/alternatives.zsh
 !/.config/zsh/lib/cmdtime.zsh
 !/.config/zsh/lib/completion.zsh
+!/.config/zsh/lib/csv.zsh
 !/.config/zsh/lib/curl.zsh
 !/.config/zsh/lib/git.zsh
+!/.config/zsh/lib/gpg.zsh
 !/.config/zsh/lib/history.zsh
 !/.config/zsh/lib/prompt.zsh
 !/.config/zsh/lib/pswalk.zsh
 !/.config/zsh/lib/say-my.zsh
 !/.config/zsh/lib/selfservice.zsh
+!/.config/zsh/lib/systemd.zsh
 !/.config/zsh/lib/term.zsh
 !/.config/zsh/lib/time.zsh
 !/.config/zsh/lib/title.zsh
@@ -69,9 +73,11 @@
 !/.config/zsh/opt/prompt.zsh
 !/.config/zsh/rc.zsh
 !/.config/zsh/rc/completion.zsh
+!/.config/zsh/rc/gpg-agent.zsh
 !/.config/zsh/rc/keyboard.zsh
 !/.config/zsh/rc/pager.zsh
 !/.config/zsh/rc/prompt.zsh
+!/.config/zsh/rc/ssh-agent.zsh
 !/.config/zsh/rc/terminal.zsh
 !/.config/zsh/var/.keep
 !/.gdbinit

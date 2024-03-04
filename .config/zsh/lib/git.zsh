@@ -21,7 +21,7 @@ __z_git_desc_tag() { __z_git describe --tags "$@" ; }
 z-git-test() {
     [ "${ZSHU_PS[git]}" = '1' ] || return 1
 
-    __z_git_avail || return 2
+    __z_git_avail || return $?
 
     __z_git_is_repo || return 3
 

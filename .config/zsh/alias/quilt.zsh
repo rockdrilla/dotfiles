@@ -5,7 +5,7 @@ quilt-series-strip-comments() {
 }
 
 quilt-series-auto() {
-    [ -n "${1:?}" ] || return 1
+    [ -n "${1:?}" ]
 
     find "$1/" -follow -type f -printf '%P\0' \
     | sed -zEn '/\.(diff|patch)$/p' \
@@ -13,16 +13,16 @@ quilt-series-auto() {
 }
 
 krd-quilt() {
-    [ -n "${1:?}" ] || return 1
+    (( $+commands[quilt] )) || return 127
 
-    (( $+commands[quilt] )) || return 2
+    [ -n "${1:?}" ]
 
     local patchdir series tmp_series
 
     if [ -d "$1" ] ; then
         patchdir="$1/debian/patches"
         if [ -d "${patchdir}" ] ; then
-            [ -f "${patchdir}/series" ] || return 3
+            [ -f "${patchdir}/series" ] || return 1
         else
             patchdir="$1"
         fi
@@ -34,7 +34,7 @@ krd-quilt() {
             quilt-series-auto "${patchdir}" > "${series}"
         fi
     elif [ -f "$1" ] ; then
-        [ -s "$1" ] || return 3
+        [ -s "$1" ] || return 2
 
         series="$1"
         patchdir=${series:h}
@@ -53,7 +53,7 @@ krd-quilt() {
         command quilt pop -a ; echo
 
         r=0
-        while read -r i ; do
+        while read -rs i ; do
             [ -n "$i" ] || continue
 
             k="${patchdir}/$i"

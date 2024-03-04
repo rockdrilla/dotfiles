@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 gpg-warmup() {
-    (( ${+commands[gpg]} )) || return 1
+    (( ${+commands[gpg]} )) || return 127
 
     local t r
 

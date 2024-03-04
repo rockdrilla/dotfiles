@@ -2,11 +2,12 @@
 
 z-gobin-fixup() {
     (( ${+commands[go]} )) || return 0
+
     local gobin
-    gobin=$(go env GOBIN)
+    gobin=$(command go env GOBIN)
     if [ -z "${gobin}" ] ; then
         local gopath
-        gopath=$(go env GOPATH)
+        gopath=$(command go env GOPATH)
         [ -n "${gopath}" ] || return 1
         [ -d "${gopath}" ] || return 0
         gobin="${gopath}/bin"

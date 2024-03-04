@@ -48,11 +48,12 @@ __z_compdump_finalize() {
 
 ## TODO: refactor (e.g. buildah completion is a "bit" broken)
 __z_comp_bash() {
+    # (( ${+commands[$1]} )) || return 127
+
     local f p x
 
-    (( ${+commands[$1]} )) || return 1
-    (( ${+_comps[$1]} )) && return 2
-    (( ${+ZSHU[compdump_bash]} )) || return 3
+    (( ${+_comps[$1]} )) && return 1
+    (( ${+ZSHU[compdump_bash]} )) || return 2
     (( ${+2} )) && return 0
 
     f=0
@@ -60,7 +61,7 @@ __z_comp_bash() {
         x="_$1" ; [ -s "$p/$x" ] && f=1 && break
         x="$1"  ; [ -s "$p/$x" ] && f=1 && break
     done
-    [ "$f" = 0 ] && return 4
+    [ "$f" = 0 ] && return 3
     complete -C "$x" "$1"
 
     return 0
@@ -70,9 +71,9 @@ __z_comp_external() {
     local c f
     c="$1" ; shift
 
-    [ $# -gt 0 ] || return 1
+    (( ${+commands[$c]} )) || return 127
 
-    (( ${+commands[$c]} )) || return 2
+    [ $# -gt 0 ] || return 1
 
     if ! (( ${+ZSHU_COMP_FORCE[$c]} )) ; then
         (( ${+_comps[$c]} )) && return 0
@@ -82,7 +83,7 @@ __z_comp_external() {
     if ! [ -s "$f" ] ; then
         if ! "$@" > "$f" ; then
             rm -f "$f"
-            return 3
+            return 2
         fi
     fi
     # zcompile -zR "$f"
@@ -94,10 +95,11 @@ __z_comp_external() {
 }
 
 __z_comp_system() {
+    # (( ${+commands[$1]} )) || return 127
+
     local d
 
-    (( ${+commands[$1]} )) || return 1
-    (( ${+_comps[$1]} ))   && return 2
+    (( ${+_comps[$1]} )) && return 1
 
     (( ${+ZSHU_COMP_FORCE[$c]} )) && return 0
 
@@ -113,12 +115,12 @@ __z_comp_system() {
         return 0
     done
     fpath=( ${_fpath} )
-    return 3
+    return 2
 }
 
 ## reload or new session are required to regenerate compcache
 z-comp-invalidate() {
-    [ -n "$1" ] || return 1
+    [ -n "${1:?}" ]
 
     # rm -f "${ZSHU[d_completion]}/_$1" "${ZSHU[d_compzwc]}/_$1.zwc" "${ZSHU[d_compzwc]}/$1.zwc"
     rm -f "${ZSHU[d_completion]}/_$1"

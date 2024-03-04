@@ -12,19 +12,19 @@ alias pod-logs='podman logs '
 sko-inspect() {
     local i
     i="${1:?}" ; shift
-    command skopeo inspect "docker://$i" "$@"
+    command skopeo inspect "$@" "docker://$i"
 }
 
 sko-list-tags() {
     local i
     i="${1:?}" ; shift
-    command skopeo list-tags "docker://$i" "$@"
+    command skopeo list-tags "$@" "docker://$i"
 }
 
 pod-dive() {
     local i
     i="${1:?}" ; shift
-    command dive "podman://$i" "$@"
+    command dive "$@" "podman://$i"
 }
 
 jq-visual() {

@@ -5,8 +5,9 @@ z-orig-term() {
     local i x
 
     for i ( ${ZSHU_PARENTS_PID} ) ; do
-        [ -r "/proc/$i/environ" ] || continue
-        x=$(sed -zEn '/^TERM=(.+)$/{s//\1/;p;}' "/proc/$i/environ" 2>/dev/null | tr -d '\0')
+        i="${ZSHU[procfs]}/$i/environ"
+        [ -r "$i" ] || continue
+        x=$(sed -zEn '/^TERM=(.+)$/{s//\1/;p;}' "$i" 2>/dev/null | tr -d '\0')
         [ -n "$x" ] || continue
         a+=( "$x" )
     done

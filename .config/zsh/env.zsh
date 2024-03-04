@@ -86,3 +86,7 @@ function {
     ## last resort
     ZSHU[host]=${ZSHU[host_name]}
 }
+
+case "${ZSHU[os_family]}" in
+linux ) ZSHU[procfs]=/proc ;;
+esac
