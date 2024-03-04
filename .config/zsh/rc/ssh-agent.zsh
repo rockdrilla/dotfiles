@@ -9,6 +9,8 @@ z-ssh-agent() {
 
         break
     done
+    [ -z "${SSH_AGENT_PID}" ] || kill "${SSH_AGENT_PID}"
+    unset SSH_AGENT_PID
 
     (( ${+commands[ssh-agent]} )) || return 127
 
@@ -24,6 +26,6 @@ z-ssh-agent() {
     fi
 
     {
-        eval "$(ssh-agent -s -k -a "${SSH_AUTH_SOCK}")"
+        eval "$(ssh-agent -s -a "${SSH_AUTH_SOCK}")"
     } >/dev/null
 }
