@@ -1,11 +1,15 @@
 #!/bin/zsh
 
 z-ssh-agent() {
-    while [ -n "${SSH_AGENT_PID}" ] ; do
+    while : ; do
+        [ -n "${SSH_AGENT_PID}" ] || break
         z-proc-exists "${SSH_AGENT_PID}" || break
 
+        [ -n "${SSH_AUTH_SOCK}" ] || break
+        [ -S "${SSH_AUTH_SOCK}" ] || break
+
         ## don't bother with ssh agent socket if it already set
-        [ -z "${SSH_AUTH_SOCK}" ] || return 0
+        return 0
 
         break
     done
@@ -25,7 +29,34 @@ z-ssh-agent() {
         SSH_AUTH_SOCK="${sock_dir}/ssh-agent.sock"
     fi
 
+    local pid_file
+    pid_file="${SSH_AUTH_SOCK:h}/ssh-agent.pid"
+    while : ; do
+        [ -s "${pid_file}" ] || break
+        SSH_AGENT_PID=$(cat "${pid_file}")
+        z-proc-exists "${SSH_AGENT_PID}" || break
+        [ -S "${SSH_AUTH_SOCK}" ] || break
+
+        ## don't bother with ssh agent socket if it already set
+        export SSH_AGENT_PID SSH_AUTH_SOCK
+        return 0
+    done
+    unset SSH_AGENT_PID
+
     {
         eval "$(ssh-agent -s -a "${SSH_AUTH_SOCK}")"
     } >/dev/null
+
+    while : ; do
+        [ -n "${SSH_AGENT_PID}" ] || break
+        [ -n "${SSH_AUTH_SOCK}" ] || break
+        [ -S "${SSH_AUTH_SOCK}" ] || break
+
+        echo "${SSH_AGENT_PID}" > "${pid_file}"
+        export SSH_AGENT_PID SSH_AUTH_SOCK
+        return 0
+    done
+
+    unset SSH_AGENT_PID SSH_AUTH_SOCK
+    return 1
 }
