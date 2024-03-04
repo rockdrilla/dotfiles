@@ -65,6 +65,7 @@
 !/.config/zsh/local.zsh.example
 !/.config/zsh/local/.keep
 !/.config/zsh/local/completion/.keep
+!/.config/zsh/local/env.zsh.example
 !/.config/zsh/opt.zsh
 !/.config/zsh/opt/chase.zsh
 !/.config/zsh/opt/completion.zsh
