@@ -43,6 +43,10 @@ z-ssh-agent() {
     done
     unset SSH_AGENT_PID
 
+    if [ -S "${SSH_AUTH_SOCK}" ] ; then
+        rm -fv "${SSH_AUTH_SOCK}"
+    fi
+
     {
         eval "$(ssh-agent -s -a "${SSH_AUTH_SOCK}")"
     } >/dev/null
