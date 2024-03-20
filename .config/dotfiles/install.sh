@@ -61,7 +61,7 @@ select_forge() {
     ## try with github.com
     t_gitignore="${uri_github}/raw/${git_branch}/${f_gitignore}"
     if fetch "${t_gitignore}" >/dev/null ; then
-        uri_repo="${uri_krdsh}.git"
+        uri_repo="${uri_github}.git"
         uri_gitignore="${t_gitignore}"
         uri_tarball="${uri_github}/archive/refs/heads/${git_branch}.tar.gz"
         unset t_gitignore
