@@ -1,44 +1,42 @@
 #!/bin/sh
 set -ef
 
-gh_repo='rockdrilla/dotfiles'
-gh_br='main'
+uri_krdsh="${GITKRDSH:-https://git.krd.sh/krd}/dotfiles"
+uri_github="${GITHUB:-https://github.com/rockdrilla}/dotfiles"
 
-f_gitignore='.config/dotfiles/gitignore'
-u_gitignore="${GITHUB_RAW:-https://raw.githubusercontent.com}/${gh_repo}/${gh_br}/${f_gitignore}"
+git_branch='main'
 
-u_repo="https://github.com/${gh_repo}.git"
 d_repo='.config/dotfiles/repo.git'
-
-u_tarball="${GITHUB:-https://github.com}/${gh_repo}/archive/refs/heads/${gh_br}.tar.gz"
+f_gitignore='.config/dotfiles/gitignore'
 
 have_cmd() {
-    command -v "$1" >/dev/null 2>&1
+    command -v "$1" >/dev/null 2>&1 || return $?
 }
 
 fetch() {
     if have_cmd curl ; then
-        curl -sSL ${2:+ -o "$2" } "$1"
-        return
+        curl -sSL ${2:+ -o "$2" } "$1" || return $?
+        return 0
     fi
     if have_cmd wget ; then
         if [ -n "$2" ] ; then
-            wget -q -O - "$1" > "$2"
+            wget -q -O - "$1" > "$2" || return $?
         else
-            wget -q -O - "$1"
+            wget -q -O - "$1" || return $?
         fi
-        return
+        return 0
     fi
-    if have_cmd /usr/lib/apt/apt-helper ; then
+    x=/usr/lib/apt/apt-helper
+    if have_cmd $x ; then
         if [ -n "$2" ] ; then
-            /usr/lib/apt/apt-helper download-file "$1" "$2"
-            return
+            $x download-file "$1" "$2" || return $?
+            return 0
         fi
         __fetch_t=$(mktemp) || return 1
         set +e
         (
             set -e
-            /usr/lib/apt/apt-helper download-file "$1" "${__fetch_t}"
+            $x download-file "$1" "${__fetch_t}" || return $?
             cat "${__fetch_t}"
         )
         __fetch_r=$?
@@ -49,9 +47,33 @@ fetch() {
     return 1
 }
 
+select_forge() {
+    unset uri_gitignore uri_repo uri_tarball
+    ## try with git.krd.sh
+    t_gitignore="${uri_krdsh}/raw/branch/${git_branch}/${f_gitignore}"
+    if fetch "${t_gitignore}" >/dev/null ; then
+        uri_repo="${uri_krdsh}.git"
+        uri_gitignore="${t_gitignore}"
+        uri_tarball="${uri_krdsh}/archive/${git_branch}.tar.gz"
+        unset t_gitignore
+        return
+    fi
+    ## try with github.com
+    t_gitignore="${uri_github}/raw/${git_branch}/${f_gitignore}"
+    if fetch "${t_gitignore}" >/dev/null ; then
+        uri_repo="${uri_krdsh}.git"
+        uri_gitignore="${t_gitignore}"
+        uri_tarball="${uri_github}/archive/refs/heads/${git_branch}.tar.gz"
+        unset t_gitignore
+        return
+    fi
+    echo 'no forge is available to fetch URLs' >&2
+    return 1
+}
+
 main() {
-    ## dry run to test connectivity
-    fetch "${u_gitignore}" >/dev/null
+    ## test connectivity and select forge
+    select_forge
 
     umask 0077
 
@@ -76,7 +98,7 @@ dot_install() {
     git_env
     mkdir -p "${GIT_DIR}"
     git init
-    git branch -M "${gh_br}" || true
+    git branch -M "${git_branch}" || true
     git_config_init
     git_update
 }
@@ -92,7 +114,7 @@ find_fast() {
 
 dot_install_raw() {
     tf_tar=$(mktemp)
-    fetch "${u_tarball}" "${tf_tar}"
+    fetch "${uri_tarball}" "${tf_tar}"
 
     td_tree=$(mktemp -d)
 
@@ -103,7 +125,7 @@ dot_install_raw() {
     rm -f "${tf_tar}"
 
     tf_list=$(mktemp)
-    fetch "${u_gitignore}" \
+    fetch "${uri_gitignore}" \
     | sed -En '/^!\/(.+)$/{s//\1/;p;}' \
     > "${tf_list}"
 
@@ -141,10 +163,10 @@ git_env() {
 
 git_config_init() {
     ## remote
-    git remote add origin "${u_repo}"
-    git config remote.origin.fetch "+refs/heads/${gh_br}:refs/remotes/origin/${gh_br}"
+    git remote add origin "${uri_repo}"
+    git config remote.origin.fetch "+refs/heads/${git_branch}:refs/remotes/origin/${git_branch}"
     git config remote.origin.tagopt '--no-tags'
-    git config "branch.${gh_br}.remote" origin
+    git config "branch.${git_branch}.remote" origin
     ## repo-specific
     git config core.worktree "${GIT_WORK_TREE}"
     git config core.excludesfile "${f_gitignore}"
@@ -152,6 +174,7 @@ git_config_init() {
 
 git_config() {
     ## repo-specific
+    git remote set-url origin "${uri_repo}"
     git config core.attributesfile .config/dotfiles/gitattributes
     ## migration (remove later)
     git config --unset gc.auto || :
@@ -166,7 +189,7 @@ git_config() {
 git_update() {
     git_config
     git remote update -p
-    git pull || git reset --hard "origin/${gh_br}"
+    git pull || git reset --hard "origin/${git_branch}"
     git gc --aggressive --prune=all --force || git gc || true
 }
 
@@ -193,7 +216,7 @@ cmp_files() {
 
 backup_unconditionally() {
     tf_list=$(mktemp)
-    fetch "${u_gitignore}" \
+    fetch "${uri_gitignore}" \
     | sed -En '/^!\/(.+)$/{s//\1/;p;}' \
     > "${tf_list}"
 
