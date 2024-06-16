@@ -116,7 +116,7 @@ dkr-dive() {
     command dive "$@" "docker://$i"
 }
 
-typeset -ga ZSHU_GRP_DOCKER=docker
+typeset -g ZSHU_GRP_DOCKER=docker
 z-adjust-docker() {
     [ ${UID} -eq 0 ] && return 0
 
