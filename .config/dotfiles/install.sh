@@ -47,25 +47,41 @@ fetch() {
     return 1
 }
 
+test_forge() {
+    fetch "$1" "$2" || return 1
+    [ "$(head -n 1 "$2")" = '*' ] || return 1
+    return 0
+}
+
 select_forge() {
     unset uri_gitignore uri_repo uri_tarball
+    __t=$(mktemp)
     ## try with git.krd.sh
-    t_gitignore="${uri_krdsh}/raw/branch/${git_branch}/${f_gitignore}"
-    if fetch "${t_gitignore}" >/dev/null ; then
+    while [ -z "${uri_repo}" ] ; do
+        t_gitignore="${uri_krdsh}/raw/branch/${git_branch}/${f_gitignore}"
+        test_forge "${t_gitignore}" "${__t}" || break
+
         uri_repo="${uri_krdsh}.git"
         uri_gitignore="${t_gitignore}"
         uri_tarball="${uri_krdsh}/archive/${git_branch}.tar.gz"
-        unset t_gitignore
-        return
-    fi
+
+        break
+    done
     ## try with github.com
-    t_gitignore="${uri_github}/raw/${git_branch}/${f_gitignore}"
-    if fetch "${t_gitignore}" >/dev/null ; then
+    while [ -z "${uri_repo}" ] ; do
+        t_gitignore="${uri_github}/raw/${git_branch}/${f_gitignore}"
+        test_forge "${t_gitignore}" "${__t}" || break
+
         uri_repo="${uri_github}.git"
         uri_gitignore="${t_gitignore}"
         uri_tarball="${uri_github}/archive/refs/heads/${git_branch}.tar.gz"
-        unset t_gitignore
-        return
+
+        break
+    done
+    rm -f "${__t}" ; unset __t
+    unset t_gitignore
+    if [ -n "${uri_repo}" ] ; then
+        return 0
     fi
     echo 'no forge is available to fetch URLs' >&2
     return 1
@@ -181,7 +197,9 @@ git_config() {
     git config --unset pull.ff || :
     ## size optimization
     git config core.compression 9
+    git config core.looseCompression 6
     git config pack.compression 9
+    git config pack.threads 2
     ## generic
     git config receive.denyNonFastForwards true
 }

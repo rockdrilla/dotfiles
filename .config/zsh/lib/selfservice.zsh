@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 dotfiles-update() {
-    "${ZSHU[d_dotfiles]}/install.sh" "$@"
+    "${ZSHU[d_dotfiles]}/install.sh" "$@" || return $?
 }
 
 dotfiles-git() { (
@@ -49,7 +49,7 @@ z-zwc-flush() {
 }
 
 z-update() {
-    dotfiles-update
+    dotfiles-update || return $?
     z-cache-flush
 }
 
