@@ -3,7 +3,9 @@
 [core]
 	abbrev = 8
 	bigFileThreshold = 16m
-	compression = 5
+	compression = 7
+	deltaBaseCacheLimit = 128m
+	looseCompression = 2
 [credential]
 	helper = cache --timeout=86400
 [fetch]
@@ -12,7 +14,7 @@
 	aggressiveDepth = 100
 	aggressiveWindow = 500
 	auto = 0
-	bigPackThreshold = 512m
+	bigPackThreshold = 1g
 	pruneExpire = now
 [init]
 	defaultBranch = main
@@ -23,6 +25,7 @@
 	packSizeLimit = 1g
 	threads = 4
 	useSparse = true
+	writeBitmapLookupTable = true
 	writeReverseIndex = true
 [pull]
 	ff = only
