@@ -19,27 +19,6 @@ quilt-series-auto() {
 krd-quilt() {
     (( $+commands[quilt] )) || return 127
 
-    [ $# -gt 0 ] || return 1
-
-    local i
-    local -i n_opt=0
-    local -i o_continue=0
-    for i ; do
-        case "${i:?}" in
-        -c | --continue )
-            o_continue=1
-        ;;
-        -* )
-            env printf 'unrecognized option: %q\n' "$1"
-            return 1
-        ;;
-        * ) break ;;
-        esac
-        n_opt=$[n_opt+1]
-    done
-
-    [ ${n_opt} -eq 0 ] || shift ${n_opt}
-    [ $# -gt 0 ] || return 1
     [ -n "${1:?}" ]
 
     local patchdir series tmp_series
@@ -76,32 +55,25 @@ krd-quilt() {
         QUILT_PATCHES="${patchdir}"
         set +a
 
-        if [ ${o_continue} -eq 0 ] ; then
-            z-quilt pop -a
-            echo
-        fi
-
         r=0
         while read -rs i ; do
             [ -n "$i" ] || continue
 
-            k="${patchdir}/$i"
-            z-quilt --fuzz=0 push "$k"
+            z-quilt --fuzz=0 push "$i"
             r=$? ; [ $r -eq 0 ] || exit $r
-            z-quilt refresh "$k"
+            z-quilt refresh "$i"
             r=$? ; [ $r -eq 0 ] || exit $r
 
             sed -E -i \
               -e 's#^(-{3} )[^/][^/]*/(.*)$#\1a/\2#;' \
               -e 's#^(\+{3} )[^/][^/]*/(.*)$#\1b/\2#' \
-            "$k"
+            "$i"
 
-            rm -f "$k"'~'
+            rm -f "$i"'~'
         done <<< $(
-            if [ ${o_continue} -eq 1 ] ; then
-                z-quilt unapplied
-            else
-                quilt-series-strip-comments "${series}"
+            if ! z-quilt unapplied ; then
+                quilt-series-strip-comments "${series}" \
+                | sed -E "s${ZSHU_XSED}^${ZSHU_XSED}${patchdir}/${ZSHU_XSED}"
             fi
         )
         exit $r
