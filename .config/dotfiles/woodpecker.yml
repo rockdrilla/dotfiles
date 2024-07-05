@@ -20,7 +20,7 @@ steps:
         }
         if find_fast ./ -type f -name '*.zwc' ; then
           echo 'found *.zwc' >&2
-          find ./ -type f -name '*.zwc'
+          find ./ -type f -name '*.zwc' | sort -V
           exit 1
         fi
       - |

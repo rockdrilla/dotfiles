@@ -26,6 +26,7 @@ zstyle ':completion:*:kill:*' command 'ps -u ${USER} -o pid,%cpu,tty,cputime,cmd
 autoload -Uz +X compinit && \
 compinit -i -C -d "${ZSHU[f_compdump]}"
 
+unset 'ZSHU[compdump_bash]'
 if autoload -Uz +X bashcompinit ; then
     bashcompinit && ZSHU[compdump_bash]=1
 fi

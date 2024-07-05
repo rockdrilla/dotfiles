@@ -16,7 +16,6 @@ z-gobin-fixup() {
     ## already in PATH?
     [ "${path[(I)${gobin}]}" = 0 ] || return 0
     path=( "${gobin}" ${path} )
-    hash -f
 }
 
 z-gobin-fixup

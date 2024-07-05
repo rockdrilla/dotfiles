@@ -1,19 +1,66 @@
 #!/bin/zsh
 
-alias bud='buildah bud --isolation chroot --network host --format docker -f '
-
-alias pod-run='podman run -e "TERM=${TERM:-linux}" --rm -it '
-alias pod-images='podman images --format "table {{.ID}} {{.Repository}}:{{.Tag}} {{.Size}} {{.Created}} |{{.CreatedAt}}" '
-alias pod-inspect='podman inspect '
-alias pod-logs='podman logs '
-
 typeset -Uga ZSHU_CNTR_SHELLS=( /bin/bash /bin/sh /bin/ash )
 typeset -ga ZSHU_CNTR_FALLBACK_SHELL=( /busybox/busybox sh )
 
+alias bud='buildah bud --network=host -f '
+
+function {
+    local i
+    for i ( run images ps inspect logs ) ; do
+        alias "pod-$i"="podman $i "
+    done
+}
+
 z-pod() { command podman "$@" ; }
+
+alias podman='z-podman '
+z-podman() {
+    case "${1:-}" in
+    run )    shift ; z-pod-run "$@" ;;
+    images ) shift ; z-pod-images "$@" ;;
+    ps )     shift ; z-pod-ps "$@" ;;
+    * ) z-pod "$@" ;;
+    esac
+}
 
 z-pod-run() {
     z-pod run -e "TERM=${TERM:-linux}" --rm -it "$@"
+}
+
+z-pod-images() {
+    local have_flags=0
+    case "$1" in
+    -* ) have_flags=1 ;;
+    esac
+    if [ ${have_flags} = 1 ] ; then
+        z-pod images "$@"
+    else
+        z-pod images --format 'table {{.ID}} {{.Repository}}:{{.Tag}} {{.Size}} {{.Created}} |{{.CreatedAt}}' "$@"
+    fi
+}
+
+z-pod-ps() {
+    local have_flags=0
+    case "$1" in
+    -* ) have_flags=1 ;;
+    esac
+    if [ ${have_flags} = 1 ] ; then
+        z-pod ps "$@"
+    else
+        z-pod ps -a --sort names --format 'table {{.ID}} {{.Names}} {{.Image}} {{.CreatedHuman}} {{.Status}}' "$@"
+    fi
+}
+
+pod-images-grep() {
+    z-pod-images \
+    | {
+        if [ -z "$1" ] ; then
+            head
+        else
+            sed -En "1{p;D};\\${ZSHU_XSED}$1${ZSHU_XSED}p"
+        fi
+    }
 }
 
 ## NB: naive. rewrite!
@@ -39,40 +86,30 @@ pod-run-sh() {
     z-pod-run ${cntr_opts[@]} "$@" ${shell[@]}
 }
 
-pod-ps() {
-    [ $# -ne 0 ] || set -- -a --format 'table {{.ID}} {{.Names}} {{.Image}} {{.CreatedHuman}} {{.Status}}'
-    command podman ps "$@"
-}
-
+## NB: naive. rewrite!
 sko-inspect() {
     local i
     i="${1:?}" ; shift
     command skopeo inspect "$@" "docker://$i"
 }
 
+## NB: naive. rewrite!
 sko-list-tags() {
     local i
     i="${1:?}" ; shift
     command skopeo list-tags "$@" "docker://$i"
 }
 
+## NB: naive. rewrite!
 pod-dive() {
     local i
     i="${1:?}" ; shift
     command dive "$@" "podman://$i"
 }
 
-jq-visual() {
-    command jq -C | less
-}
-
-jq-config() {
-    command jq '.[].Config'
-}
-
-jq-tags() {
-    command jq -r '.Tags[]'
-}
+jq-visual() { jq -C | "${PAGER:-cat}" ; }
+jq-config() { jq '.[].Config' ; }
+jq-tags() { jq -r '.Tags[]' ; }
 
 alias dkr='docker '
 alias dkr-run='dkr run -e "TERM=${TERM:-linux}" --rm -it '
@@ -110,6 +147,7 @@ dkr-run-sh() {
     z-dkr-run ${cntr_opts[@]} "$@" ${shell[@]}
 }
 
+## NB: naive. rewrite!
 dkr-dive() {
     local i
     i="${1:?}" ; shift

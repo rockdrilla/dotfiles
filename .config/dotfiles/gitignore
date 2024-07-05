@@ -44,6 +44,7 @@
 !/.config/zsh/env/ld.so.zsh
 !/.config/zsh/env/pager.zsh
 !/.config/zsh/env/quilt.zsh
+!/.config/zsh/env/sed.zsh
 !/.config/zsh/env/xdg.zsh
 !/.config/zsh/lib.zsh
 !/.config/zsh/lib/alternatives.zsh
