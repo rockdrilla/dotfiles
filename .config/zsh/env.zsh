@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 ## sort-n-fill PATH
-function {
+z-sort-path() {
     local -a p
     local -aU t npath games
 
@@ -31,7 +31,10 @@ function {
     p=( $t )
 
     ## now we're with /sbin and /bin... probably :)
-    npath+=( /sbin /bin )
+
+    ## in case of merged /usr
+    [ -h /sbin ] || npath+=( /sbin )
+    [ -h /bin ]  || npath+=( /bin )
     npath+=( $p )
 
     ## finally... games! xD
@@ -41,6 +44,7 @@ function {
     path=( ${npath} )
     hash -f
 }
+z-sort-path
 
 unset GREP_OPTIONS
 unset LS_OPTIONS
