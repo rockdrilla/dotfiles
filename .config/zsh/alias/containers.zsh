@@ -32,7 +32,7 @@ z-pod-run() {
 z-pod-images() {
     local have_flags=0
     case "$1" in
-    -* ) have_flags=1 ; break ;;
+    -* ) have_flags=1 ;;
     esac
     if [ ${have_flags} = 1 ] ; then
         z-pod images "$@"
@@ -44,7 +44,7 @@ z-pod-images() {
 z-pod-ps() {
     local have_flags=0
     case "$1" in
-    -* ) have_flags=1 ; break ;;
+    -* ) have_flags=1 ;;
     esac
     if [ ${have_flags} = 1 ] ; then
         z-pod ps "$@"
@@ -56,7 +56,7 @@ z-pod-ps() {
 z-pod-top() {
     local have_flags=0
     case "$1" in
-    -* ) have_flags=1 ; break ;;
+    -* ) have_flags=1 ;;
     esac
     if [ ${have_flags} = 1 ] ; then
         z-pod top "$@"
