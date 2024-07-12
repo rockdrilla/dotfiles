@@ -7,7 +7,7 @@ alias bud='buildah bud --network=host -f '
 
 function {
     local i
-    for i ( run images ps inspect logs ) ; do
+    for i ( run images ps top inspect logs ) ; do
         alias "pod-$i"="podman $i "
     done
 }
@@ -20,6 +20,7 @@ z-podman() {
     run )    shift ; z-pod-run "$@" ;;
     images ) shift ; z-pod-images "$@" ;;
     ps )     shift ; z-pod-ps "$@" ;;
+    top )    shift ; z-pod-top "$@" ;;
     * ) z-pod "$@" ;;
     esac
 }
@@ -31,24 +32,40 @@ z-pod-run() {
 z-pod-images() {
     local have_flags=0
     case "$1" in
-    -* ) have_flags=1 ;;
+    -* ) have_flags=1 ; break ;;
     esac
     if [ ${have_flags} = 1 ] ; then
         z-pod images "$@"
-    else
-        z-pod images --format 'table {{.ID}} {{.Repository}}:{{.Tag}} {{.Size}} {{.Created}} |{{.CreatedAt}}' "$@"
+        return $?
     fi
+    z-pod images --format 'table {{.ID}} {{.Repository}}:{{.Tag}} {{.Size}} {{.Created}} |{{.CreatedAt}}' "$@"
 }
 
 z-pod-ps() {
     local have_flags=0
     case "$1" in
-    -* ) have_flags=1 ;;
+    -* ) have_flags=1 ; break ;;
     esac
     if [ ${have_flags} = 1 ] ; then
         z-pod ps "$@"
+        return $?
+    fi
+    z-pod ps -a --sort names --format 'table {{.ID}} {{.Names}} {{.Image}} {{.CreatedHuman}} {{.Status}}' "$@"
+}
+
+z-pod-top() {
+    local have_flags=0
+    case "$1" in
+    -* ) have_flags=1 ; break ;;
+    esac
+    if [ ${have_flags} = 1 ] ; then
+        z-pod top "$@"
+        return $?
+    fi
+    if [ $# -eq 1 ] ; then
+        z-pod top "$1" 'pid,ppid,user,args,pcpu,time,stime,etime,state,nice,rss,vsz'
     else
-        z-pod ps -a --sort names --format 'table {{.ID}} {{.Names}} {{.Image}} {{.CreatedHuman}} {{.Status}}' "$@"
+        z-pod top "$@"
     fi
 }
 
