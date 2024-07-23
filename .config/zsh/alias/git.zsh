@@ -16,29 +16,39 @@ git-dir-usage() {
     esac
 
     local -a subdirs
-    subdirs+="${gitdir}/logs/refs"
-    subdirs+="${gitdir}/objects/info"
-    subdirs+="${gitdir}/objects/pack"
-
-    if [ -n "${topdir}" ] ; then
-        env -C "${topdir}" du -d1 "${gitdir}"
-        env -C "${topdir}" du -d1 "${subdirs[@]}"
-    else
+    for x ( logs/refs objects/info objects/pack ) ; do
+        [ -d "${gitdir}/$x" ] || continue
+        subdirs+="${gitdir}/$x"
+    done
+    
+    (
+        [ -n "${topdir}" ] && cd "${topdir}/"
+        if [ ${#subdirs} -gt 0 ] ; then
+            du -d1 "${subdirs[@]}"
+        fi
         du -d1 "${gitdir}"
-        du -d1 "${subdirs[@]}"
-    fi | grep -Ev '^[0-9]\s' | sort -Vk2
+    ) | grep -Ev '^[0-9]K?\s' | sort -Vk2
 }
 
 git-gc() {
     git-dir-usage || return $?
     echo
-    idle git gc "$@"
+    echo "# git gc $*" >&2
+    z-time idle git gc "$@"
     echo
     git-dir-usage
 }
 
 git-gc-force() {
-    git-gc --aggressive --force
+    git-dir-usage || return $?
+    echo
+    echo "# git gc --aggressive --force $*" >&2
+    z-time idle git gc --aggressive --force "$@"
+    echo
+    echo "# git repack -Ad" >&2
+    z-time idle git repack -Ad
+    echo
+    git-dir-usage
 }
 
 git-archive-ref() {
