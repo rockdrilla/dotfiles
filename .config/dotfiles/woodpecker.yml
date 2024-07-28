@@ -1,6 +1,12 @@
+## kind of fixup (remove in near future)
+## ref: https://github.com/woodpecker-ci/plugin-git/releases
+clone:
+  git:
+    image: quay.krd.sh/docker_io/woodpeckerci/plugin-git:2.5.2
+
 steps:
   - name: check
-    image: debian:bookworm-slim
+    image: quay.krd.sh/debian:bookworm-slim
     environment:
       DEBCONF_NONINTERACTIVE_SEEN: "true"
       DEBIAN_FRONTEND: noninteractive
@@ -9,6 +15,10 @@ steps:
       MALLOC_ARENA_MAX: "4"
     commands:
       - |
+        : # configure apt
+        find /etc/apt/sources.list.d/ -mindepth 1 -delete
+        : > /etc/apt/sources.list
+        cp .config/dotfiles/debian.sources /etc/apt/sources.list.d/
         : # install required packages
         apt-get -y update
         apt-get -y install file findutils git shellcheck zsh
@@ -35,4 +45,4 @@ steps:
 
 ## personal tweaks :)
 labels:
-  network: dmz
+  network: airgap
