@@ -41,6 +41,7 @@ krd-sbuild() {
     for i ; do
         ## naive splitting args and env
         case "$i" in
+        -*)   sbuild_args+=( $i ) ;;
         *=* ) sbuild_env+=( $i ) ;;
         *)    sbuild_args+=( $i ) ;;
         esac
