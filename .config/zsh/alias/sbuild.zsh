@@ -55,7 +55,7 @@ krd-sbuild() {
         z-set-tmpdir /tmp
 
         builddir="${topdir}/${arch}"
-        mkdir -p "${topdir}/all" "${builddir}" "${builddir}-debug"
+        mkdir -p "${topdir}/all" "${builddir}" "${builddir}-all" "${builddir}-debug"
 
         cd "${builddir}"
         for i ( "${srcdir}"/*.dsc(N.r) ) ; do
@@ -64,7 +64,11 @@ krd-sbuild() {
             find -name '*.build' -type f -exec xz -9vv {} +
         done
 
-        find -name '*dbgsym*.deb' -type f -exec mv -nvt "../${arch}-debug" {} +
-        find -name '*_all.deb' -type f -exec mv -nvt '../all' {} +
+        find -name '*_all.deb'    -type f -exec mv -fvt "../${arch}-all" {} +
+        find -name '*_all.ddeb'   -type f -exec mv -fvt "../${arch}-all" {} +
+        find -name '*dbgsym*.deb' -type f -exec mv -fvt "../${arch}-debug" {} +
+        find -name '*.ddeb'       -type f -exec mv -fvt "../${arch}-debug" {} +
+        cd "${builddir}-all"
+        find -type f -exec mv -nvt '../all' {} +
     )
 }
