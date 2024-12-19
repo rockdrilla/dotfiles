@@ -6,12 +6,17 @@ z-gpg-agent() {
 
     (( ${+commands[gpg-agent]} )) || return 127
 
-    local u
-    for u in gpg-agent.{service,socket} ; do
-        z-systemctl-exists --user $u || continue
-
-        z-systemctl --user --now enable $u
-    done
+    if (( ${+commands[systemctl]} )) ; then
+        local u s
+        for u in gpg-agent.{service,socket} ; do
+            s=$(z-systemctl --user is-enabled $u)
+            case "$s" in
+            disabled ) ;;
+            * ) continue ;;
+            esac
+            z-systemctl --user --now enable $u
+        done
+    fi
 
     (( ${+commands[gpgconf]} )) || return 127
 
