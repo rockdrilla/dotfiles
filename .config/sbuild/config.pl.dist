@@ -1,0 +1,21 @@
+$chroot_mode = "schroot";
+$schroot = "schroot";
+
+$pgp_options = [ '-us', '-uc', '-ui' ];
+
+$build_arch_all = 1;
+$build_arch_any = 1;
+$check_space = 0;
+$enable_network = 1;
+
+$run_autopkgtest = 0;
+$run_lintian = 0;
+$run_piuparts = 0;
+
+$apt_distupgrade = 0;
+$apt_upgrade = 0;
+
+$purge_build_directory = 'successful';
+
+# don't remove this, Perl needs it:
+1;

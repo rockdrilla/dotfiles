@@ -14,6 +14,7 @@
 !/.config/dotfiles/woodpecker.yml
 !/.config/htop/htoprc.dist
 !/.config/mc/ini.dist
+!/.config/sbuild/config.pl.dist
 !/.config/zsh.dots/.zshenv
 !/.config/zsh/_.zsh
 !/.config/zsh/_wip/enclave.zsh.wip
@@ -86,6 +87,7 @@
 !/.config/zsh/var/.keep
 !/.gdbinit
 !/.gitconfig
+!/.sbuildrc.dist
 !/.screenrc
 !/.selected_editor
 !/.vimrc
