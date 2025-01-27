@@ -4,7 +4,6 @@
 !/.cache/zsh/compzwc/.keep
 !/.cache/zsh/ssh/.keep
 !/.config/dotfiles/bin/.keep
-!/.config/dotfiles/debian.sources
 !/.config/dotfiles/gen-gitignore.sh
 !/.config/dotfiles/gitattributes
 !/.config/dotfiles/gitignore
@@ -18,7 +17,6 @@
 !/.config/zsh.dots/.zshenv
 !/.config/zsh/_.zsh
 !/.config/zsh/_wip/enclave.zsh.wip
-!/.config/zsh/_wip/starship.zsh.sample
 !/.config/zsh/alias.zsh
 !/.config/zsh/alias/containers.zsh
 !/.config/zsh/alias/diff.zsh

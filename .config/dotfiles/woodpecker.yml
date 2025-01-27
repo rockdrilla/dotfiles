@@ -1,18 +1,14 @@
 steps:
   - name: check
-    image: quay.krd.sh/debian:bookworm-slim
+    image: docker.io/debian:bookworm-slim
     environment:
-      DEBCONF_NONINTERACTIVE_SEEN: "true"
-      DEBIAN_FRONTEND: noninteractive
-      DEBIAN_PRIORITY: critical
-      TERM: linux
-      MALLOC_ARENA_MAX: "4"
+      DEBCONF_NONINTERACTIVE_SEEN: 'true'
+      DEBIAN_FRONTEND: 'noninteractive'
+      DEBIAN_PRIORITY: 'critical'
+      TERM: 'linux'
+      MALLOC_ARENA_MAX: '4'
     commands:
       - |
-        : # configure apt
-        find /etc/apt/sources.list.d/ -mindepth 1 -delete
-        : > /etc/apt/sources.list
-        cp .config/dotfiles/debian.sources /etc/apt/sources.list.d/
         : # install required packages
         apt-get -y update
         apt-get -y install file findutils git shellcheck zsh
@@ -36,7 +32,3 @@ steps:
         : # try shellcheck (except for *.zsh)
         git ls-files | grep -Fv '.zsh' | sort -uV | xargs -r file -N -i | grep text/x-shellscript | cut -d: -f1 \
         | xargs -r -n1 shellcheck
-
-## personal tweaks :)
-labels:
-  network: airgap
