@@ -1,5 +1,5 @@
 $chroot_mode = "schroot";
-$schroot = "schroot";
+$build_path = '';
 
 $pgp_options = [ '-us', '-uc', '-ui' ];
 
