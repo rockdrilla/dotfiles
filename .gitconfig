@@ -1,7 +1,14 @@
+[advice]
+	detachedHead = false
+	resetNoRefresh = false
+	skippedCherryPicks = false
+	statusAheadBehind = false
+	statusUoption = false
+	suggestDetachingHead = false
 [commit]
 	gpgSign = false
 [core]
-	abbrev = 8
+	abbrev = 10
 	bigFileThreshold = 16m
 	compression = 7
 	deltaBaseCacheLimit = 128m
@@ -16,12 +23,19 @@
 	auto = 0
 	bigPackThreshold = 1g
 	pruneExpire = now
+[grep]
+	threads = 2
+[index]
+	threads = 2
 [init]
 	defaultBranch = main
+[log]
+	showSignature = false
 [maintainance]
 	auto = false
 [pack]
 	compression = 7
+	deltaCacheLimit = 2048
 	packSizeLimit = 1g
 	threads = 4
 	useSparse = true
@@ -34,5 +48,8 @@
 	gpgSign = false
 [receive]
 	autogc = false
+	keepAlive = 25
+[reftable]
+	blockSize = 65536
 [repack]
 	writeBitmaps = true
