@@ -196,8 +196,9 @@ git_config() {
     git config --unset gc.auto || :
     git config --unset pull.ff || :
     ## size optimization
+    git config core.bigFileThreshold 64k
     git config core.compression 9
-    git config core.looseCompression 6
+    git config core.looseCompression 8
     git config pack.compression 9
     git config pack.threads 2
     ## generic
