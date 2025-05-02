@@ -62,3 +62,7 @@ git-archive-ref() {
     git archive --format=tar -o "${topdir}/${out}" --prefix="${name}-${ver}-git.${c_hash}/" "${gitref}" || return $?
     echo "archived to ${out} in ${topdir}/" >&2
 }
+
+git-br() {
+    __z_git -c core.pager='cat' branch --no-abbrev "$@"
+}
