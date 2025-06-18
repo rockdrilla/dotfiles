@@ -8,7 +8,7 @@
 [commit]
 	gpgSign = false
 [core]
-	abbrev = 10
+	abbrev = 12
 	bigFileThreshold = 16m
 	compression = 7
 	deltaBaseCacheLimit = 128m

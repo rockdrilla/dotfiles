@@ -1,5 +1,12 @@
 #!/bin/zsh
 
+alias gar='git-archive-ref '
+alias gbr='git-br '
+alias gds='git diff -p --stat=200 '
+alias gdu='git-dir-usage '
+alias ggc='git-gc '
+alias ggcf='git-gc-force '
+
 git-dir-usage() {
     local gitdir x topdir
     gitdir=$(__z_git rev-parse --git-dir) || return $?
@@ -55,7 +62,7 @@ git-archive-ref() {
     local name ver gitref topdir c_hash c_time out
     name="${1:?}" ver="${2:?}" gitref="${3:?}"
     topdir=$(__z_git rev-parse --show-toplevel) || return $?
-    c_hash=$(__z_git log -n 1 --format='%h' --abbrev=8 "${gitref}") || return $?
+    c_hash=$(__z_git log -n 1 --format='%h' --abbrev=12 "${gitref}") || return $?
     c_time=$(__z_git log -n 1 --format='%cd' --date='format:%Y%m%d.%H%M%S' "${gitref}") || return $?
     out="${name}_${ver}+git.${c_time}.${c_hash}.tar"
     topdir=${topdir:h}
