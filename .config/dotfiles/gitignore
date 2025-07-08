@@ -29,6 +29,7 @@
 !/.config/zsh/alias/k8s.zsh
 !/.config/zsh/alias/kconfig.zsh
 !/.config/zsh/alias/ls.zsh
+!/.config/zsh/alias/openwrt.zsh
 !/.config/zsh/alias/quilt.zsh
 !/.config/zsh/alias/sbuild.zsh
 !/.config/zsh/alias/sudo.zsh
