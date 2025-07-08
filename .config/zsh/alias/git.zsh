@@ -6,6 +6,7 @@ alias gds='git diff -p --stat=200 '
 alias gdu='git-dir-usage '
 alias ggc='git-gc '
 alias ggcf='git-gc-force '
+alias gst='git status -s '
 
 git-dir-usage() {
     local gitdir x topdir
@@ -72,4 +73,8 @@ git-archive-ref() {
 
 git-br() {
     __z_git -c core.pager='cat' branch --no-abbrev "$@"
+}
+
+git-rebase-log() {
+    git log --format='pick %h # %s' --reverse "$@"
 }
