@@ -64,7 +64,6 @@
 !/.config/zsh/lib/systemd.zsh
 !/.config/zsh/lib/term.zsh
 !/.config/zsh/lib/time.zsh
-!/.config/zsh/lib/title.zsh
 !/.config/zsh/local.zsh.example
 !/.config/zsh/local/.keep
 !/.config/zsh/local/completion/.keep
@@ -78,7 +77,8 @@
 !/.config/zsh/rc.zsh
 !/.config/zsh/rc/completion.zsh
 !/.config/zsh/rc/gpg-agent.zsh
-!/.config/zsh/rc/keyboard.zsh
+!/.config/zsh/rc/keyboard-base.zsh
+!/.config/zsh/rc/keyboard-extras.zsh
 !/.config/zsh/rc/pager.zsh
 !/.config/zsh/rc/prompt.zsh
 !/.config/zsh/rc/ssh-agent.zsh

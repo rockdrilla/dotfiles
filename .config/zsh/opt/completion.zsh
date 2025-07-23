@@ -1,9 +1,5 @@
 #!/bin/zsh
 
-unsetopt flow_control
-unsetopt menu_complete
+unsetopt flow_control menu_complete
 
-setopt always_to_end
-setopt auto_menu
-setopt complete_aliases
-setopt complete_in_word
+setopt always_to_end auto_menu complete_aliases complete_in_word

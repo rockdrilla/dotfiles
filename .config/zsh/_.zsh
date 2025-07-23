@@ -1,9 +1,11 @@
 #!/bin/zsh
 
-## early module load
-zmodload -s zsh/zprof
+## early load modules
+zmodload zsh/mathfunc zsh/datetime zsh/zprof
 
 typeset -gA ZSHU
+
+__z_unsupported() { echo "not supported" >&2 ; }
 
 ZSHU[t_begin]=${(%):-%D{%s.%6.}}
 

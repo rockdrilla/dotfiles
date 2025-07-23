@@ -1,13 +1,6 @@
 #!/bin/zsh
 
-unsetopt err_exit
-unsetopt err_return
-unsetopt multios
+unsetopt err_exit err_return multios
 
-setopt bsd_echo
-setopt interactive_comments
-setopt long_list_jobs
-setopt monitor
-setopt prompt_subst
-setopt zle
+setopt bsd_echo interactive_comments long_list_jobs monitor prompt_subst zle
 # setopt magic_equal_subst

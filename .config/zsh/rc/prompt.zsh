@@ -84,17 +84,25 @@ z-ps1() {
         return
     }
 
-    local k
-    for k ( "$1" "${1}L" ) ; do
-        (( ${+ZSHU_PS1[$k]} )) || continue
+    local k ; k=$1
+    case "$k" in
+    [1-9] )
+        (( ${+ZSHU_PS1[$k]} )) || k="${k}L"
+    ;;
+    [1-9][Ll] )
+        (( ${+ZSHU_PS1[$k]} )) || k="${k%?}L"
+    ;;
+    esac
+    (( ${+ZSHU_PS1[$k]} )) || return 1
 
-        ZSHU_PS[ps1]=$k
-        PS1=${ZSHU_PS1[$k]}
-        return
-    done
-    return 1
+    ZSHU_PS[ps1]=$k
+    PS1=${ZSHU_PS1[$k]}
 }
 
-z-ps1 3
-[ "${ZSHU_RUN[nested]}"   = 1 ] && z-ps1 2
-[ "${ZSHU_RUN[nested1L]}" = 1 ] && z-ps1 1
+if [ "${ZSHU_RUN[nested1L]}" = 1 ] ; then
+    z-ps1 1
+elif [ "${ZSHU_RUN[nested]}" = 1 ] ; then
+    z-ps1 2
+else
+    z-ps1 3
+fi

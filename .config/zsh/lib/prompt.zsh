@@ -47,5 +47,7 @@ __z_pwd_hook() {
 add-zsh-hook precmd __z_pwd_hook
 
 else
-    echo "shiny pwd's are disabled due to missing hook support" >&2
+
+echo "shiny pwd's are disabled due to missing hook support" >&2
+
 fi

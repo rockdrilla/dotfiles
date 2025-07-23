@@ -7,8 +7,7 @@ z-time() {
     "$@" ; r=$?
     a=$[ EPOCHREALTIME - a ]
     a=$(z-ts-to-human "$a" 6)
-    echo >&2
-    echo "time took: $a" >&2
+    printf '\n# time took: %s\n' "$a" >&2
 
     return $r
 }
@@ -49,5 +48,7 @@ add-zsh-hook precmd  __z_cmdtime_measure
 add-zsh-hook preexec __z_cmdtime_set
 
 else
-    echo "cmd time measurement is disabled due to missing hook support" >&2
+
+echo "cmd time measurement is disabled due to missing hook support" >&2
+
 fi

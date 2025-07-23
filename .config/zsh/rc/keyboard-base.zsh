@@ -4,10 +4,8 @@ typeset -A ZSHU_TI_KEYS
 typeset -A ZSHU_FB_KEYS
 
 if z-ti-test smkx rmkx ; then
-    zle-line-init()   { emulate -L zsh ; echoti smkx ; }
-    zle-line-finish() { emulate -L zsh ; echoti rmkx ; }
-#   zle-line-init()   { echoti smkx ; }
-#   zle-line-finish() { echoti rmkx ; }
+    zle-line-init()   { echoti smkx ; }
+    zle-line-finish() { echoti rmkx ; }
     zle -N zle-line-init
     zle -N zle-line-finish
 fi
@@ -87,7 +85,7 @@ z-bind () {
     case "${widget}" in
     /* )
         widget=${widget:1}
-        emulate zsh -c "autoload -RUz ${widget}"
+        autoload -RUz "${widget}"
         zle -N "${widget}"
     ;;
     esac
@@ -131,8 +129,3 @@ z-bind emacs viins vicmd -- Esc-w            kill-region
 
 ## use emacs key bindings
 bindkey -e
-
-for i ( /usr/share/doc/fzf/examples/key-bindings.zsh ) ; do
-    [ -s "$i" ] || continue
-    source $i
-done ; unset i
