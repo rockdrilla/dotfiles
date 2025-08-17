@@ -12,8 +12,8 @@ $run_autopkgtest = 0;
 $run_lintian = 0;
 $run_piuparts = 0;
 
-$apt_distupgrade = 0;
-$apt_upgrade = 0;
+$apt_distupgrade = 1;
+$apt_upgrade = 1;
 
 $purge_build_directory = 'successful';
 
