@@ -64,10 +64,20 @@ krd-sbuild() {
             find -name '*.build' -type f -exec xz -9vv {} +
         done
 
-        find -name '*_all.deb'    -type f -exec mv -fvt "../${arch}-all" {} +
-        find -name '*_all.ddeb'   -type f -exec mv -fvt "../${arch}-all" {} +
-        find -name '*dbgsym*.deb' -type f -exec mv -fvt "../${arch}-debug" {} +
-        find -name '*.ddeb'       -type f -exec mv -fvt "../${arch}-debug" {} +
+        find \
+          -name '*_all.deb' -type f \
+          -exec mv -fvt "../${arch}-all" {} +
+        find \
+          -name '*_all.ddeb' -type f \
+          -exec mv -fvt "../${arch}-all" {} +
+
+        find \
+          -regextype egrep -regex '.+dbg(sym)?_[^_]+_'"${arch}"'\.d?deb$' -type f \
+          -exec mv -fvt "../${arch}-debug" {} +
+        find \
+          -name '*.ddeb' -type f \
+          -exec mv -fvt "../${arch}-debug" {} +
+
         cd "${builddir}-all"
         find -type f -exec mv -nvt '../all' {} +
     )
