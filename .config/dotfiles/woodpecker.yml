@@ -1,6 +1,6 @@
 steps:
   - name: check
-    image: docker.io/debian:bookworm-slim
+    image: docker.io/debian:trixie-slim
     environment:
       DEBCONF_NONINTERACTIVE_SEEN: 'true'
       DEBIAN_FRONTEND: 'noninteractive'
