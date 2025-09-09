@@ -1,0 +1,44 @@
+#!/bin/sh
+set -ef
+
+me="${0##*/}"
+usage() {
+	cat >&2 <<-EOF
+	# usage: ${me} <binary>[:<package>] [...]
+	EOF
+	exit "${1:-0}"
+}
+[ $# != 0 ] || usage
+[ -n "$1" ] || usage 1
+
+for i ; do
+	unset bin pkg
+	IFS=: read -r bin pkg <<-EOF
+	$i
+	EOF
+
+	if [ -z "${bin}" ] ; then
+		env printf "%q: 'binary' expected but empty: %q\\n" "${me}" "$i" >&2
+		usage 1
+	fi
+done
+
+for i ; do
+	unset bin pkg
+	IFS=: read -r bin pkg <<-EOF
+	$i
+	EOF
+
+	[ -n "${pkg}" ] || pkg=${bin}
+
+	if command -v "${bin}" >/dev/null 2>&1 ; then
+		continue
+	fi
+
+	cat >&2 <<-EOF
+	# ${0##*/}: unable to find command '${bin}'
+	#   install package '${pkg}' first, e.g.
+	#     sudo apt-install ${pkg}
+	EOF
+	exit 1
+done

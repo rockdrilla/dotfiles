@@ -1,0 +1,9 @@
+#!/bin/sh
+set -ef
+
+apt-update ${APT_OPTS}
+exec apt-env \
+  apt-get \
+    ${APT_OPTS} \
+  "${APT_INSTALL:-install}" \
+  "$@"

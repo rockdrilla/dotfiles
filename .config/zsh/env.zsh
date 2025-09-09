@@ -14,7 +14,7 @@ z-sort-path() {
 
     ## process in-home part
     t=( ${(@)p:#${HOME}/*} )
-    npath+=( "${ZSHU[d_scripts]}" "${ZSHU[d_bin]}" "${HOME}/bin" )
+    npath+=( "${HOME}/bin" "${ZSHU[d_bin]}" "${ZSHU[d_scripts]}" )
     npath+=( ${(@)p:|t} )
     p=( $t )
 

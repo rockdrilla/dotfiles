@@ -1,0 +1,4 @@
+#!/bin/sh
+set -ef
+
+exec sed -zE 's/\r\n/\n/g;s/\r/\n/g' "$@"

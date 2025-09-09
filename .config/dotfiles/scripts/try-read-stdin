@@ -1,0 +1,42 @@
+#!/bin/sh
+set +e ; set -f
+
+_timelimit='15s'
+
+me="${0##*/}"
+usage() {
+	cat >&2 <<-EOF
+	# usage: ${me} [<timeout>]
+	# if <timeout> is not specified then default '${_timelimit}' is used
+	# <timeout> format: [1-9][0-9]*[smh]
+	EOF
+	exit "${1:-0}"
+}
+
+case "$1" in
+-h | --help ) usage ;;
+esac
+
+_timeout() { timeout --verbose --kill-after=3s --foreground "$@" ; }
+
+tlimit="${1:-${_timelimit}}"
+case "${tlimit}" in
+*s | *m | *h )
+	printf '%s' "${tlimit}" | grep -zEq '^[1-9][0-9]*[smh]$' || {
+		env printf "%q: broken <timeout> format: %q\\n" "${me}" "${tlimit}" >&2
+		usage 1
+	}
+;;
+* )
+	env printf "%q: unsupported <timeout> format: %q\\n" "${me}" "${tlimit}" >&2
+	usage 1
+;;
+esac
+
+## verify tlimit
+_timeout "${tlimit}" /bin/true || usage 1
+
+_dd='dd conv=notrunc status=none'
+
+_timeout "${tlimit}" ${_dd} bs=1 count=1 || exit 1
+exec ${_dd}

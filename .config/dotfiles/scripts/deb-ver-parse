@@ -1,0 +1,23 @@
+#!/bin/sh
+set +e ; set -f
+
+## debian package version handling
+
+## match pattern "epoch:version-revision"
+m1='([1-9][0-9]*):([0-9][0-9a-zA-Z.+~-]*)-([0-9a-zA-Z.+~]+)'
+## match pattern "epoch:native_version"
+m2='([1-9][0-9]*):([0-9][0-9a-zA-Z.+~]*)'
+## match pattern "version-revision"
+m3='([0-9][0-9a-zA-Z.+~-]*)-([0-9a-zA-Z.+~]+)'
+## match pattern "native_version"
+m4='([0-9][0-9a-zA-Z.+~]*)'
+
+## replace pattern "epoch|upstream version|revision or native_version"
+replace='\2\5|\3\7|\4\6\8\9'
+
+## sed script to split package version into kind of 'list'
+pkg_ver_to_list='/^('${m1}'|'${m2}'|'${m3}'|'${m4}')$/{s##'${replace}'#;p;}'
+
+for i ; do
+	echo "$i" | sed -En "${pkg_ver_to_list}"
+done

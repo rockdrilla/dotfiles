@@ -1,0 +1,209 @@
+#!/bin/sh
+set -ef
+
+ocsp_fetch_timeout=15
+ocsp_fetch_retries=3
+ocsp_fetch_retry_delay=5
+ocsp_valid_threshold=86400
+
+me="${0##*/}"
+usage() {
+	cat >&2 <<-EOF
+	# usage: ${me} <command> [args...]
+	#   ${me} get-uri <in:cert.pem>
+	#   ${me} is-valid <in:issuer.pem> <in:cert.pem> <in:ocsp.der>
+	#   ${me} is-expiring <in:issuer.pem> <in:cert.pem> <in:ocsp.der>
+	#   ${me} fetch <in:issuer.pem> <in:cert.pem> <out:ocsp.der>
+	EOF
+	exit "${1:-0}"
+}
+[ $# != 0 ] || usage
+
+## $1 - X509 in PEM format
+ossl_x509_verify_fmt() {
+	openssl x509 -in "$1" -noout >/dev/null
+}
+
+## $1 - cert
+ossl_ocsp_uri() {
+	openssl x509 -in "$1" -noout -ocsp_uri \
+	| head -n 1
+}
+
+## $1 - chain
+## $2 - cert
+## $3 - ocsp uri
+## $4 - ocsp response
+ossl_ocsp_fetch() {
+	openssl ocsp \
+	  -timeout "${ocsp_fetch_timeout}" \
+	  -nonce \
+	  -issuer "$1" -cert "$2" -url "$3" -respout "$4"
+}
+
+## $1 - ocsp response
+ossl_ocsp_verify_fmt() {
+	openssl ocsp \
+	  -noverify -respin "$1"
+}
+
+## $1 - chain
+## $2 - cert
+## $3 - ocsp response
+ossl_ocsp_read() {
+	openssl ocsp \
+	  -issuer "$1" -cert "$2" -respin "$3" -resp_text
+}
+
+## $1 - chain
+## $2 - cert
+## $3 - ocsp response
+ossl_ocsp_verify() {
+	ossl_ocsp_read "$@" >/dev/null
+}
+
+## stdin - output of ossl_ocsp_read()
+ossl_ocsp_next_update() {
+	sed -En '/^\s*[Nn]ext [Uu]pdate:\s*(\S.+\S)\s*$/{s//\1/;p;q}'
+}
+
+unset arg_ok cmd chain cert ocsp_uri ocsp_resp
+arg_ok=
+while : ; do
+	[ -n "$1" ] || break
+	cmd="$1"
+	case "$1" in
+	get-uri )
+		[ -n "$2" ] || break
+		[ -s "$2" ] || break
+		ossl_x509_verify_fmt "$2" || break
+		cert="$2"
+	;;
+	is-valid | is-expiring | fetch )
+		[ -n "$2" ] || break
+		[ -s "$2" ] || break
+		ossl_x509_verify_fmt "$2" || break
+		chain="$2"
+		[ -n "$3" ] || break
+		[ -s "$3" ] || break
+		ossl_x509_verify_fmt "$3" || break
+		cert="$3"
+		[ -n "$4" ] || break
+		ocsp_resp="$4"
+		## OCSP response validation is handled later and in various ways (!)
+		## e.g. "is-valid" (cmd_is_valid) validates OCSP response as expected
+		## but "is-expiring" (cmd_is_expiring) returns success for invalid OCSP response
+		## which means OCSP response should be updated ASAP
+	;;
+	*) break ;;
+	esac
+	arg_ok=1
+break ; done
+[ -n "${arg_ok}" ] || usage 1
+unset arg_ok
+
+## OCSP URI is used only in "get-uri" and "fetch" commands
+## but implicitly required for all actions
+ocsp_uri=$(ossl_ocsp_uri "${cert}") || exit 1
+if [ -z "${ocsp_uri}" ] ; then
+	env printf '%q: unable to extract OCSP URI from %q\n' "${me}" "${cert}" >&2
+	exit 1
+fi
+## early command handling
+if [ "${cmd}" = 'get-uri' ] ; then
+	printf '%s\n' "${ocsp_uri}"
+	exit 0
+fi
+
+## $1 - chain
+## $2 - cert
+## $3 - ocsp response
+cmd_is_valid() {
+	ossl_ocsp_verify_fmt "$3" || return 1
+	ossl_ocsp_verify "$1" "$2" "$3" || return 1
+}
+
+## $1 - chain
+## $2 - cert
+## $3 - ocsp response
+cmd_is_expiring() {
+	cmd_is_valid "$1" "$2" "$3" || return 0
+
+	local need_update next ts_now ts_next ts_diff
+
+	need_update=1
+	while : ; do
+		next=$(ossl_ocsp_read "$1" "$2" "$3" 2>/dev/null | ossl_ocsp_next_update)
+		[ -n "${next}" ] || break
+
+		ts_now=$(date '+%s')
+		ts_next=$(date -d "${next}" '+%s')
+		[ -n "${ts_next}" ] || break
+		[ ${ts_now} -lt ${ts_next} ] || break
+
+		ts_diff=$((ts_next - ts_now))
+		[ ${ts_diff} -le ${ocsp_valid_threshold} ] || need_update=0
+	break ; done
+
+	if [ "${need_update}" = 0 ] ; then
+		env printf '%q: %q has valid and fresh OCSP response\n' "${me}" "$2" >&2
+		return 1
+	fi
+
+	return 0
+}
+
+## $1 - chain
+## $2 - cert
+## $3 - ocsp uri
+## $4 - ocsp response
+cmd_fetch() {
+	local t i r
+
+	t=$(mktemp) ; : "${t:?}"
+
+	for i in $(seq 1 "${ocsp_fetch_retries}") ; do
+		i= ## no-op
+
+		if ossl_ocsp_fetch "$1" "$2" "$3" "$t" ; then
+			break
+		fi
+		: > "$t"
+		sleep "${ocsp_fetch_retry_delay}"
+	done
+
+	r=
+	while : ; do
+		[ -s "$t" ] || break
+		cmd_is_valid "$1" "$2" "$t" || break
+		r=1
+	break ; done
+
+	if [ -z "$r" ] ; then
+		env printf '%q: unable to fetch OCSP response for %q via %q\n' "${me}" "$2" "$3" >&2
+		rm -rf "$t"
+		return 1
+	fi
+
+	r=
+	while : ; do
+		touch "$4" || break
+		tee "$4" < "$t" >/dev/null || break
+		chmod 0644 "$4" || break
+		r=1
+	break ; done
+
+	if [ -z "$r" ] ; then
+		env printf '%q: unable to save OCSP response for %q into %q\n' "${me}" "$2" "$4" >&2
+		rm -rf "$t"
+		return 1
+	fi
+
+	return 0
+}
+
+case "${cmd}" in
+is-valid )     cmd_is_valid "${chain}" "${cert}" "${ocsp_resp}" ;;
+is-expiring )  cmd_is_expiring "${chain}" "${cert}" "${ocsp_resp}" ;;
+fetch )        cmd_fetch "${chain}" "${cert}" "${ocsp_uri}" "${ocsp_resp}" ;;
+esac

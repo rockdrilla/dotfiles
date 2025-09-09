@@ -1,0 +1,89 @@
+#!/bin/sh
+set +e ; set -f
+
+: "${GZIP_COMPLEVEL:=1}"
+: "${BROTLI_COMPLEVEL:=1}"
+: "${ZSTD_COMPLEVEL:=1}"
+
+has_gzip=1 has_brotli=1 has_zstd=1
+check-bin-pkg gzip   || has_gzip=
+check-bin-pkg brotli || has_brotli=
+check-bin-pkg zstd   || has_zstd=
+
+if [ -z "${has_gzip}${has_brotli}${has_zstd}" ] ; then
+	env printf "%q: suitable compressors are missing\\n" "${0##*/}" >&2
+	exit 1
+fi
+
+do_gzip() {
+	[ "$1" -nt "$1.gz" ] || return 0
+	gzip "-${GZIP_COMPLEVEL}kf" "$1" || return $?
+	comp_fixup "$1" "$1.gz" || rm -f "$1.gz"
+}
+
+do_brotli() {
+	[ "$1" -nt "$1.br" ] || return 0
+	brotli "-${BROTLI_COMPLEVEL}kf" "$1" || return $?
+	comp_fixup "$1" "$1.br" || rm -f "$1.br"
+}
+
+do_zstd() {
+	[ "$1" -nt "$1.zst" ] || return 0
+	zstd "-${ZSTD_COMPLEVEL}kfq" "$1" || return $?
+	comp_fixup "$1" "$1.zst" || rm -f "$1.zst"
+}
+
+have_cmd() { command -v "$1" </dev/null >/dev/null 2>&1 ; }
+
+unset has_mawk
+if have_cmd mawk ; then has_mawk=1 ; fi
+mawk_then_awk() {
+	if [ -n "${has_mawk}" ]
+	then mawk "$@"
+	else awk "$@"
+	fi
+}
+
+float_div() {
+	mawk_then_awk -v "a=$1" -v "b=$2" 'BEGIN{print a/b;exit;}' </dev/null
+}
+
+comp_fixup() {
+	[ -f "$1" ] || return 1
+	size1=$(env stat -Lc '%s' "$1") || return 1
+	[ -n "${size1}" ] || return 1
+	[ "${size1}" != 0 ] || return 1
+
+	[ -f "$2" ] || return 1
+	size2=$(env stat -c '%s' "$2") || return 1
+	[ -n "${size2}" ] || return 1
+	[ "${size2}" != 0 ] || return 1
+
+	ratio=$(float_div "${size2}" "${size1}") || return 1
+	case "${ratio}" in
+	[0-9]*e-[0-9]* )
+		## doubtful but okay (c) Oleg Tinkov
+	;;
+	0.[0-8]* | 0.9[0-5]* )
+		## compression ratio below 95% is fine enough
+	;;
+	* ) return 1 ;;
+	esac
+
+	return 0
+}
+
+for i ; do
+	[ -n "$i" ] || continue
+
+	case "$i" in
+	*.br | *.gz | *.zst ) continue ;;
+	esac
+
+	[ -f "$i" ] || continue
+	[ -s "$i" ] || continue
+
+	[ -z "${has_gzip}"   ] || do_gzip   "$i"
+	[ -z "${has_brotli}" ] || do_brotli "$i"
+	[ -z "${has_zstd}"   ] || do_zstd   "$i"
+done

@@ -1,0 +1,148 @@
+#!/bin/sh
+set -ef
+
+me="${0##*/}"
+usage() {
+	cat >&2 <<-EOF
+	# usage: ${me} <user>[:<group>] [command and arguments]
+	EOF
+	exit "${1:-0}"
+}
+[ $# != 0 ] || usage
+[ -n "$1" ] || usage 1
+
+if ! command -v setpriv >/dev/null ; then
+	env printf "%q: error: 'setpriv' is missing, unable to switch user!\\n" "${me}" >&2
+	exit 126
+fi
+
+is_id() { printf '%s' "$1" | grep -Eqz '^(0|[1-9][0-9]*)$' ; }
+
+userspec="$1" ; shift
+
+unset user group _xtra
+IFS=':' read -r user group _xtra <<-EOF
+${userspec}
+EOF
+
+if [ -z "${user}" ] ; then
+	env printf "%q: error: 'user' expected but empty\\n" "${me}" >&2
+	usage 1
+fi
+
+if [ -n "${_xtra}" ] ; then
+	env printf "%q: warning: extra data in 'user:group' specifier: %q\\n" "${me}" "${_xtra}" >&2
+fi
+unset _xtra
+
+unset _user _x _uid _gid _comment _home _shell _xtra
+IFS=':' read -r _user _x _uid _gid _comment _home _shell _xtra <<-EOF
+$(getent passwd "${user}" || : )
+EOF
+unset _x _uid _comment _xtra
+
+_has_user=0
+homedir='/'
+shell=/bin/sh
+if [ -n "${_user}" ] ; then
+	_has_user=1
+	user=${_user}
+	homedir=${_home}
+	shell=${_shell}
+elif is_id "${user}" ; then
+	## accept unknown/random uid
+	:
+else
+	env printf "%q: error: 'user' is malformed - not exist nor numeric\\n" "${me}" >&2
+	exit 1
+fi
+
+if [ -z "${group}" ] ; then
+	if [ ${_has_user} = 1 ] ; then
+		group=_gid
+	else
+		group=nogroup
+	fi
+else
+	unset _group _x _gid _users _xtra
+	IFS=':' read -r _group _x _gid _users _xtra <<-EOF
+	$(getent group "${group}" || : )
+	EOF
+	unset _x _gid _users _xtra
+
+	if [ -n "${_group}" ] ; then
+		group=${_group}
+	elif is_id "${group}" ; then
+		## accept unknown/random gid
+		:
+	else
+		env printf "%q: error: 'group' is malformed - not exist nor numeric\\n" "${me}" >&2
+		exit 1
+	fi
+fi
+
+unset _user _gid _home _shell _group _gid _users
+
+# handle username and working directory
+username='__non_existent_user__'
+init_groups='--clear-groups'
+if [ ${_has_user} = 1 ] ; then
+	username="${user}"
+	init_groups='--init-groups'
+fi
+
+unset __exec__
+_runas() {
+	${__exec__:+ exec } \
+	setpriv \
+	  --reuid="${user}" \
+	  --regid="${group}" \
+	  ${init_groups} \
+	  ${inh_caps} \
+	env \
+	  -u __exec__ \
+	  -C "${cwd}" \
+	  USER="${username}" \
+	  LOGNAME="${username}" \
+	  HOME="${homedir}" \
+	  SHELL="${shell}" \
+	"$@"
+}
+
+## TODO: support somehow flags for "setpriv"
+
+## Ubuntu 20.04 "Focal":
+## setpriv: libcap-ng is too old for "all" caps
+cwd=/
+inh_caps='--inh-caps=-all'
+_runas true >/dev/null 2>&1 || inh_caps=
+
+cwd=
+for i in "${PWD}" "${homedir}" / ; do
+	[ -d "$i" ] || continue
+
+	cwd=/
+	if _runas ls -l "$i" >/dev/null ; then
+		if [ "$i" != "${PWD}" ] ; then
+			env printf "%q: info: working directory will be changed to %q\\n" "${me}" "$i" >&2
+		fi
+
+		cwd="$i"
+		break
+	else
+		env printf "%q: warning: user %q can't access directory %q\\n" "${me}" "${user}" "$i" >&2
+	fi
+	cwd=
+done
+
+if [ -z "${cwd}" ] ; then
+	env printf "%q: error: unable to find appropriate working directory\\n" "${me}" >&2
+	exit 1
+fi
+
+__exec__=1
+if [ $# = 0 ] ; then
+	_runas id
+else
+	_runas "$@"
+fi

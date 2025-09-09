@@ -1,0 +1,91 @@
+#!/bin/sh
+set +e ; set -f
+
+usage() {
+	cat >&2 <<-EOF
+	# usage: ${0##*/} <path> [<path> ..]
+	EOF
+	exit "${1:-0}"
+}
+[ $# != 0 ] || usage
+
+: "${DPKG_ADMINDIR:=/var/lib/dpkg}"
+dpkg_info_dir="${DPKG_ADMINDIR}/info"
+dpkg_diversions="${DPKG_ADMINDIR}/diversions"
+
+# _same() { find "$@" -maxdepth 0 -samefile "$1" -print0 2>/dev/null ; }
+
+_get_alt() {
+	[ -n "$1" ] || return
+
+	a="$1"
+	case "$1" in
+	/usr/local/* )  return ;;
+	/usr/* )        a="${1#/usr}" ;;
+	/* )            a="/usr$1" ;;
+	* )             return ;;
+	esac
+
+	# n=$(_same "$1" "$a" | xargs -0 sh -c 'echo $#' --)
+	# [ "$n" = 2 ] || return
+	# printf '%s' "$a"
+	test "$1" -ef "$a" || return 0
+	printf '%s' "$a"
+}
+
+_dpkg_search() {
+	[ -n "$1" ] || return
+
+	grep -FxRl -e "$1" "${dpkg_info_dir}/" \
+	| sed -En '/\.list$/{s,^.+/([^/]+)\.list$,\1,p}'
+}
+
+_dpkg_divert() {
+	[ -n "$1" ] || return
+
+	n=$(grep -Fxhn -e "$1" "${dpkg_diversions}" | cut -d: -f1)
+	[ -n "$n" ] || return
+
+	case "$((n%3))" in
+	1 | 2 ) ;;
+	* ) return ;;
+	esac
+
+	k=$(( n - (n%3) ))
+	divert_pkg=$(sed -n "$((k+3))p" "${dpkg_diversions}")
+	case "$((n%3))" in
+	1 )
+		[ "${divert_pkg}" = ':' ] || echo "${divert_pkg}"
+	;;
+	2 )
+		divert_from=$(sed -n "$((k+1))p" "${dpkg_diversions}")
+		_dpkg_search "${divert_from}" | grep -Fxv -e "${divert_pkg}"
+	;;
+	esac
+}
+
+for i ; do
+	[ -n "$i" ] || continue
+
+	name=
+	altpath=$(_get_alt "$i")
+
+	name=$(_dpkg_divert "$i")
+	if [ -n "${name}" ] ; then
+		echo "${name}"
+		continue
+	fi
+
+	name=$(_dpkg_divert "${altpath}")
+	if [ -n "${name}" ] ; then
+		echo "${name}"
+		continue
+	fi
+
+	name=$( { _dpkg_search "$i" ; _dpkg_search "${altpath}" ; } | sort -uV)
+	if [ -n "${name}" ] ; then
+		echo "${name}"
+		continue
+	fi
+done
+exit 0

@@ -1,0 +1,30 @@
+#!/bin/sh
+set +e ; set -f
+
+if [ -z "${ZAP_TREE}" ] ; then
+	export ZAP_TREE=1
+
+	## intrusive parallelism
+	jobs=$(nproc)
+	jobs=$(( jobs + (jobs + 1)/2 ))
+
+	for i ; do
+		[ -d "$i" ] || continue
+		find "$i/" -mindepth 1 -maxdepth 1 -type d -print0
+	done \
+	| xargs -0 -r readlink -e \
+	| sort -zuV \
+	| xargs -0 -r -n 1 -P "${jobs}" "$0"
+
+	exit
+fi
+
+find_fast() {
+	find "$@" -printf . -quit | grep -Fq .
+}
+
+for i ; do
+	[ -d "$i" ] || continue
+
+	find_fast "$i/" ! -type d || rm -rfv "$i"
+done

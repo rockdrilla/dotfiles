@@ -1,0 +1,6 @@
+#!/bin/sh
+set -ef
+
+dpkg-query --show --showformat='${Package}:${Architecture}|${db:Status-Abbrev}\n' \
+| sed -En '/^(.+)\|[hi]i $/{s//\1/;p}' \
+| sort -V

@@ -1,0 +1,117 @@
+#!/bin/sh
+set +e ; set -f
+
+me=${0##*/}
+usage() {
+	cat >&2 <<-EOF
+	# usage: ${me} <certificate file> [PEM output file] [fingerprints output file] [offsets output file]
+	EOF
+	exit "${1:-0}"
+}
+[ $# != 0 ] || usage
+
+[ -n "$1" ] || exit 1
+[ -f "$1" ] || {
+	env printf '%s: not a file or does not exist: %q\n' "${me}" "$1" >&2
+	exit 1
+}
+[ -s "$1" ] || exit 0
+
+w=$(mktemp -d) || exit 1
+w_cleanup() {
+	[ -z "$w" ] || ls -lA "$w/" >&2
+	[ -z "$w" ] || rm -rf "$w"
+	unset w
+	exit "${1:-0}"
+}
+
+have_cmd() { command -v "$1" </dev/null >/dev/null 2>&1 ; }
+
+unset has_mawk
+if have_cmd mawk ; then has_mawk=1 ; fi
+mawk_then_awk() {
+	if [ -n "${has_mawk}" ]
+	then mawk "$@"
+	else awk "$@"
+	fi
+}
+
+bundle_offsets() {
+	mawk_then_awk 'BEGIN { OFS = ","; i_begin = 0; }
+	$0 == "-----BEGIN CERTIFICATE-----" {
+	    i_begin = NR;
+	}
+	$0 == "-----END CERTIFICATE-----" {
+	    if (i_begin > 0) {
+	        print i_begin, NR;
+	        i_begin = 0;
+	    }
+	}' "$1"
+}
+
+bundle_fingerprints() {
+	local x f
+	while read -r x ; do
+		[ -n "$x" ] || continue
+
+		f=$(sed -ne "${x}p" "$1" | openssl x509 -noout -fingerprint -sha256)
+		[ -n "$f" ] || f=$(sed -ne "${x}p" "$1" | openssl x509 -noout -fingerprint)
+		[ -n "$f" ] || continue
+
+		printf '%s\n' "$f" | tr '[:upper:]' '[:lower:]'
+	done < "$2"
+}
+
+openssl storeutl -certs "$1" > "$w/cert.pem" || w_cleanup 1
+[ -s "$w/cert.pem" ] || w_cleanup 1
+tr -s '\r\n' '\n' < "$w/cert.pem" > "$w/cert.txt"
+[ -s "$w/cert.txt" ] || w_cleanup 1
+rm -f "$w/cert.pem"
+
+bundle_offsets "$w/cert.txt" > "$w/cert.off"
+[ -s "$w/cert.off" ] || w_cleanup 1
+
+bundle_fingerprints "$w/cert.txt" "$w/cert.off" > "$w/cert.fp.all"
+[ -s "$w/cert.fp.all" ] || w_cleanup 1
+
+sort -uV < "$w/cert.fp.all" > "$w/cert.fp"
+while read -r fp ; do
+	[ -n "${fp}" ] || continue
+
+	n=$(grep -m1 -Fxn -e "${fp}" "$w/cert.fp.all" | cut -d : -f 1)
+	[ -n "$n" ] || continue
+
+	off=$(sed -ne "${n}p" "$w/cert.off")
+	[ -n "${off}" ] || continue
+
+	sed -ne "${off}p" "$w/cert.txt"
+done < "$w/cert.fp" > "$w/cert.pem"
+[ -s "$w/cert.pem" ] || w_cleanup 1
+rm -f "$w/cert.txt" "$w/cert.off" "$w/cert.fp.all"
+
+if [ -n "$2" ] ; then
+	while : ; do
+		if [ -e "$2" ] ; then
+			[ -f "$2" ] || break
+		fi
+		cat > "$2"
+	break ; done
+else
+	cat
+fi < "$w/cert.pem"
+
+while [ -n "$3" ] ; do
+	if [ -e "$3" ] ; then
+		[ -f "$3" ] || break
+	fi
+	cat "$w/cert.fp" > "$3"
+break ; done
+
+while [ -n "$4" ] ; do
+	if [ -e "$4" ] ; then
+		[ -f "$4" ] || break
+	fi
+	bundle_offsets "$w/cert.pem" > "$4"
+break ; done
+
+rm -rf "$w" ; unset w

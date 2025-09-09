@@ -1,0 +1,49 @@
+#!/bin/sh
+set -ef
+
+w=$(mktemp -d) ; : "${w:?}"
+
+have_cmd() { command -v "$1" </dev/null >/dev/null 2>&1 ; }
+
+unset has_mawk
+if have_cmd mawk ; then has_mawk=1 ; fi
+mawk_then_awk() {
+	if [ -n "${has_mawk}" ]
+	then mawk "$@"
+	else awk "$@"
+	fi
+}
+
+f='/var/lib/apt/extended_states'
+if [ -f "$f" ] ; then
+	mawk_then_awk '
+	/^Package:/,/^$/ {
+		if ($1 == "Package:")        { pkg = $2; }
+		if ($1 == "Architecture:")   { arch = $2; }
+		if ($1 == "Auto-Installed:") { is_auto = $2; }
+		if ($0 == "") {
+			if (is_auto == 1) { print pkg ":" arch; }
+		}
+	}
+	' "$f" | sort -V
+fi > "$w/auto.pkg"
+
+while [ -s "$w/auto.pkg" ] ; do
+	dpkg-list-installed > "$w/all"
+
+	## fix:
+	## /var/lib/apt/extended_states stores (some) arch:all entries as arch:native
+	sed -En '/^([^:]+):all$/ {s##/^\1:.+$/ {s//\1:all/}#p}' \
+	  < "$w/all" \
+	  > "$w/auto.sed"
+
+	if [ -s "$w/auto.sed" ] ; then
+		sed -E -f "$w/auto.sed"
+	else
+		cat
+	fi < "$w/auto.pkg"
+
+	break
+done
+
+rm -rf "$w"

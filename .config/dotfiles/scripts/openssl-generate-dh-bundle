@@ -1,0 +1,28 @@
+#!/bin/sh
+set -ef
+
+for k in 1024:20 2048:80 ; do
+
+	unset b t
+	IFS=':' read -r b t <<-EOF
+	$k
+	EOF
+
+	f="dh${b}.pem"
+	echo "# openssl genpkey: $f" >&2
+	timeout --kill-after=3s ${t}s \
+	  openssl genpkey -quiet -genparam -algorithm DH -out "./$f" -pkeyopt "dh_paramgen_prime_len:${b}"
+done
+
+for k in 2048:80 3072:120 4096:160 ; do
+
+	unset b t
+	IFS=':' read -r b t <<-EOF
+	$k
+	EOF
+
+	f="ffdhe${b}.pem"
+	echo "# openssl genpkey: $f" >&2
+	timeout --kill-after=3s ${t}s \
+	  openssl genpkey -quiet -genparam -algorithm DH -out "./$f" -pkeyopt "group:ffdhe${b}"
+done

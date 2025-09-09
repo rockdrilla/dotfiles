@@ -1,0 +1,10 @@
+#!/bin/sh
+set +e ; set -f
+
+check-bin-pkg gpg || exit $?
+
+t=$(mktemp) || exit $?
+gpg -abs "$t"
+r=$?
+rm -f "$t" "$t.asc"
+exit $r

@@ -1,0 +1,24 @@
+#!/bin/sh
+set +e ; set -f
+
+_list() {
+	dpkg-query --show --showformat='${Package}:${Architecture} ${Version} status="${db:Status-Abbrev}"\n' \
+	| grep -Ev '"ii "$' \
+	| sort -V
+}
+
+t=$(mktemp)
+if [ -z "$t" ] ; then
+	# unable to create temporary file?
+	# produce "raw" output
+	_list
+	exit 0
+fi
+
+_list > "$t"
+if [ -s "$t" ] ; then
+	echo '# "martian" packages (i.e. unusual state):' >&2
+	cat "$t"
+fi
+
+rm -f "$t"

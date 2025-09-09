@@ -1,0 +1,115 @@
+#!/bin/sh
+set +e ; set -f
+
+me="${0##*/}"
+usage() {
+	cat >&2 <<-EOF
+	# usage: ${me} <package top directory> {<arch>|<host-arch>:<build-arch>} [env|arguments]
+	EOF
+	exit "${1:-0}"
+}
+[ $# != 0 ] || usage
+
+check-bin-pkg sbuild xz:xz-utils || exit $?
+
+_tmpdir() {
+	TMPDIR="$1"
+	TMP="$1"
+	TEMPDIR="$1"
+	TEMP="$1"
+	export TMPDIR TMP TEMPDIR TEMP
+}
+## TODO: questionable
+_tmpdir /tmp
+
+[ -n "${1:?}" ]
+[ -n "${2:?}" ]
+
+case "$1" in
+*/* ) topdir="$1" ;;
+* )   topdir="/tmp/$1" ;;
+esac
+[ -d "${topdir}" ] || return 1
+
+srcdir="${topdir}/src"
+[ -d "${srcdir}" ] || return 2
+
+_sbuild_args=
+_append_args() {
+	for __i ; do
+		_sbuild_args="${_sbuild_args}${_sbuild_args:+ }$(env printf '%q' "${__i}" )"
+	done ; unset __i
+}
+
+case "$2" in
+*:* )
+	unset host_arch build_arch _xtra
+	IFS=: read -r host_arch build_arch _xtra <<-EOF
+	$i
+	EOF
+
+	if [ -z "${host_arch}" ] ; then
+		env printf "%q: error: 'host-arch' expected but empty\\n" "${me}" >&2
+		exit 1
+	fi
+	if [ -z "${build_arch}" ] ; then
+		env printf "%q: error: 'build-arch' expected but empty\\n" "${me}" >&2
+		exit 1
+	fi
+	if [ -n "${_xtra}" ] ; then
+		env printf "%q: warning: extra data in 'host-arch:build-arch' specifier: %q\\n" "${me}" "${_xtra}" >&2
+	fi
+	unset _xtra
+
+	arch=${host_arch}
+	_append_args "--host=${host_arch}"
+	_append_args "--build=${build_arch}"
+;;
+* )
+	arch=$2
+	_append_args "--arch=$2"
+;;
+esac
+
+## done with args
+shift 2
+
+for i ; do
+	## naive splitting args and env
+	case "$i" in
+	-*  ) _append_args "$i" ;;
+	=*  ) _append_args "$i" ;;
+	*=  ) unset "$i" ;;
+	*=* ) export "$i" ;;
+	*   ) _append_args "$i" ;;
+	esac
+done ; unset i
+
+builddir="${topdir}/${arch}"
+mkdir -p "${topdir}/all" "${builddir}" "${builddir}-all" "${builddir}-debug"
+
+cd "${builddir}"
+
+set +f
+for i in "${srcdir}"/*.dsc ; do
+	## I'm NOT proud of using "eval" here :(
+	eval "idle sbuild --arch-all --arch-any ${_sbuild_args} $i" || exit $?
+	find -name '*.build' -type l -exec rm -f {} +
+	find -name '*.build' -type f -exec xz -9vv {} +
+done
+
+find \
+  -regextype egrep -regex '.+all\.d?deb$' -type f \
+  -exec mv -fvt "../${arch}-all" {} +
+
+find \
+  -name '*.ddeb' -type f \
+  -exec mv -fvt "../${arch}-debug" {} +
+find \
+  -regextype egrep -regex '.+dbgsym_[^_]+_'"${arch}"'\.d?deb$' -type f \
+  -exec mv -fvt "../${arch}-debug" {} +
+
+cd "${builddir}-all"
+find -type f -exec mv -nvt '../all' {} +
+
+exit 0

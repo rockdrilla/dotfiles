@@ -1,0 +1,38 @@
+#!/bin/sh
+set +e ; set -f
+
+me="${0##*/}"
+
+usage() {
+	cat >&2 <<-EOF
+	# usage: ${me} <command> [arguments]
+	EOF
+	exit "${1:-0}"
+}
+[ $# != 0 ] || usage
+
+t=$(mktemp)
+if [ -z "$t" ] ; then
+	env printf "# %q: unable to create temporary file\\n" "${me}" >&2
+
+	## unable to create temporary file?
+	## no output in case of error
+	exec "$@" >/dev/null 2>/dev/null
+fi
+
+( "$@" ; ) >"$t" 2>"$t"
+
+r=$?
+if [ $r != 0 ] ; then
+	printf '# command:'
+	env printf ' %q' "$@"
+	echo
+	echo "# return code: $r"
+	if [ -s "$t" ] ; then
+		echo '# output:'
+		sed -E 's/^(.+)$/#>| \1/;s/^$/#=|/' < "$t"
+	fi
+fi >&2
+
+rm -f "$t"
+exit $r

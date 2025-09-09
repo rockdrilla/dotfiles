@@ -1,0 +1,10 @@
+#!/bin/sh
+set +e ; set -f
+
+[ -n "${1:?}" ] || exit 1
+[ -d "$1" ] || exit 1
+
+find "$1/" -follow -type f -printf '%P\0' \
+| sed -zEn '/\.(diff|patch)$/p' \
+| sort -zuV \
+| xargs -0r printf '%s\n'

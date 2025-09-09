@@ -1,0 +1,14 @@
+#!/bin/sh
+set -ef
+
+apt-env \
+  apt-get \
+    ${APT_OPTS} \
+    --allow-remove-essential \
+  "${APT_REMOVE:-remove}" \
+  "$@"
+exec apt-env \
+  apt-get \
+    ${APT_OPTS} \
+    -y
+  autoremove \

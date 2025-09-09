@@ -1,0 +1,60 @@
+#!/bin/sh
+set +e ; set -f
+
+check-bin-pkg quilt || exit $?
+
+[ -n "${1:?}" ] || exit 1
+
+if [ -d "$1" ] ; then
+	patchdir="$1/debian/patches"
+	if [ -d "${patchdir}" ] ; then
+		ls "${patchdir}/series" >/dev/null || exit 1
+	else
+		patchdir="$1"
+	fi
+
+	series="${patchdir}/series"
+	if ! [ -f "${series}" ] ; then
+		mkdir -p "$1/.pc" || exit 1
+		series="$1/.pc/krd-quilt-series"
+		touch "${series}" || exit 1
+		quilt-series-auto "${patchdir}" > "${series}"
+	fi
+elif [ -f "$1" ] ; then
+	[ -s "$1" ] || exit 1
+
+	series="$1"
+	patchdir=$(dirname "${series}")
+else
+	exit 1
+fi
+
+set -a
+QUILT_SERIES="${series:?}"
+QUILT_PATCHES="${patchdir:?}"
+set +a
+
+xsedx=$(printf '\027')
+
+r=0
+while read -r i ; do
+	[ -n "$i" ] || continue
+
+	quilt --fuzz=0 push "$i" || exit $?
+	quilt refresh "$i" || exit $?
+
+	sed -E -i \
+		-e 's#^(-{3} )[^/][^/]*/(.*)$#\1a/\2#;' \
+		-e 's#^(\+{3} )[^/][^/]*/(.*)$#\1b/\2#' \
+	"$i"
+
+	rm -f "$i"'~'
+done <<EOF
+$(
+	if ! quilt unapplied ; then
+		quilt-series-strip-comments "${series}" \
+		| sed -E "s${xsedx}^${xsedx}${patchdir}/${xsedx}"
+	fi
+)
+EOF
+exit $r

@@ -1,0 +1,20 @@
+#!/bin/sh
+set +e ; set -f
+
+have_cmd() { command -v "$1" </dev/null >/dev/null 2>&1 ; }
+
+has_nice=1 has_chrt=1 has_ionice=1
+have_cmd nice || has_nice=
+have_cmd chrt || has_chrt=
+have_cmd ionice || has_ionice=
+
+if [ -z "${has_nice}${has_chrt}${has_ionice}" ] ; then
+	env printf "%q: unable to launch command in idle mode due to missing executables\\n" "${0##*/}" >&2
+	exit 126
+fi
+
+exec \
+  ${has_nice:+ nice -n +40 } \
+  ${has_chrt:+ chrt -i 0 } \
+  ${has_ionice:+ ionice -c 3 } \
+"$@"

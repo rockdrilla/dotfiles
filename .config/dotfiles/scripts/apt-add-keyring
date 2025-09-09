@@ -1,0 +1,430 @@
+#!/bin/sh
+set -ef
+
+me="${0##*/}"
+
+usage() {
+	cat >&2 <<-EOF
+	# usage: ${me} [options] <name> <repo uri> <suite> [keyring uri or path]
+	# options:
+	#  -m, --merge
+	#    merge with existing keyring (if any)
+	#  -o, --optimize
+	#    optimize keyring - preserve public key(s) which is/are used to sign repository
+	EOF
+	exit "${1:-0}"
+}
+[ $# != 0 ] || usage
+
+gnupg_testdata_clearsign() {
+	cat <<-EOF
+	-----BEGIN PGP SIGNED MESSAGE-----
+	Hash: SHA256
+
+	test data
+	-----BEGIN PGP SIGNATURE-----
+
+	iHUEARYIAB0WIQTk95XBmO8PsqERxxdADlhK/AU7ugUCZVSqdwAKCRBADlhK/AU7
+	uj4rAP4nb8tkF6FEhEd7sAoBBTPX5vc/WlAhDYM8uK61mo2KMQD/UjsJ3YOvRYip
+	epkflbk2cdCD7ZHsGYpBIhMh9eDTRQE=
+	=vrbd
+	-----END PGP SIGNATURE-----
+	EOF
+}
+
+## NB: requires further "base64 -d" per line output
+gnupg_dearmor_pubkey() {
+	sed -En -e "$(_gnupg_dearmor_pubkey_sed)" "$@"
+}
+
+_gnupg_dearmor_pubkey_sed() {
+	cat <<-EOF
+	/^-----BEGIN PGP PUBLIC KEY BLOCK-----\$/ {
+
+	:_scan
+	    \$ { b _quit }
+	    n
+
+	    /^-----BEGIN PGP PUBLIC KEY BLOCK-----\$/  { b _quit }
+	    /^-----END PGP PUBLIC KEY BLOCK-----\$/    { b _quit }
+
+	    \\%^[[:alnum:]/+]{64}\$%     { h ; b _read }
+	    \\%^[[:alnum:]/+]{1,64}=*\$% { b _quit }
+	    \\%^=[[:alnum:]/+]+=*\$%     { b _quit }
+
+	    b _scan
+
+	:_read
+	    \$ { b _quit }
+	    n
+
+	    /^-----BEGIN PGP PUBLIC KEY BLOCK-----\$/  { b _quit }
+	    /^-----END PGP PUBLIC KEY BLOCK-----\$/    { z ; b _end }
+
+	    \\%^[[:alnum:]/+]{64}\$%     { H ; b _read }
+	    \\%^[[:alnum:]/+]{1,64}=*\$% { H ; b _read }
+	    \\%^=[[:alnum:]/+]+=*\$%     { H ; b _read }
+	    b _read
+
+	:_end
+	    x
+	    s/[\\n]//gm
+	    s/^([[:alnum:]/+]+).+\$/\\1==/g
+	    p
+	:_quit
+	}
+	EOF
+}
+
+## NB: almost pristine format except last empty line
+## TODO: research gnupg format
+gnupg_armor_pubkey() {
+	cat <<-EOF
+	-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+	$(base64 < "$1")
+
+	-----END PGP PUBLIC KEY BLOCK-----
+	EOF
+}
+
+_gpgv_debug_pkt() { gpgv --debug 1 "$@" ; }
+
+gnupg_count_public_keys() {
+	## sanity test
+	_gpgv_debug_pkt --version >/dev/null 2>&1
+
+	gnupg_testdata_clearsign \
+	| _gpgv_debug_pkt --keyring "$1" 2>&1 >/dev/null \
+	| { grep -Fw parse_packet || : ; } \
+	| { grep -Fwc -e 'type=6' || : ; }
+}
+
+# process options
+n_opt=0
+for i ; do
+	case "$i" in
+	-m | --merge )
+		if [ -n "${o_merge:+1}" ] ; then
+			env printf "%q: error: 'merge' flag already set\\n" "${me}" >&2
+			usage 1
+		fi
+		o_merge=1
+	;;
+	-o | --optimize )
+		if [ -n "${o_optimize:+1}" ] ; then
+			env printf "%q: error: 'optimize' flag already set\\n" "${me}" >&2
+			usage 1
+		fi
+		o_optimize=1
+	;;
+	-*)
+		env printf "%q: error: unknown option: %q\\n" "${me}" "$i" >&2
+		usage 1
+	;;
+	*) break ;;
+	esac
+
+	n_opt=$((n_opt+1))
+done
+
+[ ${n_opt} = 0 ] || shift ${n_opt}
+
+arg_ok=
+while : ; do
+	[ -n "$1" ] || break
+	[ -n "$2" ] || break
+	[ -n "$3" ] || break
+	arg_ok=1 ; break
+done
+[ -n "${arg_ok}" ] || usage 1
+
+xsedx=$(printf '\027')
+
+_distro=$(sh -ec '. /etc/os-release ; printf "%s" "${ID}"' || : )
+_suite=$(sh -ec '. /etc/os-release ; printf "%s" "${VERSION_CODENAME}"' || : )
+if [ -z "${_distro}" ] || [ -z "${_suite}" ] ; then
+	env printf "%q: error: /etc/os-release is somewhat broken\\n" "${me}" >&2
+	exit 1
+fi
+unwrap_default_distro_suite() {
+	sed -ze "s${xsedx}@{distro}${xsedx}${_distro}${xsedx}g;s${xsedx}@{suite}${xsedx}${_suite}${xsedx}g"
+}
+
+name=$(printf '%s' "$1" | unwrap_default_distro_suite)
+uri=$(printf '%s' "$2" | unwrap_default_distro_suite)
+suite=$(printf '%s' "$3" | unwrap_default_distro_suite)
+keyring_arg=$(printf '%s' "$4" | unwrap_default_distro_suite)
+
+case "${name}" in
+*/* | *..* )
+	env printf "%q: error: name is path-like: %q\\n" "${me}" "${name}" >&2
+	usage 1
+;;
+esac
+
+verify_apt_uri() {
+	case "$1" in
+	http:* | https:* ) return 0 ;;
+	mirror:* | mirror+http:* | mirror+https:* ) return 0 ;;
+	esac
+
+	__uncommon=
+	case "$1" in
+	cdrom:* | copy:* | file:* | rsh:* | ssh:* ) __uncommon=1 ;;
+	mirror+copy:* | mirror+file:* ) __uncommon=1 ;;
+	mirror+*:* )
+		env printf "%q: error: unsupported uri mirror format: %q\\n" "${me}" "$1" >&2
+		usage 1
+	;;
+	esac
+
+	if [ -n "${__uncommon}" ] ; then
+		unset __uncommon
+		env printf "%q: warning: uncommon but likely valid uri: %q\\n" "${me}" "$1" >&2
+		return 0
+	fi
+
+	env printf "%q: error: unsupported uri format: %q\\n" "${me}" "$1" >&2
+	usage 1
+}
+
+verify_suite() {
+	if printf '%s' "$1" | grep -Eq '^[[:alnum:]][[:alnum:]-_]*[[:alnum:]]$' ; then
+		return 0
+	fi
+	env printf "%q: error: unsupported suite format: %q\\n" "${me}" "$1" >&2
+	usage 1
+}
+
+verify_apt_uri "${uri}"
+verify_suite "${suite}"
+
+_keyring_dirs='/etc/apt/keyrings /etc/apt/trusted.gpg.d'
+lookup_keyring_dir() {
+	if [ -n "${_keyring_dir}" ] ; then
+		echo "${_keyring_dir}"
+		return
+	fi
+	for __keyring_dir in ${_keyring_dirs} ; do
+		[ -d "${__keyring_dir}" ] || continue
+		_keyring_dir=${__keyring_dir}
+		unset __keyring_dir
+		echo "${_keyring_dir}"
+		return
+		# [ -z "${1:-}" ] || return
+	done
+	unset __keyring_dir
+	env printf "%q: error: APT installation is broken: /etc/apt/trusted.gpg.d/ is missing\\n" "${me}" >&2
+	return 1
+}
+
+keyring_dir=$(lookup_keyring_dir) || exit 1
+keyring_base="${keyring_dir}/${name}"
+keyring="${keyring_base}.asc"
+
+w=$(mktemp -d) ; : "${w:?}"
+
+lookup_keyring() {
+	case "${1:?}" in
+	*/* | *..* )
+		env printf "%q: error: arg is path-like: %q\\n" "${me}" "$1" >&2
+		return 1
+	;;
+	esac
+
+	__keyring_base=$(lookup_keyring_dir) || return 1
+	__keyring_base="${__keyring_base}/$1"
+	__keyring_cnt=0
+	for __ext in asc gpg gpg.asc ; do
+		__keyring="${__keyring_base}.${__ext}"
+		[ -e "${__keyring}" ] || continue
+		if ! [ -f "${__keyring}" ] ; then
+			__dentry_type=$(env stat -c %F "${__keyring}")
+			env printf "%q: warning: found %q (expected: file): %q\\n" "${me}" "${__dentry_type}" "${__keyring}" >&2
+			continue
+		fi
+		if ! [ -s "${__keyring}" ] ; then
+			env printf "%q: warning: found empty file: %q\\n" "${me}" "${__keyring}" >&2
+			continue
+		fi
+		env printf "%q: info: found keyring: %q\\n" "${me}" "${__keyring}" >&2
+		echo "${__keyring}"
+		__keyring_cnt=$((__keyring_cnt+1))
+
+		## return 1st available
+		[ -z "$2" ] || break
+	done
+	unset __keyring_base __ext __keyring __dentry_type
+}
+
+if [ -n "${keyring_arg}" ] ; then
+	case "${keyring_arg}" in
+	http:* | https:* )
+		apt-http-fetch "${keyring_arg}" "$w/keyring" || {
+			rm -rf "$w"
+			exit 1
+		}
+	;;
+	* )
+		if ! [ -f "${keyring_arg}" ] ; then
+			env printf "%q: error: unknown keyring argument format: %q\\n" "${me}" "${keyring_arg}" >&2
+			rm -rf "$w"
+			usage 1
+		fi
+		if ! [ -s "${keyring_arg}" ] ; then
+			env printf "%q: error: empty keyring file: %q\\n" "${me}" "${keyring_arg}" >&2
+			rm -rf "$w"
+			usage 1
+		fi
+		cat < "${keyring_arg}" > "$w/keyring"
+	;;
+	esac
+
+	keynum=$(gnupg_count_public_keys "$w/keyring")
+	if [ "${keynum}" != 0 ] ; then
+		## valid gnupg keyring file in (appropriate) binary format (*.gpg)
+		keyring="${keyring_base}.gpg"
+	else
+		while read -r n ; do
+			[ -n "$n" ] || continue
+
+			echo "$n" | base64 -d > "$w/temp.gpg" || continue
+			x=$(gnupg_count_public_keys "$w/temp.gpg")
+			[ "$x" != 0 ] || continue
+
+			keynum=$((keynum+1))
+		done <<-EOF
+		$(gnupg_dearmor_pubkey "$w/keyring")
+		EOF
+
+		rm -f "$w/temp.gpg"
+	fi
+
+	if [ "${keynum}" = 0 ] ; then
+		env printf "%q: error: unable to parse keyring file: %q\\n" "${me}" "${keyring_arg}" >&2
+		rm -rf "$w"
+		exit 1
+	fi
+
+	while [ -n "${o_merge}" ] ; do
+		lookup_keyring "${name}" | grep -Fxq -e "${keyring}" || break
+
+		env printf "%q: warning: existing file is to be REPLACED: %q\\n" "${me}" "${keyring}" >&2
+		env printf "%q: info: consider running script with -m/--merge option to merge with existing keyring\\n" "${me}" >&2
+		break
+	done
+fi
+
+## TODO: whether we can skip gpg-related tasks?
+
+## request gnupg for work
+check-bin-pkg gpg gpgv dirmngr gpgconf
+
+gpg_on() { gpg-batch start ; }
+gpg_off() {
+	cd /
+	gpg-batch stop
+	unset GNUPGHOME
+	rm -rf "$w"
+	exit "${1:-0}"
+}
+
+(
+	export GNUPGHOME="$w/dot-gnupg"
+	mkdir -m 0700 "${GNUPGHOME}"
+	gpg_on
+
+	cd "$w"
+
+	csv_field_grep() {
+		if [ -n "$2" ] ; then
+			sed -En "\\${xsedx}$2${xsedx}p"
+		else
+			cat
+		fi \
+		| cut -d: -f "$1"
+	}
+
+	join_lines() { sed -zE 's/[[:space:]]+/ /g;s/^ //;s/ $//' ; }
+
+	if [ -s ./keyring ] ; then
+		gpg --import ./keyring
+		rm -f ./keyring
+	else
+		apt-repo-get-fpr "${uri}" "${suite}" > fpr.repo
+		## must contain at least one fingerprint; if not - bail out
+		[ -s fpr.repo ]
+
+		keys=$(join_lines < fpr.repo)
+
+		gpg --recv-keys ${keys}
+	fi
+
+	gpg --with-colons --list-keys > dump.all
+	csv_field_grep 5 '^pub:' < dump.all > pub.all
+
+	## must contain at least one public key; if not - bail out
+	[ -s pub.all ]
+
+	## minimize keyring
+	while [ -n "${o_optimize}" ] ; do
+		csv_field_grep 10 '^fpr:' < dump.all > fpr.all
+
+		: > fpr.save
+		for i in $(join_lines < pub.all) ; do
+			gpg --with-colons --list-keys "$i" \
+			| csv_field_grep 10 '^fpr:' > "fpr.$i"
+
+			## must contain at least one fingerprint; if not - bail out
+			[ -s "fpr.$i" ]
+
+			fpr_pub=$(head -n 1 "fpr.$i")
+
+			## try filter out useful fingerprints; if none - skip whole key chain
+			grep -Fx -f fpr.repo "fpr.$i" > "fpr-save.$i" || :
+			[ -s "fpr-save.$i" ] || continue
+
+			if grep -Fxq -e "${fpr_pub}" "fpr-save.$i" ; then
+				## primary key fingerprint match - do nothing
+				:
+			else
+				## subkey fingerprint match - add primary key fingerprint
+				echo "${fpr_pub}" >> "fpr-save.$i"
+			fi
+
+			## append fingerprints
+			cat < "fpr-save.$i" >> fpr.save
+		done
+		## must contain at least one fingerprint; if not - bail out
+		## (supplied key material seems to be useless)
+		[ -s fpr.save ]
+
+		sort -u < fpr.save > fpr.include
+
+		grep -Fxv -f fpr.include fpr.all > fpr.exclude || :
+		if [ -s fpr.exclude ] ; then
+			gpg --delete-keys $(sed -E 's/$/!/' < fpr.exclude)
+		fi
+
+		break
+	done
+
+	if [ -n "${o_merge}" ] ; then
+		while read -r k ; do
+			[ -n "$k" ] || continue
+
+			gpg --import "$k" || continue
+			rm -f "$k"
+			env printf "%q: info: merging with existing keyring: %q\\n" "${me}" "$k" >&2
+		done <<-EOF
+		$(lookup_keyring "${name}" 2>/dev/null)
+		EOF
+	fi
+
+	gpg --armor --export > "${keyring}"
+	gpg --show-keys "${keyring}"
+
+	gpg_off
+
+) || gpg_off 1

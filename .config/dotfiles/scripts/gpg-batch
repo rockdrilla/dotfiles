@@ -1,0 +1,59 @@
+#!/bin/sh
+set -ef
+
+: "${GPG_KEYSERVER:=hkps://keyserver.ubuntu.com}"
+
+me="${0##*/}"
+usage() {
+	cat >&2 <<-EOF
+	# usage: ${me} {start|stop}
+	# NB: ensure that env GNUPGHOME is set to appropriate (e.g. temporary) directory
+	EOF
+	exit "${1:-0}"
+}
+[ $# != 0 ] || usage
+
+act=$(printf '%s' "$1" | tr '[:upper:]' '[:lower:]')
+case "${act}" in
+1 | start ) ;;
+0 | stop )  ;;
+* )         usage 1 ;;
+esac
+
+check-bin-pkg gpg dirmngr gpgconf
+
+case "${act}" in
+1 | start )
+	[ -n "${GNUPGHOME}" ] || usage 1
+	[ -d "${GNUPGHOME}" ] || usage 1
+
+	cd "${GNUPGHOME}"
+	cat > gpg.conf <<-EOF
+		quiet
+		batch
+		trust-model always
+		no-auto-check-trustdb
+		ignore-time-conflict
+		keyid-format 0xlong
+		keyserver ${GPG_KEYSERVER}
+	EOF
+	cat > dirmngr.conf <<-EOF
+		quiet
+		batch
+		keyserver ${GPG_KEYSERVER}
+	EOF
+	quiet gpg --update-trustdb
+	quiet gpg --list-keys
+	quiet dirmngr
+;;
+0 | stop )
+	[ -n "${GNUPGHOME}" ] || exit 0
+	[ -d "${GNUPGHOME}" ] || usage 1
+
+	cd "${GNUPGHOME}"
+	quiet gpgconf --kill all
+	cd /
+	rm -rf "${GNUPGHOME}"
+;;
+esac
+exit 0

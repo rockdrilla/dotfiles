@@ -1,0 +1,80 @@
+#!/bin/sh
+set -ef
+
+me="${0##*/}"
+usage() {
+	cat >&2 <<-EOF
+	# usage: ${me} <repo uri> <suite>
+	EOF
+	exit "${1:-0}"
+}
+[ $# != 0 ] || usage
+
+arg_ok=
+while : ; do
+	[ -n "$1" ] || break
+	[ -n "$2" ] || break
+	arg_ok=1 ; break
+done
+[ -n "${arg_ok}" ] || usage 1
+
+check-bin-pkg gpg dirmngr gpgconf
+
+gpg_on() { gpg-batch start ; }
+gpg_off() {
+	cd /
+	gpg-batch stop
+	unset GNUPGHOME
+	rm -rf "$w"
+	exit "${1:-0}"
+}
+
+gpg_keys_from_sig() {
+	set +e
+	gpg --no-options --verify "$@" 2>&1 \
+	| sed -En 's/\s+/ /g;s/ $//;/^([Gg][Pp][Gg]|[Gg][Nn][Uu][Pp][Gg]): using .+ key (.+)$/{s,,\2,p}'
+	set -e
+}
+
+w=$(mktemp -d) ; : "${w:?}"
+export GNUPGHOME="$w/dot-gnupg"
+
+(
+	mkdir -m 0700 "${GNUPGHOME}"
+	gpg_on
+
+	cd "$w"
+
+	while : ; do
+		apt-http-fetch -s "$1/dists/$2/InRelease" InRelease || break
+		gpg_keys_from_sig InRelease > apt.fpr.InRelease
+		break
+	done
+	rm -f InRelease
+
+	while : ; do
+		apt-http-fetch -s "$1/dists/$2/Release.gpg" Release.gpg || break
+		apt-http-fetch -s "$1/dists/$2/Release" Release || break
+		gpg_keys_from_sig Release.gpg Release > apt.fpr.Release
+		break
+	done
+	rm -f Release.gpg Release
+
+	rm -f apt.fpr
+	c=0
+	for i in apt.fpr.InRelease apt.fpr.Release ; do
+		[ -s "$i" ] || continue
+		cp -f "$i" apt.fpr
+		c=$((c+1))
+	done
+
+	if [ "$c" = 2 ] ; then
+		cmp apt.fpr.InRelease apt.fpr.Release >&2
+	fi
+
+	[ -s apt.fpr ]
+	cat apt.fpr
+
+	gpg_off
+
+) || gpg_off 1

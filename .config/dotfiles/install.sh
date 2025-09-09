@@ -1,6 +1,11 @@
 #!/bin/sh
 set -ef
 
+unset LANGUAGE LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE
+unset LC_MONETARY LC_MESSAGES LC_PAPER LC_NAME LC_ADDRESS
+unset LC_TELEPHONE LC_MEASUREMENT LC_IDENTIFICATION
+unset POSIXLY_CORRECT TAR_OPTIONS
+
 uri_krdsh="${GITKRDSH:-https://git.krd.sh/krd}/dotfiles"
 uri_github="${GITHUB:-https://github.com/rockdrilla}/dotfiles"
 
@@ -9,9 +14,7 @@ git_branch='main'
 d_repo='.config/dotfiles/repo.git'
 f_gitignore='.config/dotfiles/gitignore'
 
-have_cmd() {
-    command -v "$1" >/dev/null 2>&1 || return $?
-}
+have_cmd() { command -v "$1" </dev/null >/dev/null 2>&1 ; }
 
 fetch() {
     if have_cmd curl ; then

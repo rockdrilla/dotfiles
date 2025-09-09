@@ -1,0 +1,11 @@
+#!/bin/sh
+set -ef
+
+set -a
+PIP_DISABLE_PIP_VERSION_CHECK=1
+PIP_NO_CACHE_DIR=1
+PIP_ROOT_USER_ACTION=ignore
+PIP_NO_COMPILE=1
+set +a
+
+exec "$@"

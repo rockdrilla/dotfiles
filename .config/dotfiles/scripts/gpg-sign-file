@@ -1,0 +1,38 @@
+#!/bin/sh
+set +e ; set -f
+
+me="${0##*/}"
+
+## test that 1st argument is (exactly) file
+if [ -z "$1" ] ; then
+	env printf "%q: requires 1st argument\\n" "${me}" >&2
+	exit 1
+fi
+if [ -h "$1" ] ; then
+	env printf "%q: symlinks are not supported: %q\\n" "${me}" "$1" >&2
+	exit 1
+fi
+if ! [ -f "$1" ] ; then
+	env printf "%q: file does not exist: %q\\n" "${me}" "$1" >&2
+	exit 1
+fi
+
+check-bin-pkg gpg dirmngr gpgconf
+
+w=$(mktemp -d) ; : "${w:?}"
+(
+	set -e
+	cp -L "$1" "$w/s"
+	ensure-eof-empty-line "$w/s"
+	gpg \
+	  --utf8-strings --textmode --armor --clearsign \
+	  --output "$w/d" - < "$w/s"
+	rm -f "$w/s"
+	cat < "$w/d" > "$1"
+	rm -f "$w/d"
+)
+res=$?
+
+rm -rf -- "$w"
+
+exit ${res}

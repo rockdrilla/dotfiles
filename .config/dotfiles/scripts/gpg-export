@@ -1,0 +1,29 @@
+#!/bin/sh
+set -ef
+
+: "${1:?}" "${2:?}"
+
+w=$(mktemp -d) ; : "${w:?}"
+
+gpg_on() { gpg-batch start ; }
+gpg_off() {
+	cd /
+	gpg-batch stop
+	unset GNUPGHOME
+	rm -rf "$w"
+	exit "${1:-0}"
+}
+
+(
+	export GNUPGHOME="$w/dot-gnupg"
+	mkdir -m 0700 "${GNUPGHOME}"
+	gpg_on
+
+	gpg --import "$1"
+	gpg --armor --export > "$w/export"
+	cat < "$w/export" > "$2"
+	gpg --show-keys "$2"
+
+	gpg_off
+
+) || gpg_off 1

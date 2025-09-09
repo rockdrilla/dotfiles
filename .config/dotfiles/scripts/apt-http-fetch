@@ -1,0 +1,51 @@
+#!/bin/sh
+set -ef
+
+me="${0##*/}"
+usage() {
+	cat >&2 <<-EOF
+	# usage: ${me} [options] <uri> <destination file>
+	# cURL compatibility options:
+	#  -s, --silent
+	#    suppress output until error is occured
+	#  -k, --insecure
+	#    ignore TLS verification error
+	#  -L, --location
+	#    no-op (does nothing)
+	#  --no-location
+	#    prohibit HTTP redirects
+	EOF
+	exit "${1:-0}"
+}
+[ $# != 0 ] || usage
+
+o_quiet=
+o_insecure=
+o_noredir=
+
+## process options
+n_opt=0
+for i ; do
+	case "$i" in
+	-s | --silent )   o_quiet=1 ;;
+	-k | --insecure ) o_insecure=1 ;;
+	--no-location )   o_noredir=1 ;;
+	-L | --location ) o_noredir= ;;
+	-* )
+		env printf "%q: unknown option: %q\\n" "${me}" "$i" >&2
+		usage 1
+	;;
+	* ) break ;;
+	esac
+
+	n_opt=$((n_opt+1))
+done
+
+[ ${n_opt} = 0 ] || shift ${n_opt}
+[ $# -eq 2 ] || usage 1
+
+exec ${o_quiet:+ quiet } /usr/lib/apt/apt-helper \
+  ${o_insecure:+ -o 'Acquire::https::Verify-Peer=false' } \
+  ${o_insecure:+ -o 'Acquire::https::Verify-Host=false' } \
+  ${o_noredir:+ -o 'Acquire::http::AllowRedirect=false' } \
+  download-file "$1" "$2"
