@@ -22,6 +22,8 @@ esac
 
 check-bin-pkg gpg dirmngr gpgconf
 
+exec 0</dev/null
+
 case "${act}" in
 1 | start )
 	[ -n "${GNUPGHOME}" ] || usage 1

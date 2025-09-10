@@ -190,7 +190,7 @@ verify_apt_uri() {
 }
 
 verify_suite() {
-	if printf '%s' "$1" | grep -Eq '^[[:alnum:]][[:alnum:]-_]*[[:alnum:]]$' ; then
+	if printf '%s' "$1" | grep -Eq '^[[:alnum:]][[:alnum:]_-]*[[:alnum:]]$' ; then
 		return 0
 	fi
 	env printf "%q: error: unsupported suite format: %q\\n" "${me}" "$1" >&2
