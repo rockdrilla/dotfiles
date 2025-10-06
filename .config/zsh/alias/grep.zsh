@@ -23,7 +23,7 @@ z-alt-grep() {
 GREP_GNU='--color=auto'
 
 z-alt-grep "grep ${GREP_GNU}|grep"
-unfunction z-alt-grep
+unset -f z-alt-grep
 unset GREP_GNU
 
 alias grep='grep '

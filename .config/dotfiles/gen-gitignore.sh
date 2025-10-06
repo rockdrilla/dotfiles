@@ -8,13 +8,13 @@ gen_gitignore() {
     touch "$1"
     {
         echo '*'
-        git ls-files | sed -E 's:^:!/:'
+        git ls-files -z | sort -zn | sed -zE 's:^:!/:' | tr '\0' '\n'
     } > "$1"
     exit 0
 }
 
 me=$(readlink -e "$0")
-topdir=$(printf '%s' "${me}" | sed -E 's:/[^/]+/[^/]+/[^/]+$::')
+topdir=$(printf '%s' "${me}" | sed -zE 's:/[^/]+/[^/]+/[^/]+$::')
 cd "${topdir}"
 
 export GIT_OPTIONAL_LOCKS=0

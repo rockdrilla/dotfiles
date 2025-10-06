@@ -1,0 +1,37 @@
+#!/bin/sh
+set +e ; set -f
+
+me="${0##*/}"
+usage() {
+	cat >&2 <<-EOF
+	# usage: ${me} <output name> <output version> <input git ref>
+	EOF
+	exit "${1:-0}"
+}
+[ $# != 0 ] || usage
+
+arg_ok=
+while : ; do
+	[ -n "$1" ] || break
+	[ -n "$2" ] || break
+	[ -n "$3" ] || break
+	arg_ok=1 ; break
+done
+[ -n "${arg_ok}" ] || usage 1
+
+name="$1" ver="$2" ref="$3"
+
+topdir=$(ro-git rev-parse --show-toplevel) || exit $?
+case "${topdir}" in
+*/* ) topdir=${topdir%/*} ;;
+esac
+
+r_hash=$(git log -n 1 --format='%H' "${ref}") || exit $?
+read -r c_hash c_time <<EOF
+$(git log -n 1 --format='%h %cd' --date='format:%Y%m%d.%H%M%S' "${r_hash}") || exit $?
+EOF
+
+out="${name}_${ver}+git.${c_time}.${c_hash}.tar"
+
+git archive --format=tar -o "${topdir}/${out}" --prefix="${name}-${ver}-git.${c_hash}/" "${r_hash}" || exit $?
+echo "archived to ${out} in ${topdir}/" >&2

@@ -39,3 +39,7 @@ z-ts-to-human() {
 
     echo "$f"
 }
+
+z-load-time() {
+    echo "zsh-u load time: ${ZSHU[t_load]}" >&2
+}

@@ -33,6 +33,8 @@
 !/.config/dotfiles/scripts/dpkg-which
 !/.config/dotfiles/scripts/ensure-eof-empty-line
 !/.config/dotfiles/scripts/from
+!/.config/dotfiles/scripts/git-archive-ref
+!/.config/dotfiles/scripts/git-dir-usage
 !/.config/dotfiles/scripts/gpg-batch
 !/.config/dotfiles/scripts/gpg-export
 !/.config/dotfiles/scripts/gpg-sign-file
@@ -48,6 +50,7 @@
 !/.config/dotfiles/scripts/quiet
 !/.config/dotfiles/scripts/quilt-series-auto
 !/.config/dotfiles/scripts/quilt-series-strip-comments
+!/.config/dotfiles/scripts/ro-git
 !/.config/dotfiles/scripts/run-as
 !/.config/dotfiles/scripts/sperl
 !/.config/dotfiles/scripts/static-compress
@@ -62,6 +65,7 @@
 !/.config/zsh.dots/.zshenv
 !/.config/zsh/_.zsh
 !/.config/zsh/_wip/enclave.zsh.wip
+!/.config/zsh/_wip/idle.zsh.old
 !/.config/zsh/alias.zsh
 !/.config/zsh/alias/containers.zsh
 !/.config/zsh/alias/diff.zsh
@@ -69,7 +73,6 @@
 !/.config/zsh/alias/git.zsh
 !/.config/zsh/alias/grep.zsh
 !/.config/zsh/alias/history.zsh
-!/.config/zsh/alias/idle.zsh.old
 !/.config/zsh/alias/k8s.zsh
 !/.config/zsh/alias/kconfig.zsh
 !/.config/zsh/alias/ls.zsh
