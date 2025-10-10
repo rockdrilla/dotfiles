@@ -21,15 +21,20 @@ done
 
 name="$1" ver="$2" ref="$3"
 
-topdir=$(ro-git rev-parse --show-toplevel) || exit $?
+topdir=$(ro-git rev-parse --show-toplevel)
+[ -n "${topdir}" ] || exit 1
 case "${topdir}" in
 */* ) topdir=${topdir%/*} ;;
 esac
 
-r_hash=$(git log -n 1 --format='%H' "${ref}") || exit $?
+r_hash=$(git log -n 1 --format='%H' "${ref}")
+[ -n "${r_hash}" ] || exit 1
+
 read -r c_hash c_time <<EOF
-$(git log -n 1 --format='%h %cd' --date='format:%Y%m%d.%H%M%S' "${r_hash}") || exit $?
+$(git log -n 1 --format='%h %cd' --date='format:%Y%m%d.%H%M%S' "${r_hash}")
 EOF
+[ -n "${c_hash}" ] || exit 1
+[ -n "${c_time}" ] || exit 1
 
 out="${name}_${ver}+git.${c_time}.${c_hash}.tar"
 

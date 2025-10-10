@@ -17,6 +17,7 @@ me=$(readlink -e "$0")
 topdir=$(printf '%s' "${me}" | sed -zE 's:/[^/]+/[^/]+/[^/]+$::')
 cd "${topdir}"
 
+## sync with /.config/dotfiles/scripts/ro-git
 export GIT_OPTIONAL_LOCKS=0
 
 dir="${me%/*}/repo.git"

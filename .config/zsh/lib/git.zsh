@@ -12,6 +12,7 @@ ZSHU_PM[git_commit]='⌽'
 
 __z_git_avail() { (( $+commands[git] )) ; }
 
+## sync with /.config/dotfiles/scripts/ro-git
 __z_git() { GIT_OPTIONAL_LOCKS=0 command git "$@"; }
 
 __z_git_is_repo() { __z_git rev-parse --git-dir &>/dev/null ; }

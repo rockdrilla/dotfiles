@@ -12,8 +12,6 @@ export LC_ALL=C.UTF-8 LANG=C.UTF8
 
 have_cmd() { command -v "$1" </dev/null >/dev/null 2>&1 ; }
 
-ro_git() { GIT_OPTIONAL_LOCKS=0 command git "$@" ; }
-
 find_fast() {
 	find "$@" -printf . -quit | grep -Fq .
 }
@@ -23,7 +21,7 @@ check-bin-pkg dh:debhelper dpkg-parsechangelog:dpkg-dev
 have_git=
 while [ "${DEB_SRC_EXPORT_GIT:-1}" = 1 ] ; do
 	have_cmd git || break
-	ro_git rev-parse --is-inside-work-tree >/dev/null 2>&1 || break
+	ro-git rev-parse --is-inside-work-tree >/dev/null 2>&1 || break
 
 	have_git=1
 	break
@@ -36,7 +34,7 @@ while [ "${DEB_SRC_EXPORT_GNUPG:-1}" = 1 ] ; do
 	[ -z "${DEB_SIGN_KEYID}" ] || want_gpg=1
 
 	if [ -n "${have_git}" ] ; then
-		if ro_git config --get commit.gpgsign | grep -Fxq true ; then
+		if ro-git config --get commit.gpgsign | grep -Fxq true ; then
 			want_gpg=1
 		fi
 	fi
@@ -60,7 +58,7 @@ fi
 deb_folder='debian'
 if [ -z "$2" ] ; then
 	if [ -n "${have_git}" ] ; then
-		cd "$(ro_git rev-parse --show-toplevel)"
+		cd "$(ro-git rev-parse --show-toplevel)"
 	fi
 else
 	deb_folder=$(printf '%s' "$2" | sed -zE 's,/+,/,g;s,/$,,')
@@ -229,11 +227,13 @@ pna="${pnd}_source"
 cd "$W"
 
 (
-	## verify that we have upstream tarball(s)
-	if ! find_fast "$T" -mindepth 1 -maxdepth 1 -name "${pnu}.orig.*" -type f ; then
-		d_rules debian/watch || :
-		check-bin-pkg uscan:devscripts || exit 1
-		uscan --destdir "$T" --download-current-version --rename
+	if [ "${DEB_SRC_EXPORT_USCAN:-1}" = 1 ] ; then
+		## verify that we have upstream tarball(s)
+		if ! find_fast "$T" -mindepth 1 -maxdepth 1 -name "${pnu}.orig.*" -type f ; then
+			d_rules debian/watch || :
+			check-bin-pkg uscan:devscripts || exit 1
+			uscan --destdir "$T" --download-current-version --rename
+		fi
 	fi
 
 	tar -cf - debian | xz -9 > "$T/${pnd}.debian.tar.xz"
