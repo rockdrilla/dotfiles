@@ -33,19 +33,8 @@ do_zstd() {
 	comp_fixup "$1" "$1.zst" || rm -f "$1.zst"
 }
 
-have_cmd() { command -v "$1" </dev/null >/dev/null 2>&1 ; }
-
-unset has_mawk
-if have_cmd mawk ; then has_mawk=1 ; fi
-mawk_then_awk() {
-	if [ -n "${has_mawk}" ]
-	then mawk "$@"
-	else awk "$@"
-	fi
-}
-
 float_div() {
-	mawk_then_awk -v "a=$1" -v "b=$2" 'BEGIN{print a/b;exit;}' </dev/null
+	mawk-or-awk -v "a=$1" -v "b=$2" 'BEGIN{print a/b;exit;}' </dev/null
 }
 
 comp_fixup() {

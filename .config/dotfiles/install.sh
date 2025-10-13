@@ -39,7 +39,7 @@ fetch() {
         set +e
         (
             set -e
-            $x download-file "$1" "${__fetch_t}" || return $?
+            $x download-file "$1" "${__fetch_t}" >&2 || return $?
             cat "${__fetch_t}"
         )
         __fetch_r=$?
@@ -195,9 +195,6 @@ git_config() {
     ## repo-specific
     git remote set-url origin "${uri_repo}"
     git config core.attributesfile .config/dotfiles/gitattributes
-    ## migration (remove later)
-    git config --unset gc.auto || :
-    git config --unset pull.ff || :
     ## size optimization
     git config core.bigFileThreshold 64k
     git config core.compression 9

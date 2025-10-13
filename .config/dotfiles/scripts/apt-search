@@ -29,7 +29,7 @@ r=$?
 [ $r = 0 ] || _exit
 [ -s "$w/search" ] || _exit
 
-awk '{print $1}' < "$w/search" > "$w/list"
+mawk-or-awk '{print $1}' < "$w/search" > "$w/list"
 rm -f "$w/search"
 
 pat="${2:-$1}"

@@ -43,6 +43,7 @@
 !/.config/dotfiles/scripts/krd-debsrc
 !/.config/dotfiles/scripts/krd-quilt
 !/.config/dotfiles/scripts/krd-sbuild
+!/.config/dotfiles/scripts/mawk-or-awk
 !/.config/dotfiles/scripts/openssl-cert-auto-pem
 !/.config/dotfiles/scripts/openssl-generate-dh-bundle
 !/.config/dotfiles/scripts/openssl-ocsp

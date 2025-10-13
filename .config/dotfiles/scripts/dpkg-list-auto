@@ -3,20 +3,9 @@ set -ef
 
 w=$(mktemp -d) ; : "${w:?}"
 
-have_cmd() { command -v "$1" </dev/null >/dev/null 2>&1 ; }
-
-unset has_mawk
-if have_cmd mawk ; then has_mawk=1 ; fi
-mawk_then_awk() {
-	if [ -n "${has_mawk}" ]
-	then mawk "$@"
-	else awk "$@"
-	fi
-}
-
 f='/var/lib/apt/extended_states'
 if [ -f "$f" ] ; then
-	mawk_then_awk '
+	mawk-or-awk '
 	/^Package:/,/^$/ {
 		if ($1 == "Package:")        { pkg = $2; }
 		if ($1 == "Architecture:")   { arch = $2; }
