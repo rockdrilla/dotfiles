@@ -12,8 +12,8 @@ z-proc-exists() {
     ps -o 'pid=' -p "$1" >/dev/null 2>&1
 }
 
-typeset -Uga ZSHU_PARENTS_PID
-typeset -ga ZSHU_PARENTS_NAME
+typeset -g -aU ZSHU_PARENTS_PID
+typeset -g -a ZSHU_PARENTS_NAME
 
 function {
     local procfs
@@ -62,7 +62,7 @@ function {
     typeset -r ZSHU_PARENTS_PID ZSHU_PARENTS_NAME
 }
 
-typeset -gA ZSHU_RUN
+typeset -g -A ZSHU_RUN
 
 z-run-test() {
     local k i

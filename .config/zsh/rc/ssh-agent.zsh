@@ -38,7 +38,7 @@ z-ssh-agent() {
         [ -S "${SSH_AUTH_SOCK}" ] || break
 
         ## don't bother with ssh agent socket if it already set
-        export SSH_AGENT_PID SSH_AUTH_SOCK
+        typeset -g -x SSH_AGENT_PID SSH_AUTH_SOCK
         return 0
     done
     unset SSH_AGENT_PID
@@ -57,7 +57,7 @@ z-ssh-agent() {
         [ -S "${SSH_AUTH_SOCK}" ] || break
 
         echo "${SSH_AGENT_PID}" > "${pid_file}"
-        export SSH_AGENT_PID SSH_AUTH_SOCK
+        typeset -g -x SSH_AGENT_PID SSH_AUTH_SOCK
         return 0
     done
 

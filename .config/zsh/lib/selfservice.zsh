@@ -31,17 +31,17 @@ z-zwc-gen() {
     for i ( "${ZSHU[d_conf]}"/**/*.zsh(N.r) ) ; do
         zcompile -UR "$i"
     done
-    # for i ( "${ZSHU[d_completion]}"/*(N.r) ) ; do
-    #     case "$i" in
-    #     *.zwc )
-    #         # likely a remnant
-    #         rm -f "$i"
-    #         continue
-    #     ;;
-    #     esac
-    #     zcompile -UR "$i"
-    #     mv -f "$i.zwc" "${ZSHU[d_compzwc]}/"
-    # done
+    for i ( "${ZSHU[d_completion]}"/*(N.r) ) ; do
+        case "$i" in
+        *.zwc )
+            ## likely a remnant
+            rm -f "$i"
+            continue
+        ;;
+        esac
+        zcompile -UR "$i"
+        mv -f "$i.zwc" "${ZSHU[d_compzwc]}/"
+    done
 }
 
 z-zwc-flush() {

@@ -1,7 +1,7 @@
 #!/bin/zsh
 
-typeset -Uga ZSHU_CNTR_SHELLS=( /bin/bash /bin/sh /bin/ash )
-typeset -ga ZSHU_CNTR_FALLBACK_SHELL=( /busybox/busybox sh )
+typeset -g -aU ZSHU_CNTR_SHELLS=( /bin/bash /bin/sh /bin/ash )
+typeset -g -a ZSHU_CNTR_FALLBACK_SHELL=( /busybox/busybox sh )
 
 alias bud='buildah bud --network=host -f '
 

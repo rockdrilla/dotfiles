@@ -1,7 +1,7 @@
 #!/bin/zsh
 
-typeset -gA ZSHU_TERM
-typeset -Uga ZSHU_TERM_MISSING
+typeset -g -A ZSHU_TERM
+typeset -g -aU ZSHU_TERM_MISSING
 
 z-ti-test() {
     local r i

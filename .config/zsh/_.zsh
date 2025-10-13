@@ -3,7 +3,7 @@
 ## early load modules
 zmodload zsh/mathfunc zsh/datetime zsh/zprof
 
-typeset -gA ZSHU
+typeset -g -A ZSHU
 
 __z_unsupported() { echo "not supported" >&2 ; }
 
@@ -23,7 +23,7 @@ unsetopt global_rcs
 
 ## safety measure:
 ## redirect all following activity within ZDOTDIR to cache
-export ZDOTDIR="${ZDOTDIR}/.config/zsh.dots"
+typeset -g -x ZDOTDIR="${ZDOTDIR}/.config/zsh.dots"
 
 ## cleanup: start from scratch
 for i ( a s f d ) ; do unhash -$i -m '*' ; done ; unset i

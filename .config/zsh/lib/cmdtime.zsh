@@ -14,7 +14,7 @@ z-time() {
 
 if autoload -Uz add-zsh-hook ; then
 
-typeset -gA ZSHU_PS
+typeset -g -A ZSHU_PS
 ZSHU_PS[cmd_threshold]=3
 
 __z_cmdtime_measure() {

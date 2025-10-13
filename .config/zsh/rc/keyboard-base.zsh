@@ -1,7 +1,7 @@
 #!/bin/zsh
 
-typeset -A ZSHU_TI_KEYS
-typeset -A ZSHU_FB_KEYS
+typeset -g -A ZSHU_TI_KEYS
+typeset -g -A ZSHU_FB_KEYS
 
 if z-ti-test smkx rmkx ; then
     zle-line-init()   { echoti smkx ; }

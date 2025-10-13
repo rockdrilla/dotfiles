@@ -9,5 +9,5 @@
 
 typeset -x -m 'XDG*'
 
-export -T XDG_DATA_DIRS    xdg_data_dirs
-export -T XDG_CONFIG_DIRS  xdg_config_dirs
+typeset -x -T XDG_DATA_DIRS    xdg_data_dirs
+typeset -x -T XDG_CONFIG_DIRS  xdg_config_dirs

@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-typeset -A ZSHU_COMP_EXTERNAL
+typeset -g -A ZSHU_COMP_EXTERNAL
 
 for i ( kubectl podman skopeo docker ) ; do
     ZSHU_COMP_EXTERNAL[$i]="command $i completion zsh"

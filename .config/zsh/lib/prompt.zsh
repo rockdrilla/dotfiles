@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-typeset -gA ZSHU_PM ZSHU_PS
+typeset -g -A ZSHU_PM ZSHU_PS
 
 ZSHU_PM[rst]='%b%k%u%s%f'
 ZSHU_PM[crlf]=$'\n'

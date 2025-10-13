@@ -1,3 +1,3 @@
 #!/bin/zsh
 
-typeset -r ZSHU_XSED=$'\027'
+typeset -gr ZSHU_XSED=$'\027'

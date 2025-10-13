@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-typeset -gA ZSHU_PS1
+typeset -g -A ZSHU_PS1
 
 ## three-line prompt
 function {

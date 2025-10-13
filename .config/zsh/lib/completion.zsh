@@ -1,13 +1,13 @@
 #!/bin/zsh
 
-typeset -gA ZSHU_COMP_FORCE
+typeset -g -A ZSHU_COMP_FORCE
 
 ZSHU[f_compdump]="${ZSHU[d_cache]}/compdump"
 ZSHU[d_completion]="${ZSHU[d_cache]}/completion"
 ZSHU[d_compzwc]="${ZSHU[d_cache]}/compzwc"
 ZSHU[d_compcache]="${ZSHU[d_cache]}/compcache"
 
-typeset -a ZSHU_SYS_FPATH=( ${fpath} )
+typeset -gr -a ZSHU_SYS_FPATH=( ${fpath} )
 fpath=( "${ZSHU[d_compzwc]}" "${ZSHU[d_completion]}" ${fpath} )
 
 __z_compdump_print() { printf '#zshu %s %s\n' "$1" "${(P)1}" ; }
@@ -86,8 +86,8 @@ __z_comp_external() {
             return 2
         fi
     fi
-    # zcompile -zR "$f"
-    # mv -f "$f.zwc" "${ZSHU[d_compzwc]}/$c.zwc"
+    zcompile -zR "$f"
+    mv -f "$f.zwc" "${ZSHU[d_compzwc]}/_$c.zwc"
     # emulate zsh -c "autoload -Uz _$c"
     autoload -Uz "_$c"
 
@@ -122,8 +122,7 @@ __z_comp_system() {
 z-comp-invalidate() {
     [ -n "${1:?}" ]
 
-    # rm -f "${ZSHU[d_completion]}/_$1" "${ZSHU[d_compzwc]}/_$1.zwc" "${ZSHU[d_compzwc]}/$1.zwc"
-    rm -f "${ZSHU[d_completion]}/_$1"
+    rm -f "${ZSHU[d_completion]}/_$1" "${ZSHU[d_compzwc]}/_$1.zwc" "${ZSHU[d_compzwc]}/$1.zwc"
 }
 
 ## reload or new session are required to regenerate completions

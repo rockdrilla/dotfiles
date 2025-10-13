@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 ## fancy and manageable PS1 for git
-typeset -gA ZSHU_GIT ZSHU_PM ZSHU_PS
+typeset -g -A ZSHU_GIT ZSHU_PM ZSHU_PS
 ZSHU_PS[git]=0
 ZSHU_PM[git_branch]='🞷'
 ZSHU_PM[git_ahead]='↱'
