@@ -1,5 +1,5 @@
 $chroot_mode = "schroot";
-$build_path = '';
+$build_path = '/build';
 
 $pgp_options = [ '-us', '-uc', '-ui' ];
 
@@ -16,6 +16,14 @@ $apt_distupgrade = 1;
 $apt_upgrade = 1;
 
 $purge_build_directory = 'successful';
+
+$build_environment = {
+    'MALLOC_ARENA_MAX' => '8',
+    'GOMAXPROCS' => '8',
+    "CCACHE_DIR" => "/ccache",
+};
+$unshare_bind_mounts = [ { directory => "$HOME/sbuild/_ccache", mountpoint => "/ccache" } ];
+$path = "/usr/lib/ccache:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games";
 
 # don't remove this, Perl needs it:
 1;
