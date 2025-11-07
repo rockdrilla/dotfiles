@@ -1,3 +1,5 @@
 #!/bin/sh
 export GIT_OPTIONAL_LOCKS=0
-exec git "$@"
+if [ "${0##*/}" = 'ro-git' ] ; then
+	exec git "$@"
+fi

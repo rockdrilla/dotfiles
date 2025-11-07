@@ -1,0 +1,76 @@
+#!/bin/sh
+set -ef
+
+me="${0##*/}"
+usage() {
+	cat >&2 <<-EOF
+	# usage: ${me} [-f|--force] <git ref> -- [<pathspec>...]
+	EOF
+	exit "${1:-0}"
+}
+[ $# != 0 ] || usage
+
+[ -n "$1" ] || usage 1
+apply_anyway=
+case "$1" in
+-f | --force )
+	apply_anyway=1 ; shift
+;;
+esac
+
+[ -n "$1" ] || usage 1
+ref="$1" ; shift
+
+gitdir=$(ro-git rev-parse --git-dir)
+topdir=$(ro-git rev-parse --show-toplevel)
+
+r_hash=$(ro-git log -n 1 --format='%H' "${ref}") || usage 1
+
+cp_temp() { mktemp "--tmpdir=${gitdir}" "cherry-pick-$1.XXXXXXXX" ; }
+
+cp_stat=$(cp_temp stat)
+cp_diff=$(cp_temp diff)
+
+ro-git diff --stat  "${r_hash}~1..${r_hash}" "$@" > "${cp_stat}"
+ro-git diff --patch "${r_hash}~1..${r_hash}" "$@" > "${cp_diff}"
+
+echo "# ${me}: diff stat for ${ref}:" >&2
+cat "${cp_stat}" >&2
+
+## verify patch
+while : ; do
+	[ -z "${apply_anyway}" ] || break
+
+	cp_dryrun=$(cp_temp dryrun)
+	if env -C "${topdir}" patch --dry-run -p1 < "${cp_diff}" > "${cp_dryrun}" 2>&1 ; then
+		rm -f "${cp_dryrun}" ; unset cp_dryrun
+		break
+	fi
+
+	cat >&2 <<-EOF
+	# ${me}: unable to apply patch cleanly
+	# patch log:
+	#
+	EOF
+	sed -E 's/^/#    /' < "${cp_dryrun}" ; rm -f "${cp_dryrun}" ; unset cp_dryrun
+	cat >&2 <<-EOF
+	#
+	# review changes or re-run "${me}" with "-f" flag
+	EOF
+
+	rm -f "${cp_stat}" "${cp_diff}"
+	exit 1
+done
+
+## apply patch
+env -C "${topdir}" patch -p1 < "${cp_diff}" 2>&1 | cat || echo "# ${me}: patch errors are ignored" >&2
+
+## fill commit message
+{
+	ro-git log -n 1 --format='%B' "${r_hash}"
+	echo
+	echo "# diff stat for ${ref}:"
+	sed -E 's/^/#  /' < "${cp_stat}"
+} > "${gitdir}/COMMIT_EDITMSG"
+
+rm -f "${cp_stat}" "${cp_diff}"

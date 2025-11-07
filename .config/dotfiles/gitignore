@@ -34,6 +34,7 @@
 !/.config/dotfiles/scripts/ensure-eof-empty-line
 !/.config/dotfiles/scripts/from
 !/.config/dotfiles/scripts/git-archive-ref
+!/.config/dotfiles/scripts/git-cherry-pick-path
 !/.config/dotfiles/scripts/git-dir-usage
 !/.config/dotfiles/scripts/gpg-batch
 !/.config/dotfiles/scripts/gpg-export
