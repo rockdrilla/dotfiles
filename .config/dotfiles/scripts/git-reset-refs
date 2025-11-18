@@ -1,0 +1,55 @@
+#!/bin/sh
+set -ef
+
+me="${0##*/}"
+
+_main() {
+	grr_topdir=$(ro-git rev-parse --show-toplevel)
+	cd "${grr_topdir}"
+
+	grr_gitdir=$(ro-git rev-parse --git-dir)
+	[ -n "${grr_gitdir}" ] || grr_gitdir='.'
+
+	grr_logdir="${grr_gitdir}/logs"
+	[ -d "${grr_logdir}" ] || exit 0
+	export grr_gitdir
+
+	find "${grr_logdir}/" -type f -size +1c -printf '%p\0' | sort -zV \
+	| xargs -0r -n1 "$0" --ref-file
+
+	exit 0
+}
+
+[ -n "$1" ] || _main
+
+case "$1" in
+--ref-file ) shift ;;
+* )
+	env printf '%s: unsupported argument: %q\n' "${me}" "$1" >&2
+	exit 1
+;;
+esac
+
+[ -f "$1" ] || {
+	env printf '%s: not a file or does not exist: %q\n' "${me}" "$1" >&2
+	exit 1
+}
+[ -s "$1" ] || {
+	env printf '%s: file is empty, nothing to do: %q\n' "${me}" "$1" >&2
+	exit 0
+}
+
+[ -n "${grr_gitdir}" ] || grr_gitdir=$(ro-git rev-parse --git-dir)
+[ -n "${grr_gitdir}" ] || grr_gitdir='.'
+grr_temp() { mktemp --tmpdir="${grr_gitdir}" 'reset-refs-tmp.XXXXXXXX' ; }
+
+t=$(grr_temp)
+
+awk 'END {gsub(/[^0]/,"0",$1);print;}' < "$1" > "$t"
+
+if [ -s "$t" ] ; then
+	cat < "$t" > "$1"
+fi
+
+rm -f "$t"
+exit 0
