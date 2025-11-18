@@ -4,6 +4,7 @@ typeset -a zshu_modules
 zshu_modules=(
     clone
     langinfo
+    mapfile
     parameter
     sched
     stat

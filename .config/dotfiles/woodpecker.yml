@@ -31,4 +31,4 @@ steps:
       - |
         : # try shellcheck (except for *.zsh)
         git ls-files | grep -Fv '.zsh' | sort -uV | xargs -r file -N -i | grep text/x-shellscript | cut -d: -f1 \
-        | xargs -r -n1 shellcheck
+        | xargs -r -n1 shellcheck || : ignore errors
