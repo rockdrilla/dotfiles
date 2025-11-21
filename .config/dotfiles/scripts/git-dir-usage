@@ -2,12 +2,12 @@
 set +e ; set -f
 
 unset gitdir
-x=$(ro-git rev-parse --path-format=absolute 2>/dev/null) || exit $?
+x=$(ro-git rev-parse --path-format=absolute 2>/dev/null) || exit
 if [ -n "$x" ] ; then
 	## older git version which does not support "--path-format=absolute"
-	gitdir=$(ro-git rev-parse --git-dir) || exit $?
+	gitdir=$(ro-git rev-parse --git-dir) || exit
 else
-	gitdir=$(ro-git rev-parse --path-format=absolute --git-dir) || exit $?
+	gitdir=$(ro-git rev-parse --path-format=absolute --git-dir) || exit
 fi
 
 unset topdir
@@ -21,7 +21,7 @@ esac
 	for x in logs/refs objects/info objects/pack ; do
 		x="${gitdir}/$x"
 		[ -d "$x" ] || continue
-		du -d1 "$x"
+		du -xhd1 "$x"
 	done
-	du -d1 "${gitdir}"
-} | grep -Ev '^[0-9][KMG]?\s' | sort -Vk2
+	du -xhd1 "${gitdir}"
+} | grep -Ev '^([0-9]+\.[0-9]+|[0-9]|1[0-9])K\s' | sort -Vk2

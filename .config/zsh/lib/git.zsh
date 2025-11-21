@@ -153,4 +153,49 @@ z-git-status() {
     echo "Git repo: "${(%):-%(?..NOT )}"present"
 }
 
+z-git-gc() {
+    local i gitdir _full; local -a shallows
+    git-dir-usage || return $?
+    echo
+
+    gitdir=$(ro-git rev-parse --git-dir)
+    # preserve shallow references: "git gc" MAY override them silently
+    if [ -s "${gitdir}/shallow" ] ; then
+        shallows=(${(@f)mapfile[${gitdir}/shallow]})
+    fi
+
+    echo "# git gc $*" >&2
+    z-time idle git gc "$@"
+    echo
+
+    # restore shallow references (if any)
+    if [ ${#shallows} -gt 0 ] ; then
+        for i (${shallows}) ; do
+            printf '%s\n' "$i"
+        done > "${gitdir}/shallow"
+    fi
+
+    git-dir-usage
+
+    for i ; do
+        case "$i" in
+        --aggressive )
+            _full=1
+        ;;
+        esac
+    done
+    [ -n "${_full}" ] || return 0
+
+    echo
+    echo "# git repack -Ad" >&2
+    z-time idle git repack -Ad
+
+    echo
+    echo "# git prune -v" >&2
+    z-time idle git prune -v
+    echo
+
+    git-dir-usage
+}
+
 ZSHU[pwd_hook]="${ZSHU[pwd_hook]}${ZSHU[pwd_hook]:+ }__z_git_pwd"
