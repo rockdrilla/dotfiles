@@ -184,16 +184,24 @@ z-git-gc() {
         ;;
         esac
     done
-    [ -n "${_full}" ] || return 0
 
-    echo
-    echo "# git repack -Ad" >&2
-    z-time idle git repack -Ad
+    if [ -n "${_full}" ] ; then
+        echo
+        echo "# git repack -Ad" >&2
+        z-time idle git repack -Ad
 
-    echo
-    echo "# git prune -v" >&2
-    z-time idle git prune -v
-    echo
+        echo
+        echo "# git prune -v" >&2
+        z-time idle git prune -v
+        echo
+
+        # restore shallow references (if any)
+        if [ ${#shallows} -gt 0 ] ; then
+            for i (${shallows}) ; do
+                printf '%s\n' "$i"
+            done > "${gitdir}/shallow"
+        fi
+    fi
 
     git-dir-usage
 }
