@@ -1,6 +1,8 @@
 $chroot_mode = "schroot";
-$build_path = '/build';
+$build_path = '';
 
+# $key_id = $ENV{DEBFULLNAME}.' <'.$ENV{DEBEMAIL}.'>';
+# $maintainer_name = $key_id;
 $pgp_options = [ '-us', '-uc', '-ui' ];
 
 $build_arch_all = 1;
@@ -18,12 +20,25 @@ $apt_upgrade = 1;
 $purge_build_directory = 'successful';
 
 $build_environment = {
-    'MALLOC_ARENA_MAX' => '8',
-    'GOMAXPROCS' => '8',
-    "CCACHE_DIR" => "/ccache",
+	'MALLOC_ARENA_MAX' => '8',
+	'GOMAXPROCS' => '8',
+#	"CCACHE_DIR" => "/ccache",
 };
-$unshare_bind_mounts = [ { directory => "$HOME/sbuild/_ccache", mountpoint => "/ccache" } ];
-$path = "/usr/lib/ccache:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games";
+# $unshare_bind_mounts = [ { directory => "$HOME/sbuild/_ccache", mountpoint => "/ccache" } ];
+# $path = "/usr/lib/ccache:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games";
+
+## GOMAXPROCS - generic
+## DEB_STAGE - for use with gcc
+# use Dpkg::BuildInfo;
+# $environment_filter = [(sort (map "^$_\$", Dpkg::BuildInfo::get_build_env_allowed())), '^GOMAXPROCS$', '^DEB_STAGE$'];
+
+# $external_commands = {
+# 	"chroot-setup-commands" => [
+# 		"install -d -m 0700 -o    0 -g    0 /tmp/user/0",
+# 		"install -d -m 0700 -o  117 -g  125 /tmp/user/117",
+# 		"install -d -m 0700 -o 1000 -g 1000 /tmp/user/1000",
+# 	],
+# };
 
 # don't remove this, Perl needs it:
 1;
