@@ -1,6 +1,62 @@
 #!/bin/sh
 set +e ; set -f
 
+me="${0##*/}"
+usage() {
+	cat >&2 <<-EOF
+	# usage: ${me} [-b|-k|-m|-g|--block-size=N]
+	EOF
+	exit "${1:-0}"
+}
+
+block_size=
+opt_size=h
+du_opt_size=
+if [ $# != 0 ] ; then
+	case "$1" in
+	-h | --help ) usage ;;
+
+	-[bkm] ) opt_size="${1#?}" ;;
+	-g )     block_size=1073741824 ;;
+
+	--block-size=* )
+		block_size="${1#*=}"
+		[ -n "${block_size}" ] || usage 1
+		if printf '%s' "${block_size}" | grep -Eqz '^[1-9][0-9]*$' ; then
+			: # "block_size" seems to be ok
+		else
+			usage 1
+		fi
+
+		## fallback to short option in case of common block size
+		case "${block_size}" in
+		1 )       opt_size=b block_size= ;;
+		1024 )    opt_size=k block_size= ;;
+		1048576 ) opt_size=m block_size= ;;
+		esac
+	;;
+
+	* ) usage 1 ;;
+	esac
+fi
+if [ -n "${block_size}" ] ; then
+	du_opt_size="--block-size=${block_size}"
+	## reset
+	opt_size=
+else
+	du_opt_size="-${opt_size}"
+fi
+
+## internal handling
+case "${opt_size}" in
+h ) block_size=0 ;;
+b ) block_size=1 ;;
+k ) block_size=1024 ;;
+m ) block_size=1048576 ;;
+esac
+
+unset BLOCK_SIZE BLOCKSIZE DU_BLOCK_SIZE POSIXLY_CORRECT
+
 unset gitdir
 x=$(ro-git rev-parse --path-format=absolute 2>/dev/null) || exit
 if [ -n "$x" ] ; then
@@ -17,11 +73,33 @@ esac
 
 [ -z "${topdir}" ] || cd "${topdir}/"
 
+w=$(mktemp -d) ; : "${w:?}"
 {
 	for x in logs/refs objects/info objects/pack ; do
 		x="${gitdir}/$x"
 		[ -d "$x" ] || continue
-		du -xhd1 "$x"
+		du "${du_opt_size}" -xd1 -- "$x"
 	done
-	du -xhd1 "${gitdir}"
-} | grep -Ev '^([0-9]+\.[0-9]+|[0-9]|1[0-9])K\s' | sort -Vk2
+	du "${du_opt_size}" -xd1 -- "${gitdir}"
+} > "$w/out.0"
+
+## mangle output - enforce "|" field separator
+sed -i -E 's/^\s+//;s/\s+/|/' "$w/out.0"
+
+## filter out unrelated records
+case "${block_size}" in
+0 )    grep -Ev '^([0-9]+\.[0-9]+|[0-9])K' ;;
+1024 ) grep -Ev '^[0-9]\|' ;;
+* )    grep -Ev '^0' ;;
+esac < "$w/out.0" > "$w/out.1"
+
+## sort output
+uniq < "$w/out.1" | sort -t '|' -Vk2 > "$w/out.2"
+
+## adjust output
+## NB: field separator is whitespace now
+## PS: maybe single awk script without pipe?
+col1_len=$(mawk-or-awk -F'|' '{print $1}' < "$w/out.1" | wc -L)
+mawk-or-awk -F'|' '{$1=sprintf("%'"${col1_len}"'s ",$1);print}' < "$w/out.2"
+
+rm -rf "$w"

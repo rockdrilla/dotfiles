@@ -3,7 +3,7 @@ set +e ; set -f
 
 [ -n "${1:?}" ]
 
-check-bin-pkg deb-src-export || exit $?
+command -v deb-src-export >/dev/null 2>&1 || exit $?
 
 case "$1" in
 */* ) dstdir="$1/src" ;;

@@ -154,29 +154,26 @@ z-git-status() {
 }
 
 z-git-gc() {
-    local i gitdir _full; local -a shallows
-    git-dir-usage || return $?
-    echo
+    local gitdir
+    gitdir=$(ro-git rev-parse --git-dir) || return
 
-    gitdir=$(ro-git rev-parse --git-dir)
+    local rv
+    rv=0
+
     # preserve shallow references: "git gc" MAY override them silently
+    local -a shallows ; local shallow_before shallow_after
     if [ -s "${gitdir}/shallow" ] ; then
+        echo '# --------------------------------------'
+        echo "# current /.git/shallow:"
+        cat "${gitdir}/shallow"
+        echo '# --------------------------------------'
+        echo
+
         shallows=(${(@f)mapfile[${gitdir}/shallow]})
+        shallow_before=$(sha256sum "${gitdir}/shallow" | awk '{print $1}')
     fi
 
-    echo "# git gc $*" >&2
-    z-time idle git gc "$@"
-    echo
-
-    # restore shallow references (if any)
-    if [ ${#shallows} -gt 0 ] ; then
-        for i (${shallows}) ; do
-            printf '%s\n' "$i"
-        done > "${gitdir}/shallow"
-    fi
-
-    git-dir-usage
-
+    local i _full
     for i ; do
         case "$i" in
         --aggressive )
@@ -185,25 +182,55 @@ z-git-gc() {
         esac
     done
 
-    if [ -n "${_full}" ] ; then
-        echo
-        echo "# git repack -Ad" >&2
-        z-time idle git repack -Ad
+    while : ; do
+        git-dir-usage ; rv=$?
+        [ ${rv} -eq 0 ] || break
 
         echo
-        echo "# git prune -v" >&2
-        z-time idle git prune -v
-        echo
+        echo "# git gc $*"
+        z-time idle git gc "$@" ; rv=$?
+        [ ${rv} -eq 0 ] || break
 
-        # restore shallow references (if any)
-        if [ ${#shallows} -gt 0 ] ; then
-            for i (${shallows}) ; do
-                printf '%s\n' "$i"
-            done > "${gitdir}/shallow"
+        [ -n "${_full}" ] || break
+
+        echo
+        echo "# git repack -Ad"
+        z-time idle git repack -Ad ; rv=$?
+        [ ${rv} -eq 0 ] || break
+
+        echo
+        echo "# git prune -v"
+        z-time idle git prune -v ; rv=$?
+        # [ ${rv} -eq 0 ] || break
+    break ; done
+
+    echo
+    git-dir-usage ; rv=$?
+
+    # restore shallow references (if any)
+    while : ; do
+        [ -n "${shallow_before}" ] || break
+
+        if [ -f "${gitdir}/shallow" ] ; then
+            shallow_after=$(sha256sum "${gitdir}/shallow" | awk '{print $1}')
         fi
-    fi
+        [ "${shallow_before}" != "${shallow_after}" ] || break
 
-    git-dir-usage
+        if [ -s "${gitdir}/shallow" ] ; then
+            echo
+            echo '# --------------------------------------'
+            echo "# new /.git/shallow:"
+            cat "${gitdir}/shallow"
+            echo '# --------------------------------------'
+        fi
+        echo "# restoring /.git/shallow to previous state"
+
+        for i (${shallows}) ; do
+            printf '%s\n' "$i"
+        done > "${gitdir}/shallow"
+    break ; done
+
+    return ${rv}
 }
 
 ZSHU[pwd_hook]="${ZSHU[pwd_hook]}${ZSHU[pwd_hook]:+ }__z_git_pwd"
