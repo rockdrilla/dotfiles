@@ -162,6 +162,7 @@ z-git-gc() {
 
     # preserve shallow references: "git gc" MAY override them silently
     local -a shallows ; local shallow_before shallow_after
+    z-git-gc-shallow-restore() { : ; }
     if [ -s "${gitdir}/shallow" ] ; then
         echo '# --------------------------------------'
         echo "# current /.git/shallow:"
@@ -171,6 +172,29 @@ z-git-gc() {
 
         shallows=(${(@f)mapfile[${gitdir}/shallow]})
         shallow_before=$(sha256sum "${gitdir}/shallow" | awk '{print $1}')
+
+        # restore shallow references (if any)
+        z-git-gc-shallow-restore() {
+            [ -n "${shallow_before}" ] || return 0
+
+            if [ -f "${gitdir}/shallow" ] ; then
+                shallow_after=$(sha256sum "${gitdir}/shallow" | awk '{print $1}')
+            fi
+            [ "${shallow_before}" != "${shallow_after}" ] || return 0
+
+            if [ -s "${gitdir}/shallow" ] ; then
+                echo
+                echo '# --------------------------------------'
+                echo "# new /.git/shallow:"
+                cat "${gitdir}/shallow"
+                echo '# --------------------------------------'
+            fi
+            echo "# restoring /.git/shallow to previous state"
+
+            for i (${shallows}) ; do
+                printf '%s\n' "$i"
+            done > "${gitdir}/shallow"
+        }
     fi
 
     local i _full
@@ -193,6 +217,9 @@ z-git-gc() {
 
         [ -n "${_full}" ] || break
 
+        ## "git repack" wants sane /.git/shallow
+        z-git-gc-shallow-restore
+
         echo
         echo "# git repack -Ad"
         z-time idle git repack -Ad ; rv=$?
@@ -207,28 +234,8 @@ z-git-gc() {
     echo
     git-dir-usage ; rv=$?
 
-    # restore shallow references (if any)
-    while : ; do
-        [ -n "${shallow_before}" ] || break
-
-        if [ -f "${gitdir}/shallow" ] ; then
-            shallow_after=$(sha256sum "${gitdir}/shallow" | awk '{print $1}')
-        fi
-        [ "${shallow_before}" != "${shallow_after}" ] || break
-
-        if [ -s "${gitdir}/shallow" ] ; then
-            echo
-            echo '# --------------------------------------'
-            echo "# new /.git/shallow:"
-            cat "${gitdir}/shallow"
-            echo '# --------------------------------------'
-        fi
-        echo "# restoring /.git/shallow to previous state"
-
-        for i (${shallows}) ; do
-            printf '%s\n' "$i"
-        done > "${gitdir}/shallow"
-    break ; done
+    z-git-gc-shallow-restore
+    unset -f z-git-gc-shallow-restore
 
     return ${rv}
 }
