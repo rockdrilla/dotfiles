@@ -4,6 +4,10 @@ openwrt-ssh() {
     ssh -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o CheckHostIP=no -o StrictHostKeyChecking=no "$@"
 }
 
+openwrt-scp() {
+    scp -o GlobalKnownHostsFile=/dev/null -o UserKnownHostsFile=/dev/null -o CheckHostIP=no -o StrictHostKeyChecking=no "$@"
+}
+
 openwrt-apk-list() {
     (( ${+commands[openwrt-apk]} )) || {
         echo 'missing "openwrt-apk"' >&2

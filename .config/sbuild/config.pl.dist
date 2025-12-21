@@ -29,8 +29,9 @@ $build_environment = {
 
 ## GOMAXPROCS - generic
 ## DEB_STAGE - for use with gcc
+## CROSS_ARCHS - for use with binutils
 # use Dpkg::BuildInfo;
-# $environment_filter = [(sort (map "^$_\$", Dpkg::BuildInfo::get_build_env_allowed())), '^GOMAXPROCS$', '^DEB_STAGE$'];
+# $environment_filter = [(sort (map "^$_\$", Dpkg::BuildInfo::get_build_env_allowed())), '^GOMAXPROCS$', '^DEB_STAGE$', '^CROSS_ARCHS$'];
 
 # $external_commands = {
 # 	"chroot-setup-commands" => [

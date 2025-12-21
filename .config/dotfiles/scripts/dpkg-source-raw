@@ -183,7 +183,7 @@ foreach my $pkg ($control->get_packages()) {
             } else {
                 for my $a (split(/\s+/, $v)) {
                     error("'%s' is not a legal architecture string", $a)
-                        if debarch_is_illegal($a);
+                        if debarch_is_invalid($a);
                     error('architecture %s only allowed on its ' .
                              "own (list for package %s is '%s')",
                           $a, $p, $a)
