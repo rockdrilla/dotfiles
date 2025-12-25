@@ -25,7 +25,7 @@ z-gpgconf-comp-opt-avail() {
 }
 
 ## merely that command:
-##   gpgconf --list-options "$1" | awk -F: "/^$2:/{ print \$10 }"
+##   gpgconf --list-options "$1" | awk -F: -v "v=$2" '$1 == v { print $10 }'
 z-gpgconf-getopt() {
     (( ${+commands[gpgconf]} )) || return 127
 

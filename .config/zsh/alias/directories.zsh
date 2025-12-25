@@ -19,17 +19,17 @@ done ; unset i
 gd() {
     case "$#" in
     0 ) cd ;;
-    1 )
-        while ! [ -d "$1" ] ; do
-            [ -e "$1" ] || break
-            echo "# gd: argument exists but not a directory" >&2
-            return 1
-        done
-        mkdir -p "$1" || return $?
-        cd "$1"
-    ;;
+    1 ) ;;
     * )
         echo "# gd: takes no more than one argument, seen instead: $#" >&2
     ;;
     esac
+
+    while ! [ -d "$1" ] ; do
+        [ -e "$1" ] || break
+        echo "# gd: argument exists but not a directory" >&2
+        return 1
+    done
+    mkdir -p "$1" || return $?
+    cd "$1"
 }
