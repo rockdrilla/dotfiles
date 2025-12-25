@@ -24,8 +24,7 @@ while [ "${DEB_SRC_EXPORT_GIT:-1}" = 1 ] ; do
 	ro-git rev-parse --is-inside-work-tree >/dev/null 2>&1 || break
 
 	have_git=1
-	break
-done
+break;done
 
 want_gpg=
 while [ "${DEB_SRC_EXPORT_GNUPG:-1}" = 1 ] ; do
@@ -38,9 +37,7 @@ while [ "${DEB_SRC_EXPORT_GNUPG:-1}" = 1 ] ; do
 			want_gpg=1
 		fi
 	fi
-
-	break
-done
+break;done
 
 SIGN_OPT=
 if [ -n "${want_gpg}" ] ; then

@@ -135,8 +135,8 @@ while : ; do
 	[ -n "$1" ] || break
 	[ -n "$2" ] || break
 	[ -n "$3" ] || break
-	arg_ok=1 ; break
-done
+	arg_ok=1
+break;done
 [ -n "${arg_ok}" ] || usage 1
 
 xsedx=$(printf '\027')
@@ -312,8 +312,7 @@ if [ -n "${keyring_arg}" ] ; then
 
 		env printf "%q: warning: existing file is to be REPLACED: %q\\n" "${me}" "${keyring}" >&2
 		env printf "%q: info: consider running script with -m/--merge option to merge with existing keyring\\n" "${me}" >&2
-		break
-	done
+	break;done
 fi
 
 ## TODO: whether we can skip gpg-related tasks?
@@ -406,9 +405,7 @@ gpg_off() {
 		if [ -s fpr.exclude ] ; then
 			gpg --delete-keys $(sed -E 's/$/!/' < fpr.exclude)
 		fi
-
-		break
-	done
+	break;done
 
 	if [ -n "${o_merge}" ] ; then
 		while read -r k ; do

@@ -94,8 +94,7 @@ pod-run-sh() {
         echo "pod-run-sh: trying '${ZSHU_CNTR_FALLBACK_SHELL[*]}' as last-resort shell" >&2
         z-pod-run ${cntr_opts[@]} "$@" ${ZSHU_CNTR_FALLBACK_SHELL[@]} -c ':' 2>/dev/null || break
         shell=(${ZSHU_CNTR_FALLBACK_SHELL})
-        break
-    done
+    break;done
     if [ -z "${shell}" ] ; then
         echo "unable to run: $*"
         return 1
@@ -155,8 +154,7 @@ dkr-run-sh() {
         echo "dkr-run-sh: trying '${ZSHU_CNTR_FALLBACK_SHELL[*]}' as last-resort shell" >&2
         z-dkr-run ${cntr_opts[@]} "$@" ${ZSHU_CNTR_FALLBACK_SHELL[@]} -c ':' 2>/dev/null || break
         shell=(${ZSHU_CNTR_FALLBACK_SHELL})
-        break
-    done
+    break;done
     if [ -z "${shell}" ] ; then
         echo "unable to run: $*"
         return 1

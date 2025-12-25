@@ -98,7 +98,7 @@ while : ; do
 	*) break ;;
 	esac
 	arg_ok=1
-break ; done
+break;done
 [ -n "${arg_ok}" ] || usage 1
 unset arg_ok
 
@@ -143,7 +143,7 @@ cmd_is_expiring() {
 
 		ts_diff=$((ts_next - ts_now))
 		[ ${ts_diff} -le ${ocsp_valid_threshold} ] || need_update=0
-	break ; done
+	break;done
 
 	if [ "${need_update}" = 0 ] ; then
 		env printf '%q: %q has valid and fresh OCSP response\n' "${me}" "$2" >&2
@@ -177,7 +177,7 @@ cmd_fetch() {
 		[ -s "$t" ] || break
 		cmd_is_valid "$1" "$2" "$t" || break
 		r=1
-	break ; done
+	break;done
 
 	if [ -z "$r" ] ; then
 		env printf '%q: unable to fetch OCSP response for %q via %q\n' "${me}" "$2" "$3" >&2
@@ -191,7 +191,7 @@ cmd_fetch() {
 		tee "$4" < "$t" >/dev/null || break
 		chmod 0644 "$4" || break
 		r=1
-	break ; done
+	break;done
 
 	if [ -z "$r" ] ; then
 		env printf '%q: unable to save OCSP response for %q into %q\n' "${me}" "$2" "$4" >&2

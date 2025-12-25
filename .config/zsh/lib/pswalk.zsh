@@ -19,8 +19,8 @@ function {
     local procfs
     while [ -n "${ZSHU[procfs]}" ] ; do
         [ -d "${ZSHU[procfs]}" ] || break
-        procfs=1 ; break
-    done
+        procfs=1
+    break;done
 
     local i c x _unused
 
@@ -36,8 +36,7 @@ function {
         while [ "${procfs}" = 1 ] ; do
             [ -f "${ZSHU[procfs]}/$i/cmdline" ] || break
             read -d $'\0' -rs c <<< $(cat "${ZSHU[procfs]}/$i/cmdline")
-            break
-        done
+        break;done
         if [ -z "$c" ] ; then
             read -rs c _unused <<< "$(ps -o 'comm=' -p "$i" 2>/dev/null)"
         fi
@@ -49,10 +48,9 @@ function {
             # read -rs _unused x <<< "$(cat "${ZSHU[procfs]}/$i/status" | grep -F 'PPid:')"
             while read -rs _unused c ; do
                 [ "${_unused}" = 'PPid:' ] || continue
-                x=$c ; break
-            done < "${ZSHU[procfs]}/$i/status"
-            break
-        done
+                x=$c
+            break;done < "${ZSHU[procfs]}/$i/status"
+        break;done
         if [ -z "$x" ] ; then
             read -rs x _unused <<< "$(ps -o 'ppid=' -p "$i" 2>/dev/null)"
         fi

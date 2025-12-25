@@ -60,7 +60,7 @@ while : ; do
 
 	rm -f "${cp_stat}" "${cp_diff}"
 	exit 1
-done
+break;done
 
 ## apply patch
 env -C "${topdir}" patch -p1 < "${cp_diff}" 2>&1 | cat || echo "# ${me}: patch errors are ignored" >&2

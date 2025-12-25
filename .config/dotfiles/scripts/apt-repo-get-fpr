@@ -14,8 +14,8 @@ arg_ok=
 while : ; do
 	[ -n "$1" ] || break
 	[ -n "$2" ] || break
-	arg_ok=1 ; break
-done
+	arg_ok=1
+break;done
 [ -n "${arg_ok}" ] || usage 1
 
 check-bin-pkg gpg dirmngr gpgconf
@@ -48,16 +48,14 @@ export GNUPGHOME="$w/dot-gnupg"
 	while : ; do
 		apt-http-fetch -s "$1/dists/$2/InRelease" InRelease || break
 		gpg_keys_from_sig InRelease > apt.fpr.InRelease
-		break
-	done
+	break;done
 	rm -f InRelease
 
 	while : ; do
 		apt-http-fetch -s "$1/dists/$2/Release.gpg" Release.gpg || break
 		apt-http-fetch -s "$1/dists/$2/Release" Release || break
 		gpg_keys_from_sig Release.gpg Release > apt.fpr.Release
-		break
-	done
+	break;done
 	rm -f Release.gpg Release
 
 	rm -f apt.fpr

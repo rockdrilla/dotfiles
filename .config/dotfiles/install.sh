@@ -67,9 +67,7 @@ select_forge() {
         uri_repo="${uri_krdsh}.git"
         uri_gitignore="${t_gitignore}"
         uri_tarball="${uri_krdsh}/archive/${git_branch}.tar.gz"
-
-        break
-    done
+    break;done
     ## try with github.com
     while [ -z "${uri_repo}" ] ; do
         t_gitignore="${uri_github}/raw/${git_branch}/${f_gitignore}"
@@ -78,9 +76,7 @@ select_forge() {
         uri_repo="${uri_github}.git"
         uri_gitignore="${t_gitignore}"
         uri_tarball="${uri_github}/archive/refs/heads/${git_branch}.tar.gz"
-
-        break
-    done
+    break;done
     rm -f "${__t}" ; unset __t
     unset t_gitignore
     if [ -n "${uri_repo}" ] ; then

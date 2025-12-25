@@ -109,7 +109,7 @@ z-term-cwd() {
         [ -n "${KONSOLE_DBUS_WINDOW}" ] || break
         [ -n "${KONSOLE_PROFILE_NAME}" ] || break
         host=
-    break ; done
+    break;done
 
     printf "\e]7;file://%s%s\e\\" "${host}" "${path}"
 }

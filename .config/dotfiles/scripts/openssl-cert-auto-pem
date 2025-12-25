@@ -84,7 +84,7 @@ if [ -n "$2" ] ; then
 			[ -f "$2" ] || break
 		fi
 		cat > "$2"
-	break ; done
+	break;done
 else
 	cat
 fi < "$w/cert.pem"
@@ -94,13 +94,13 @@ while [ -n "$3" ] ; do
 		[ -f "$3" ] || break
 	fi
 	cat "$w/cert.fp" > "$3"
-break ; done
+break;done
 
 while [ -n "$4" ] ; do
 	if [ -e "$4" ] ; then
 		[ -f "$4" ] || break
 	fi
 	bundle_offsets "$w/cert.pem" > "$4"
-break ; done
+break;done
 
 rm -rf "$w" ; unset w

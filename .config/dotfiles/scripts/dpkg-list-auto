@@ -31,8 +31,6 @@ while [ -s "$w/auto.pkg" ] ; do
 	else
 		cat
 	fi < "$w/auto.pkg"
-
-	break
-done
+break;done
 
 rm -rf "$w"

@@ -61,9 +61,7 @@ __z_git_pwd() {
 
         ZSHU_GIT[ref]=${ZSHU_GIT[commit]}
         ZSHU_PS[git_ref]="%F{red}%B${ZSHU_PM[git_detach]}%b ${ZSHU_GIT[ref]}%f"
-
-        break
-    done
+    break;done
 
     ## local<->remote changes
     while [ ${ZSHU_GIT[detached]} = 0 ] ; do
@@ -81,9 +79,7 @@ __z_git_pwd() {
         [ ${ZSHU_GIT[ref_ahead]} -eq 0 ]  || x="$x${x:+ }%B%F{green}${ZSHU_PM[git_ahead]} ${ZSHU_GIT[ref_ahead]}%b"
         [ ${ZSHU_GIT[ref_behind]} -eq 0 ] || x="$x${x:+ }%B%F{red}${ZSHU_PM[git_behind]} ${ZSHU_GIT[ref_behind]}%b"
         ZSHU_PS[git_changes]=$x
-
-        break
-    done
+    break;done
 
     ## git tag
     while [ ${ZSHU_GIT[detached]} = 1 ] ; do
@@ -100,9 +96,7 @@ __z_git_pwd() {
             ZSHU_PS[git_tag]="%F{yellow}%B${ZSHU_PM[git_commit]}%b ${ZSHU_GIT[tag]}%f"
             break
         fi
-
-        break
-    done
+    break;done
 
     ## try to fancy split current path
     while : ; do
@@ -124,8 +118,7 @@ __z_git_pwd() {
         else
             ZSHU_GIT[path_last]='/'
         fi
-        break
-    done
+    break;done
     ZSHU_GIT[path_root]=$x
 
     x="%F{magenta}${ZSHU_GIT[path_root]:gs/%/%%}"
@@ -229,7 +222,7 @@ z-git-gc() {
         echo "# git prune -v"
         z-time idle git prune -v ; rv=$?
         # [ ${rv} -eq 0 ] || break
-    break ; done
+    break;done
 
     echo
     git-dir-usage ; rv=$?

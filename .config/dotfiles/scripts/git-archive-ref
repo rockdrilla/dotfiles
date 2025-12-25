@@ -15,8 +15,8 @@ while : ; do
 	[ -n "$1" ] || break
 	[ -n "$2" ] || break
 	[ -n "$3" ] || break
-	arg_ok=1 ; break
-done
+	arg_ok=1
+break;done
 [ -n "${arg_ok}" ] || usage 1
 
 name="$1" ver="$2" ref="$3"
