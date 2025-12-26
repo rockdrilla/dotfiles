@@ -120,7 +120,7 @@ sko-list-tags() {
 pod-dive() {
     local i
     i="${1:?}" ; shift
-    command dive "$@" "podman://$i"
+    dive "$@" "podman://$i"
 }
 
 jq-visual() { jq -C | "${PAGER:-cat}" ; }
@@ -166,7 +166,7 @@ dkr-run-sh() {
 dkr-dive() {
     local i
     i="${1:?}" ; shift
-    command dive "$@" "docker://$i"
+    dive "$@" "docker://$i"
 }
 
 typeset -g ZSHU_GRP_DOCKER=docker
@@ -174,7 +174,7 @@ z-adjust-docker() {
     [ ${UID} -eq 0 ] && return 0
 
     getent group "${ZSHU_GRP_DOCKER}" >/dev/null || return 1
-    (( ${+commands[docker]} )) || return 127
+    z-have-cmd docker || return 127
 
     local _users=$(getent group "${ZSHU_GRP_DOCKER}" | cut -d: -f4)
     local -a users=("${(@s[,])_users}")
@@ -187,7 +187,7 @@ z-adjust-docker() {
     done
     [ -n "${found}" ] && return 0
 
-    (( ${+commands[sudo]} )) || return 127
+    z-have-cmd sudo || return 127
 
     alias docker='sudo docker '
     z-dkr() { command sudo docker "$@" ; }

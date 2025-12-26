@@ -29,7 +29,7 @@ done
 unset i zshu_modules
 
 ## fix for zsh/stat
-disable stat >/dev/null 2>&1
+disable stat &>/dev/null
 zsh-stat() { zstat "$@"; }
 
 autoload -Uz +X colors && colors

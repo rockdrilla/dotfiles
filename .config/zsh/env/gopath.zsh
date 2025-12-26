@@ -1,7 +1,7 @@
 #!/bin/zsh
 
 z-gobin-fixup() {
-    (( ${+commands[go]} )) || return 0
+    z-have-cmd go || return 0
 
     local gobin
     gobin=$(command go env GOBIN)
@@ -17,5 +17,3 @@ z-gobin-fixup() {
     [ "${path[(I)${gobin}]}" = 0 ] || return 0
     path=( "${gobin}" ${path} )
 }
-
-z-gobin-fixup

@@ -10,7 +10,7 @@ ZSHU_PM[git_detach]='☈'
 ZSHU_PM[git_tag]='🗹'
 ZSHU_PM[git_commit]='⌽'
 
-__z_git_avail() { (( $+commands[git] )) ; }
+__z_git_avail() { z-have-cmd git ; }
 
 ## sync with /.config/dotfiles/scripts/ro-git
 __z_git() { GIT_OPTIONAL_LOCKS=0 command git "$@"; }

@@ -9,7 +9,7 @@ openwrt-scp() {
 }
 
 openwrt-apk-list() {
-    (( ${+commands[openwrt-apk]} )) || {
+    z-have-cmd openwrt-apk || {
         echo 'missing "openwrt-apk"' >&2
         return 127
     }
