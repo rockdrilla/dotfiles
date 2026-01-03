@@ -5,6 +5,7 @@ if [ $# != 0 ] ; then
 	case "$1" in
 	-h | --help ) krd-du "$1" ;;
 	-[bgkm] ) ;;
+	--block-size ) ;;
 	--block-size=* ) ;;
 	-* ) usage 1 ;;
 	esac

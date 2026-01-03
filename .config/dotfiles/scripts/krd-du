@@ -4,7 +4,7 @@ set +e ; set -f
 me="${0##*/}"
 usage() {
 	cat >&2 <<-EOF
-	# usage: ${me} [-b|-k|-m|-g|--block-size=N]
+	# usage: ${me} [-b|-k|-m|-g|--block-size=N|--block-size N]
 	EOF
 	exit "${1:-0}"
 }
@@ -12,6 +12,23 @@ usage() {
 block_size=
 opt_size=h
 du_opt_size=
+
+handle_block_size() {
+	[ -n "${block_size}" ] || usage 1
+	if printf '%s' "${block_size}" | grep -Eqz '^[1-9][0-9]*$' ; then
+		: # "block_size" seems to be ok
+	else
+		usage 1
+	fi
+
+	## fallback to short option in case of common block size
+	case "${block_size}" in
+	1 )       opt_size=b block_size= ;;
+	1024 )    opt_size=k block_size= ;;
+	1048576 ) opt_size=m block_size= ;;
+	esac
+}
+
 if [ $# != 0 ] ; then
 	case "$1" in
 	-h | --help ) usage ;;
@@ -19,23 +36,20 @@ if [ $# != 0 ] ; then
 	-[bkm] ) opt_size="${1#?}" ; shift ;;
 	-g )     block_size=1073741824 ; shift ;;
 
-	--block-size=* )
-		block_size="${1#*=}"
-		[ -n "${block_size}" ] || usage 1
-		if printf '%s' "${block_size}" | grep -Eqz '^[1-9][0-9]*$' ; then
-			: # "block_size" seems to be ok
-		else
-			usage 1
-		fi
-
-		## fallback to short option in case of common block size
-		case "${block_size}" in
-		1 )       opt_size=b block_size= ;;
-		1024 )    opt_size=k block_size= ;;
-		1048576 ) opt_size=m block_size= ;;
-		esac
+	--block-size )
+		shift # skip bare "--block-size"
+		block_size="$1"
+		handle_block_size
 		shift
 	;;
+
+	--block-size=* )
+		block_size="${1#*=}"
+		handle_block_size
+		shift
+	;;
+
+	-- ) shift ;;
 
 	-* ) usage 1 ;;
 	esac
@@ -60,6 +74,7 @@ unset BLOCK_SIZE BLOCKSIZE DU_BLOCK_SIZE POSIXLY_CORRECT
 
 w=$(mktemp -d) ; : "${w:?}"
 {
+	[ $# != 0 ] || du "${du_opt_size}" -xd1
 	for x ; do
 		[ -d "$x" ] || continue
 		du "${du_opt_size}" -xd1 -- "$x"

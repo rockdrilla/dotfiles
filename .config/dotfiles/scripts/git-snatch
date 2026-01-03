@@ -1,0 +1,182 @@
+#!/bin/sh
+set -ef
+
+me="${0##*/}"
+usage() {
+	cat >&2 <<-EOF
+	# usage:
+	#   ${me} [-n|--no-commit] <remote name> <remote url> <branch>
+	# or
+	#   ${me} [-n|--no-commit] <remote name/url> <branch>
+	# options:
+	#   -n - don't cherry-pick commits (remote is set up anyway)
+	EOF
+	exit "${1:-0}"
+}
+[ $# != 0 ] || usage
+
+no_commit=
+case "$1" in
+-h | --help ) usage ;;
+-n | --no-commit )
+	no_commit=1 ; shift
+;;
+esac
+
+case "$#" in
+2 | 3 ) ;;
+* ) usage 1 ;;
+esac
+
+## quick verify that all parameters are non-empty
+arg_ok=
+while : ; do
+	[ -n "$1" ] || break
+	[ -n "$2" ] || break
+	arg_ok=1
+
+	[ $# = 3 ] || break
+	arg_ok=
+	[ -n "$3" ] || break
+	arg_ok=1
+break;done
+[ -n "${arg_ok}" ] || usage 1
+
+if [ $# = 3 ] ; then
+	remote_name="$1"
+	remote_spec="$2"
+	remote_ref="$3"
+else
+	case "$1" in
+	*[./:@]* ) remote_spec="$1" ;;
+	* ) remote_name="$1" ;;
+	esac
+	remote_ref="$2"
+fi
+
+export GIT_ADVICE=0 GIT_PAGER=cat
+
+## are we in git repository?
+ro-git rev-parse --git-dir >/dev/null
+
+config_list() {
+	ro-git -c pager.config=cat config --list
+}
+
+while [ -z "${remote_name}" ] ; do
+	x=$(config_list | awk -F= -v "u=${remote_spec}" '($1 ~ "^remote\\..*\\.url$") && ($2 == u) {print $1;exit;}')
+	[ -n "$x" ] || break
+	## adjust git setting name to remote name
+	x="${x#remote.}"
+	x="${x%.url}"
+	remote_name="$x"
+break;done
+if [ -z "${remote_name}" ] ; then
+	cat >&2 <<-EOF
+	# ${me}: remote is missing for url "${remote_spec}"
+	# run this script like:
+	#   ${me}${no_commit:+ -n} <remote name> "${remote_spec}" "${remote_ref}"
+	# or add remote manually, e.g.:
+	#   git remote add --no-tags -t "${remote_ref}" <remote> "${remote_spec}"
+	# and run this script again.
+	EOF
+	exit 1
+fi
+
+has_remote=
+while : ; do
+	x= ; x=$(ro-git remote get-url "${remote_name}" 2>/dev/null) || :
+	[ -n "$x" ] || break
+	has_remote=1
+
+	[ -n "${remote_spec}" ] || break
+
+	## sanity check for ${remote_spec}
+	[ "${remote_spec}" != "$x" ] || break
+	cat >&2 <<-EOF
+	# ${me}: remote "${remote_name}" is present but spec differs
+	# incoming: "${remote_spec}"
+	# existing: "$x"
+	EOF
+	exit 1
+break;done
+
+has_ref=
+if [ -z "${has_remote}" ] ; then
+	git remote add --no-tags -t "${remote_ref}" "${remote_name}" "${remote_spec}"
+	has_ref=1
+fi
+
+ref="${remote_name}/${remote_ref}"
+
+cfg_name="remote.${remote_name}.fetch"
+cfg_value="+refs/heads/${remote_ref}:refs/remotes/${ref}"
+
+while [ -z "${has_ref}" ] ; do
+	x=$(config_list | awk -F= -v "n=${cfg_name}" -v "v=${cfg_value}" '($1 == n) && ($2 == v) {print $1;exit;}')
+	[ -n "$x" ] || break
+	has_ref=1
+break;done
+
+while [ -z "${has_ref}" ] ; do
+	if git config set --append "${cfg_name}" "${cfg_value}" ; then break ; fi
+
+	## deprecated syntax
+	if git config --add "${cfg_name}" "${cfg_value}" ; then break ; fi
+
+	cat >&2 <<-EOF
+	# ${me}: unable to configure "${remote_name}"
+	# remote reference "${remote_ref}" seems untracked
+	EOF
+	exit 1
+break;done
+
+has_commits=1
+ro-git log -n 1 --format='%H' "${ref}" >/dev/null 2>&1 || has_commits=
+if [ -z "${has_commits}" ] ; then
+	(
+		set -x
+		git fetch "${remote_name}" "${remote_ref}"
+	)
+fi
+
+[ -z "${no_commit}" ] || exit 0
+
+h_commit=$(ro-git rev-parse HEAD 2>/dev/null)
+
+base=$(git merge-base "${h_commit}" "${ref}")
+
+t=$(mktemp)
+git status --porcelain > "$t"
+if [ -s "$t" ] ; then
+	cat >&2 <<-EOF
+	# ${me}: uncommitted changes
+	# either commit or reject them
+	#
+	EOF
+	sed -E 's/^/#  /' < "$t"
+	rm -f "$t"
+	exit 1
+fi
+rm -f "$t" ; unset t
+
+c=$(ro-git log --format='%H' --reverse "${base}..${ref}")
+if [ -z "$c" ] ; then
+	cat >&2 <<-EOF
+	# ${me}: nothing to commit
+	EOF
+	exit 1
+fi
+
+git commit --allow-empty -m " -- snatch begin: ${ref}"
+
+git cherry-pick $c || {
+	cat >&2 <<-EOF
+	# ${me}: failed to cherry-pick
+	# reverting changes
+	EOF
+	git reset --hard "${h_commit}"
+	exit 1
+}
+
+git commit --allow-empty -m " -- snatch end: ${ref}"
