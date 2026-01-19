@@ -26,7 +26,7 @@ for i in ${KRDEB_ENABLE} ; do
     echo "Suites: ${suite}" ;
     echo "Components: ${component}" ;
     echo ;
-done > "${KRDEB_SRC}"
+done > "${KRDEB_SRC}" ;
 
 [ -s "${KRDEB_SRC}" ] || exit 0 ;
 head -v -n 1000000 "${KRDEB_SRC}"

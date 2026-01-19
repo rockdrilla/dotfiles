@@ -46,13 +46,16 @@ $environment_filter = [
 ];
 
 my $script_krdeb_setup = do { local(@ARGV, $/) = "$HOME/.config/sbuild/krdeb-setup.sh"; <> };
+$script_krdeb_setup =~ s/\s+/ /g;
 my $script_apt_update = do { local(@ARGV, $/) = "$HOME/.config/sbuild/apt-upgrade.sh"; <> };
+$script_apt_update =~ s/\s+/ /g;
 
 ## handled by $script_apt_update
 $apt_distupgrade = 0;
 $apt_upgrade = 0;
 
-# my $script_gcc_fresh = do { local(@ARGV, $/) = "$HOME/.config/sbuild/gcc-fresh.sh"; <> };
+my $script_gcc_fresh = do { local(@ARGV, $/) = "$HOME/.config/sbuild/gcc-fresh.sh"; <> };
+$script_gcc_fresh =~ s/\s+/ /g;
 
 $external_commands = {
 	'chroot-setup-commands' => [
