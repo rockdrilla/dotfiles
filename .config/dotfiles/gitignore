@@ -37,6 +37,7 @@
 !/.config/dotfiles/scripts/git-cherry-pick-path
 !/.config/dotfiles/scripts/git-dir-usage
 !/.config/dotfiles/scripts/git-reset-refs
+!/.config/dotfiles/scripts/git-snatch
 !/.config/dotfiles/scripts/gpg-batch
 !/.config/dotfiles/scripts/gpg-export
 !/.config/dotfiles/scripts/gpg-sign-file
@@ -65,7 +66,10 @@
 !/.config/dotfiles/woodpecker.yml
 !/.config/htop/htoprc.dist
 !/.config/mc/ini.dist
+!/.config/sbuild/apt-upgrade.sh.dist
 !/.config/sbuild/config.pl.dist
+!/.config/sbuild/gcc-fresh.sh.dist
+!/.config/sbuild/krdeb-setup.sh.dist
 !/.config/zsh.dots/.zshenv
 !/.config/zsh/_.zsh
 !/.config/zsh/_wip/enclave.zsh.wip
@@ -106,8 +110,8 @@
 !/.config/zsh/lib/git.zsh
 !/.config/zsh/lib/gpg.zsh
 !/.config/zsh/lib/history.zsh
+!/.config/zsh/lib/process.zsh
 !/.config/zsh/lib/prompt.zsh
-!/.config/zsh/lib/pswalk.zsh
 !/.config/zsh/lib/say-my.zsh
 !/.config/zsh/lib/selfservice.zsh
 !/.config/zsh/lib/systemd.zsh
@@ -124,6 +128,8 @@
 !/.config/zsh/opt/history.zsh
 !/.config/zsh/opt/prompt.zsh
 !/.config/zsh/rc.zsh
+!/.config/zsh/rc/00-pswalk.zsh
+!/.config/zsh/rc/01-run.zsh
 !/.config/zsh/rc/completion.zsh
 !/.config/zsh/rc/gpg-agent.zsh
 !/.config/zsh/rc/keyboard-base.zsh

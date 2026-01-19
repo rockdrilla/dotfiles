@@ -1,4 +1,4 @@
-$chroot_mode = "schroot";
+$chroot_mode = 'schroot';
 $build_path = '';
 
 # $key_id = $ENV{DEBFULLNAME}.' <'.$ENV{DEBEMAIL}.'>';
@@ -14,32 +14,61 @@ $run_autopkgtest = 0;
 $run_lintian = 0;
 $run_piuparts = 0;
 
-$apt_distupgrade = 1;
-$apt_upgrade = 1;
-
 $purge_build_directory = 'successful';
 
 $build_environment = {
 	'MALLOC_ARENA_MAX' => '8',
 	'GOMAXPROCS' => '8',
-#	"CCACHE_DIR" => "/ccache",
+#	'CCACHE_DIR' => '/ccache',
 };
-# $unshare_bind_mounts = [ { directory => "$HOME/sbuild/_ccache", mountpoint => "/ccache" } ];
-# $path = "/usr/lib/ccache:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games";
+# $unshare_bind_mounts = [ { directory => "$HOME/sbuild/_ccache", mountpoint => '/ccache' } ];
+# $path = '/usr/lib/ccache:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games';
 
+## MALLOC_ARENA_MAX - generic
 ## GOMAXPROCS - generic
-## DEB_STAGE - for use with gcc
 ## CROSS_ARCHS - for use with binutils
-# use Dpkg::BuildInfo;
-# $environment_filter = [(sort (map "^$_\$", Dpkg::BuildInfo::get_build_env_allowed())), '^GOMAXPROCS$', '^DEB_STAGE$', '^CROSS_ARCHS$'];
+## DEB_STAGE - for use with gcc
+## KRDEB_ENABLE - backports from deb.krd.sh
+## KRDEB_KEYRING - backports from deb.krd.sh
+## KRDEB_ROOT_URI - backports from deb.krd.sh
+## KRDEB_URI - backports from deb.krd.sh
+use Dpkg::BuildInfo;
+$environment_filter = [
+	(sort (map "^$_\$", Dpkg::BuildInfo::get_build_env_allowed())),
+	'^MALLOC_ARENA_MAX$',
+	'^GOMAXPROCS$',
+	'^CROSS_ARCHS$',
+	'^DEB_STAGE$',
+	'^KRDEB_ENABLE$',
+	'^KRDEB_KEYRING$',
+	'^KRDEB_ROOT_URI$',
+	'^KRDEB_URI$',
+];
 
-# $external_commands = {
-# 	"chroot-setup-commands" => [
-# 		"install -d -m 0700 -o    0 -g    0 /tmp/user/0",
-# 		"install -d -m 0700 -o  117 -g  125 /tmp/user/117",
-# 		"install -d -m 0700 -o 1000 -g 1000 /tmp/user/1000",
-# 	],
-# };
+my $script_krdeb_setup = do { local(@ARGV, $/) = "$HOME/.config/sbuild/krdeb-setup.sh"; <> };
+my $script_apt_update = do { local(@ARGV, $/) = "$HOME/.config/sbuild/apt-upgrade.sh"; <> };
+
+## handled by $script_apt_update
+$apt_distupgrade = 0;
+$apt_upgrade = 0;
+
+# my $script_gcc_fresh = do { local(@ARGV, $/) = "$HOME/.config/sbuild/gcc-fresh.sh"; <> };
+
+$external_commands = {
+	'chroot-setup-commands' => [
+		$script_krdeb_setup,
+		$script_apt_update,
+
+#		$script_gcc_fresh,
+
+## examples:
+
+# 		'install -d -m 0700 -o    0 -g    0 /tmp/user/0',
+# 		'install -d -m 0700 -o  117 -g  125 /tmp/user/117',
+# 		'install -d -m 0700 -o 1000 -g 1000 /tmp/user/1000',
+
+	],
+};
 
 # don't remove this, Perl needs it:
 1;
