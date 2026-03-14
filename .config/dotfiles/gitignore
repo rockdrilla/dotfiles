@@ -87,7 +87,6 @@
 !/.config/zsh/alias/openwrt.zsh
 !/.config/zsh/alias/sudo.zsh
 !/.config/zsh/alias/telnet.zsh
-!/.config/zsh/completion/.keep
 !/.config/zsh/completion/bash.zsh
 !/.config/zsh/completion/external.zsh
 !/.config/zsh/completion/system.zsh
@@ -118,7 +117,6 @@
 !/.config/zsh/lib/term.zsh
 !/.config/zsh/lib/time.zsh
 !/.config/zsh/local.zsh.example
-!/.config/zsh/local/.keep
 !/.config/zsh/local/completion/.keep
 !/.config/zsh/local/env.zsh.example
 !/.config/zsh/opt.zsh
@@ -138,7 +136,6 @@
 !/.config/zsh/rc/prompt.zsh
 !/.config/zsh/rc/ssh-agent.zsh
 !/.config/zsh/rc/terminal.zsh
-!/.config/zsh/var/.keep
 !/.config/zsh/var/history.dist
 !/.gdbinit
 !/.gitconfig
