@@ -139,6 +139,7 @@
 !/.config/zsh/rc/ssh-agent.zsh
 !/.config/zsh/rc/terminal.zsh
 !/.config/zsh/var/.keep
+!/.config/zsh/var/history.dist
 !/.gdbinit
 !/.gitconfig
 !/.sbuildrc.dist

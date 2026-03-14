@@ -1,0 +1,25 @@
+: 1:0;apt update
+: 1:0;aptitude
+: 1:0;curl https://geo.krd.sh/all
+: 1:0;dmesg
+: 1:0;e ~/.config/zsh/local/env.zsh.example ~/.config/zsh/local.zsh ~/.config/zsh/local/env.zsh
+: 1:0;for i ( amd64 i386 ) ; do KRDEB_ENABLE='backports ports-gcc-15 ports-mingw ports-x11 ports-nvidia' krd-sbuild "${PWD:t}" $i -d trixie -j 8 DEB_BUILD_OPTIONS='nocheck' || break ; done
+: 1:0;gbr --all
+: 1:0;gd /tmp/zzzzzzzz
+: 1:0;git config pack.threads 8
+: 1:0;git diff > /tmp/zzz
+: 1:0;git diff|patch -p1 -R
+: 1:0;htop -d 9
+: 1:0;htop -d 9 -u ${LOGNAME}
+: 1:0;ip -o a
+: 1:0;krd-debsrc "${PWD:t}"
+: 1:0;krd-sbuild "${PWD:t}" amd64 -d sid -j 8 DEB_BUILD_OPTIONS='nocheck'
+: 1:0;ll /boot
+: 1:0;lscpu
+: 1:0;patch -p1 < /tmp/zzz
+: 1:0;screen -D -RR
+: 1:0;sudo schroot -l --all-sessions
+: 1:0;sync
+: 1:0;sync ; echo s > /proc/sysrq-trigger
+: 1:0;z-load-time
+: 1:0;z-update;z-reload
