@@ -76,7 +76,7 @@ __z_dotfiles_from_gitignore() {
     local f
     f="${ZSHU[d_dotfiles]}/gitignore"
     [ -s "$f" ] || return 1
-    sed -En "\\${xsedx}^!/$1\$${xsedx}{$2}" < "$f"
+    sed -En "\\${ZSHU_XSED}^!/$1\$${ZSHU_XSED}{$2}" < "$f"
 }
 
 dotfiles-dist-compare() {
