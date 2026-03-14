@@ -1,7 +1,14 @@
 #!/bin/zsh
 
+if [ -e "${ZDOTDIR}/.config/zsh/zprof" ] ; then
+    zmodload -s -i zsh/zprof
+    zprof -c
+else
+    zmodload -u -i zsh/zprof
+fi
+
 ## early load modules
-zmodload zsh/mathfunc zsh/datetime zsh/zprof
+zmodload zsh/mathfunc zsh/datetime
 
 typeset -g -A ZSHU
 
