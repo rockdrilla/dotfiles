@@ -113,6 +113,8 @@
 !/.config/zsh/lib/completion.zsh
 !/.config/zsh/lib/csv.zsh
 !/.config/zsh/lib/curl.zsh
+!/.config/zsh/lib/diff.zsh
+!/.config/zsh/lib/file.zsh
 !/.config/zsh/lib/git.zsh
 !/.config/zsh/lib/gpg.zsh
 !/.config/zsh/lib/history.zsh

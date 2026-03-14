@@ -1,5 +1,7 @@
 #!/bin/zsh
 
-z-alt-set-static \
-    'diff|. .' \
-    'diff --color=auto|diff'
+if [ "${ZSHU[diff_color]}" = 1 ] ; then
+    alias diff='diff --color=auto '
+else
+    alias diff='diff '
+fi
