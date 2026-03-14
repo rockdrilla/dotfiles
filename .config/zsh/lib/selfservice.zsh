@@ -84,14 +84,6 @@ dotfiles-dist-compare() {
 
     tf_list=$(mktemp) ; : "${tf_list:?}"
 
-    __z_dotfiles_from_gitignore '(.+\.dist)' 's//\1/;p' \
-    > "${tf_list}"
-    while read -r f_dist ; do
-        [ -n "${f_dist}" ] || continue
-
-        __z_dotfiles_dist_compare "${f_dist}" "${f_dist%.dist}"
-    done < "${tf_list}"
-
     __z_dotfiles_from_gitignore '(\.config/dotfiles/dist/.+)' 's//\1/;p' \
     > "${tf_list}"
     while read -r f_dist ; do
