@@ -261,8 +261,41 @@ backup_unconditionally() {
     fi
 }
 
+handle_dist_file() {
+    f_src="${HOME}/$1"
+    f_dst="${HOME}/$2"
+
+    if [ -e "${f_dst}" ] ; then return 0 ; fi
+
+    [ -e "${f_src}" ] || {
+        echo "# source file is missing: $1" >&2
+        return 0
+    }
+
+    f_dir="${f_dst%/*}"
+    [ -d "${f_dir}" ] || mkdir -p "${f_dir}" || return 1
+
+    if [ -h "${f_src}" ] ; then
+        f_link=$(readlink "${f_src}")
+        if [ -n "${f_link}" ] ; then
+            ln -s "${f_link}" "${f_dst}"
+        else
+            echo "# source symlink is not resolved: $1" >&2
+        fi
+        return 0
+    fi
+
+    if [ -f "${f_src}" ] ; then
+        cp "${f_src}" "${f_dst}"
+        return 0
+    fi
+
+    ## ignore other types
+    return 0
+}
+
 propagate_dist_files() {
-    tf_list=$(mktemp)
+    tf_list=$(mktemp) ; : "${tf_list:?}"
 
     from_gitignore '(.+\.dist)' 's//\1/;p' \
     < "${HOME}/${f_gitignore}" \
@@ -270,35 +303,8 @@ propagate_dist_files() {
     while read -r f_dist_rel ; do
         [ -n "${f_dist_rel}" ] || continue
 
-        f="${HOME}/${f_dist_rel%.dist}"
-        if [ -e "$f" ] ; then continue ; fi
-
-        f_dist="${HOME}/${f_dist_rel}"
-        [ -e "${f_dist}" ] || {
-            echo "# dist file is missing: ${f_dist_rel}" >&2
-            continue
-        }
-
-        f_dir="${f%/*}"
-        [ -d "${f_dir}" ] || mkdir -p "${f_dir}"
-
-        if [ -h "${f_dist}" ] ; then
-            f_link=$(readlink "${f_dist}")
-            if [ -n "${f_link}" ] ; then
-                ln -s "${f_link}" "$f"
-            else
-                echo "# symlink is not resolved: ${f_dist_rel}" >&2
-            fi
-            unset f_link
-            continue
-        fi
-
-        if [ -f "${f_dist}" ] ; then
-            cp "${f_dist}" "$f"
-            continue
-        fi
+        handle_dist_file "${f_dist_rel}" "${f_dist_rel%.dist}"
     done < "${tf_list}"
-    unset f_dist_rel f_dist f f_dir
 
     from_gitignore '(\.config/dotfiles/dist/.+)' 's//\1/;p' \
     < "${HOME}/${f_gitignore}" \
@@ -306,35 +312,8 @@ propagate_dist_files() {
     while read -r f_dist_rel ; do
         [ -n "${f_dist_rel}" ] || continue
 
-        f="${HOME}/${f_dist_rel#.config/dotfiles/dist/}"
-        if [ -e "$f" ] ; then continue ; fi
-
-        f_dist="${HOME}/${f_dist_rel}"
-        [ -e "${f_dist}" ] || {
-            echo "# dist file is missing: ${f_dist_rel}" >&2
-            continue
-        }
-
-        f_dir="${f%/*}"
-        [ -d "${f_dir}" ] || mkdir -p "${f_dir}"
-
-        if [ -h "${f_dist}" ] ; then
-            f_link=$(readlink "${f_dist}")
-            if [ -n "${f_link}" ] ; then
-                ln -s "${f_link}" "$f"
-            else
-                echo "# symlink is not resolved: ${f_dist_rel}" >&2
-            fi
-            unset f_link
-            continue
-        fi
-
-        if [ -f "${f_dist}" ] ; then
-            cp "${f_dist}" "$f"
-            continue
-        fi
+        handle_dist_file "${f_dist_rel}" "${f_dist_rel#.config/dotfiles/dist/}"
     done < "${tf_list}"
-    unset f_dist f f_dir
 
     rm -f "${tf_list}" ; unset tf_list
 }
