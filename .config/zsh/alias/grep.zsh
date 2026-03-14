@@ -14,7 +14,6 @@ z-alt-grep() {
         z-alt-set-static \
           "grep|-q -e ' ' ${ZSHU[d_conf]}/_.zsh" \
           "$1" \
-          "GREP_OPTIONS='' command" \
     ;;
     esac
 }

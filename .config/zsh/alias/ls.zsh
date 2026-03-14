@@ -22,7 +22,6 @@ z-alt-ls() {
         z-alt-set-static \
           'ls|-d .' \
           "$1" \
-          "LS_OPTIONS='' command"
     ;;
     esac
 }

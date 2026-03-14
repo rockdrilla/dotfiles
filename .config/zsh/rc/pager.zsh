@@ -3,7 +3,7 @@
 PAGER=$(z-alt-find 'less|pager|more')
 if [ -n "${PAGER}" ] ; then
     export PAGER
-    READNULLCMD=$(which "${PAGER}" | xargs -r readlink -e)
+    READNULLCMD=${PAGER}
 else
     unset PAGER READNULLCMD NULLCMD
 fi

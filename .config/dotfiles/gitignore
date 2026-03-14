@@ -73,11 +73,11 @@
 !/.config/zsh.dots/.zshenv
 !/.config/zsh/_.zsh
 !/.config/zsh/_wip/enclave.zsh.wip
-!/.config/zsh/_wip/idle.zsh.old
 !/.config/zsh/alias.zsh
 !/.config/zsh/alias/containers.zsh
 !/.config/zsh/alias/diff.zsh
 !/.config/zsh/alias/directories.zsh
+!/.config/zsh/alias/editor.zsh
 !/.config/zsh/alias/git.zsh
 !/.config/zsh/alias/grep.zsh
 !/.config/zsh/alias/history.zsh
