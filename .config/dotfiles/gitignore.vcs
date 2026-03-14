@@ -5,7 +5,7 @@
 !/.config/zsh/local/.keep
 !/.config/zsh/local/completion/.keep
 !/.config/zsh/local/env.zsh.example
-!/.config/zsh/var/.keep
+!/.config/zsh/var/history.dist
 
 /.cache/zsh/compcache/*
 /.cache/zsh/compdump

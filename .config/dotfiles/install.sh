@@ -4,7 +4,7 @@ set -ef
 unset LANGUAGE LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE
 unset LC_MONETARY LC_MESSAGES LC_PAPER LC_NAME LC_ADDRESS
 unset LC_TELEPHONE LC_MEASUREMENT LC_IDENTIFICATION
-unset POSIXLY_CORRECT TAR_OPTIONS
+unset POSIXLY_CORRECT LS_OPTIONS GREP_OPTIONS TAR_OPTIONS
 
 uri_krdsh="${GITKRDSH:-https://git.krd.sh/krd}/dotfiles"
 uri_github="${GITHUB:-https://github.com/rockdrilla}/dotfiles"
@@ -13,6 +13,30 @@ git_branch='main'
 
 d_repo='.config/dotfiles/repo.git'
 f_gitignore='.config/dotfiles/gitignore'
+
+xsedx=$(printf '\027')
+
+main() {
+    ## test connectivity and select forge
+    select_forge
+
+    umask 0077
+
+    if have_cmd git ; then
+        if [ -s "${HOME}/${d_repo}/HEAD" ] ; then
+            dot_update
+        else
+            dot_install
+        fi
+    else
+        echo '! git is missing, proceed "raw" installation.' >&2
+        dot_install_raw
+    fi
+
+    propagate_dist_files
+
+    echo '# installed successfully.' >&2
+}
 
 have_cmd() { command -v "$1" </dev/null >/dev/null 2>&1 ; }
 
@@ -46,7 +70,7 @@ fetch() {
         rm -f "${__fetch_t}" ; unset __fetch_t
         return ${__fetch_r}
     fi
-    echo 'no method is available to fetch URLs' >&2
+    echo '! no method is available to fetch URLs' >&2
     return 1
 }
 
@@ -82,30 +106,8 @@ select_forge() {
     if [ -n "${uri_repo}" ] ; then
         return 0
     fi
-    echo 'no forge is available to fetch URLs' >&2
+    echo '! no forge is available to fetch URLs' >&2
     return 1
-}
-
-main() {
-    ## test connectivity and select forge
-    select_forge
-
-    umask 0077
-
-    if have_cmd git ; then
-        if [ -s "${HOME}/${d_repo}/HEAD" ] ; then
-            dot_update
-        else
-            dot_install
-        fi
-    else
-        echo 'git is missing, proceed "raw" installation.' >&2
-        dot_install_raw
-    fi
-
-    propagate_dist_files
-
-    echo 'installed.' >&2
 }
 
 dot_install() {
@@ -127,6 +129,10 @@ find_fast() {
     find "$@" -printf . -quit | grep -Fq .
 }
 
+from_gitignore() {
+    sed -En "\\${xsedx}^!/$1\$${xsedx}{$2}"
+}
+
 dot_install_raw() {
     tf_tar=$(mktemp)
     fetch "${uri_tarball}" "${tf_tar}"
@@ -141,7 +147,7 @@ dot_install_raw() {
 
     tf_list=$(mktemp)
     fetch "${uri_gitignore}" \
-    | sed -En '/^!\/(.+)$/{s//\1/;p;}' \
+    | from_gitignore '(.+)' 's//\1/;p' \
     > "${tf_list}"
 
     td_backup=$(mktemp -d)
@@ -163,7 +169,7 @@ dot_install_raw() {
     rm -rf "${td_tree}"
 
     if find_fast "${td_backup}/" -mindepth 1 ; then
-        echo "backed-up files are here: ${td_backup}/"
+        echo "# backed-up files are here: ${td_backup}/"
         find "${td_backup}/" -mindepth 1 -ls
     else
         rmdir "${td_backup}"
@@ -232,7 +238,7 @@ cmp_files() {
 backup_unconditionally() {
     tf_list=$(mktemp)
     fetch "${uri_gitignore}" \
-    | sed -En '/^!\/(.+)$/{s//\1/;p;}' \
+    | from_gitignore '(.+)' 's//\1/;p' \
     > "${tf_list}"
 
     td_backup=$(mktemp -d)
@@ -248,7 +254,7 @@ backup_unconditionally() {
     rm -f "${tf_list}" ; unset tf_list
 
     if find_fast "${td_backup}/" -mindepth 1 ; then
-        echo "backed-up files are here: ${td_backup}/"
+        echo "# backed-up files are here: ${td_backup}/"
         find "${td_backup}/" -mindepth 1 -ls
     else
         rmdir "${td_backup}"
@@ -257,18 +263,82 @@ backup_unconditionally() {
 
 propagate_dist_files() {
     tf_list=$(mktemp)
-    sed -En '/^!\/(.+\.dist)$/{s//\1/;p;}' < "${HOME}/${f_gitignore}" > "${tf_list}"
 
-    while read -r f_dist ; do
-        [ -n "${f_dist}" ] || continue
-        [ -f "${f_dist}" ] || continue
+    from_gitignore '(.+\.dist)' 's//\1/;p' \
+    < "${HOME}/${f_gitignore}" \
+    > "${tf_list}"
+    while read -r f_dist_rel ; do
+        [ -n "${f_dist_rel}" ] || continue
 
-        f=${f_dist%.dist}
-        if [ -f "$f" ] ; then continue ; fi
+        f="${HOME}/${f_dist_rel%.dist}"
+        if [ -e "$f" ] ; then continue ; fi
 
-        cp "${f_dist}" "$f"
+        f_dist="${HOME}/${f_dist_rel}"
+        [ -e "${f_dist}" ] || {
+            echo "# dist file is missing: ${f_dist_rel}" >&2
+            continue
+        }
+
+        f_dir="${f%/*}"
+        [ -d "${f_dir}" ] || mkdir -p "${f_dir}"
+
+        if [ -h "${f_dist}" ] ; then
+            f_link=$(readlink "${f_dist}")
+            if [ -n "${f_link}" ] ; then
+                ln -s "${f_link}" "$f"
+            else
+                echo "# symlink is not resolved: ${f_dist_rel}" >&2
+            fi
+            unset f_link
+            continue
+        fi
+
+        if [ -f "${f_dist}" ] ; then
+            cp "${f_dist}" "$f"
+            continue
+        fi
     done < "${tf_list}"
+    unset f_dist_rel f_dist f f_dir
+
+    from_gitignore '(\.config/dotfiles/dist/.+)' 's//\1/;p' \
+    < "${HOME}/${f_gitignore}" \
+    > "${tf_list}"
+    while read -r f_dist_rel ; do
+        [ -n "${f_dist_rel}" ] || continue
+
+        f="${HOME}/${f_dist_rel#.config/dotfiles/dist/}"
+        if [ -e "$f" ] ; then continue ; fi
+
+        f_dist="${HOME}/${f_dist_rel}"
+        [ -e "${f_dist}" ] || {
+            echo "# dist file is missing: ${f_dist_rel}" >&2
+            continue
+        }
+
+        f_dir="${f%/*}"
+        [ -d "${f_dir}" ] || mkdir -p "${f_dir}"
+
+        if [ -h "${f_dist}" ] ; then
+            f_link=$(readlink "${f_dist}")
+            if [ -n "${f_link}" ] ; then
+                ln -s "${f_link}" "$f"
+            else
+                echo "# symlink is not resolved: ${f_dist_rel}" >&2
+            fi
+            unset f_link
+            continue
+        fi
+
+        if [ -f "${f_dist}" ] ; then
+            cp "${f_dist}" "$f"
+            continue
+        fi
+    done < "${tf_list}"
+    unset f_dist f f_dir
+
     rm -f "${tf_list}" ; unset tf_list
 }
 
-main "$@"
+if [ "${0##*/}" = install.sh ] ; then
+    main "$@"
+fi
