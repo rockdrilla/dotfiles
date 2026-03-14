@@ -94,6 +94,7 @@
 !/.config/zsh/env/aux.zsh
 !/.config/zsh/env/containers.zsh
 !/.config/zsh/env/gopath.zsh
+!/.config/zsh/env/grab.zsh
 !/.config/zsh/env/history.zsh
 !/.config/zsh/env/ld.so.zsh
 !/.config/zsh/env/pager.zsh

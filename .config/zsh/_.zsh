@@ -17,9 +17,9 @@ __z_unsupported() { echo "not supported" >&2 ; }
 ZSHU[t_begin]=${(%):-%D{%s.%6.}}
 
 ZSHU[d_zdot]="${ZDOTDIR}"
-ZSHU[d_dotfiles]="${ZDOTDIR}/.config/dotfiles"
-ZSHU[d_conf]="${ZDOTDIR}/.config/zsh"
-ZSHU[d_cache]="${ZDOTDIR}/.cache/zsh"
+ZSHU[d_dotfiles]="${ZSHU[d_zdot]}/.config/dotfiles"
+ZSHU[d_conf]="${ZSHU[d_zdot]}/.config/zsh"
+ZSHU[d_cache]="${ZSHU[d_zdot]}/.cache/zsh"
 
 ZSHU[d_var]="${ZSHU[d_conf]}/var"
 ZSHU[d_bin]="${ZSHU[d_dotfiles]}/bin"
@@ -30,7 +30,7 @@ unsetopt global_rcs
 
 ## safety measure:
 ## redirect all following activity within ZDOTDIR to cache
-typeset -g -x ZDOTDIR="${ZDOTDIR}/.config/zsh.dots"
+typeset -g -x ZDOTDIR="${ZSHU[d_zdot]}/.config/zsh.dots"
 
 ## cleanup: start from scratch
 for i ( a s f d ) ; do unhash -$i -m '*' ; done ; unset i
