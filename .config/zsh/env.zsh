@@ -51,15 +51,15 @@ unset LS_OPTIONS
 
 unset LANGUAGE LC_CTYPE LC_NUMERIC LC_TIME LC_COLLATE LC_MONETARY LC_MESSAGES
 unset LC_PAPER LC_NAME LC_ADDRESS LC_TELEPHONE LC_MEASUREMENT LC_IDENTIFICATION
-export LANG=C.UTF-8
-export LC_ALL=C.UTF-8
+export LANG=C.UTF-8 LC_ALL=C.UTF-8
 
 z-set-tmpdir() {
+    set -a
     TMPDIR="$1"
     TMP="$1"
     TEMPDIR="$1"
     TEMP="$1"
-    export TMPDIR TMP TEMPDIR TEMP
+    set -a
 }
 z-set-tmpdir "${TMPDIR:=/tmp}"
 

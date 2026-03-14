@@ -4,6 +4,8 @@ z-orig-term() {
     local -a a
     local i x
 
+    [ -n "${ZSHU[procfs]}" ] || return 0
+
     for i ( ${ZSHU_PARENTS_PID} ) ; do
         i="${ZSHU[procfs]}/$i/environ"
         [ -r "$i" ] || continue
