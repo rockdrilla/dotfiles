@@ -318,6 +318,6 @@ propagate_dist_files() {
     rm -f "${tf_list}" ; unset tf_list
 }
 
-if [ "${0##*/}" = install.sh ] ; then
-    main "$@"
-fi
+case "${0##*/}" in
+sh | bash | install.sh ) main "$@" ;;
+esac
