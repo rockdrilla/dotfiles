@@ -12,7 +12,7 @@ if __z_diff_test_opt --color ; then
 fi
 
 if [ "${ZSHU[diff_color]}" = 1 ] ; then
-    z-diff() { diff --color "$@" ; }
+    z-diff() { diff -Naru --color "$@" ; }
 else
-    z-diff() { diff "$@" ; }
+    z-diff() { diff -Naru "$@" ; }
 fi

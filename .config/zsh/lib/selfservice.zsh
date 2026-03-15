@@ -68,7 +68,7 @@ __z_dotfiles_dist_compare() {
         return 0
     fi
 
-    z-diff -Naru "${f_src}" "${f_src}"
+    z-diff "${f_src}" "${f_src}"
     return 0
 }
 
