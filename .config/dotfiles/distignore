@@ -1,0 +1,3 @@
+.config/dotfiles/distignore
+.config/zsh/var/history.dist
+.config/dotfiles/dist/.config/mc/ini

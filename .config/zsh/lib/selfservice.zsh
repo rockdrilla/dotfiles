@@ -27,6 +27,28 @@ dotfiles-gen-gitignore() {
     "$x" "$@"
 }
 
+__z_dotfiles_dist_list_full() {
+    local gitignore
+    gitignore="${ZSHU[d_dotfiles]}/gitignore"
+    [ -s "${gitignore}" ] || return 1
+    sed -En \
+      -e "\\${ZSHU_XSED}^!/$1\$${ZSHU_XSED}{$2}" \
+    < "${gitignore}"
+}
+
+__z_dotfiles_dist_list() {
+    local distignore
+    distignore="${ZSHU[d_dotfiles]}/distignore"
+    __z_dotfiles_dist_list_full "$@" \
+    | {
+        if [ -s "${distignore}" ] ; then
+            grep -Fxv -f "${distignore}"
+        else
+            cat
+        fi
+    }
+}
+
 __z_dotfiles_dist_compare() {
     local f_src f_dst s_src s_dst
 
@@ -54,42 +76,56 @@ __z_dotfiles_dist_compare() {
         return 0
     fi
 
-    echo "# files differ: $1 $2" >&2
-    echo "#   ${f_src}" >&2
-    echo "#   ${f_dst}" >&2
+    echo "# files differ:" >&2
+    echo "#  < ${f_src}" >&2
+    echo "#  > ${f_dst}" >&2
+
+    ## 3rd paratemer is to indicate "generate diff if applicable"
+    [ -n "$3" ] || return 0
 
     ## not dealing with "binary" files in any way
     z-is-text-file "${f_src}" || return 0
     z-is-text-file "${f_dst}" || return 0
 
-    ## try "git diff" first
-    if __z_git_avail ; then
-        env -C "${ZSHU[d_zdot]}" GIT_PAGER=cat git diff "${f_src}" "${f_dst}"
-        return 0
-    fi
-
-    z-diff "${f_src}" "${f_src}"
+    z-diff "${f_src}" "${f_dst}"
     return 0
 }
 
-__z_dotfiles_from_gitignore() {
-    local f
-    f="${ZSHU[d_dotfiles]}/gitignore"
-    [ -s "$f" ] || return 1
-    sed -En "\\${ZSHU_XSED}^!/$1\$${ZSHU_XSED}{$2}" < "$f"
-}
-
-dotfiles-dist-compare() {
+dotfiles-dist-compare-full() {
     local tf_list f_dist
 
     tf_list=$(mktemp) ; : "${tf_list:?}"
 
-    __z_dotfiles_from_gitignore '(\.config/dotfiles/dist/.+)' 's//\1/;p' \
+    __z_dotfiles_dist_list '(\.config/dotfiles/dist/.+)' 's//\1/;p' \
+    > "${tf_list}"
+    while read -r f_dist ; do
+        [ -n "${f_dist}" ] || continue
+
+        __z_dotfiles_dist_compare "${f_dist}" "${f_dist#.config/dotfiles/dist/}"  DIFF
+    done < "${tf_list}"
+
+    rm -f "${tf_list}"
+}
+
+dotfiles-dist-compare-simple() {
+    local tf_list f_dist
+
+    tf_list=$(mktemp) ; : "${tf_list:?}"
+
+    __z_dotfiles_dist_list_full '(\.config/dotfiles/dist/.+)' 's//\1/;p' \
     > "${tf_list}"
     while read -r f_dist ; do
         [ -n "${f_dist}" ] || continue
 
         __z_dotfiles_dist_compare "${f_dist}" "${f_dist#.config/dotfiles/dist/}"
+    done < "${tf_list}"
+
+    __z_dotfiles_dist_list_full '(.+\.dist)' 's//\1/;p' \
+    > "${tf_list}"
+    while read -r f_dist ; do
+        [ -n "${f_dist}" ] || continue
+
+        __z_dotfiles_dist_compare "${f_dist}" "${f_dist%.dist}"
     done < "${tf_list}"
 
     rm -f "${tf_list}"

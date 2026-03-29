@@ -16,8 +16,9 @@
 !/.config/dotfiles/dist/.screenrc
 !/.config/dotfiles/dist/.selected_editor
 !/.config/dotfiles/dist/.vimrc
+!/.config/dotfiles/distignore
 !/.config/dotfiles/gen-gitignore.sh
-!/.config/dotfiles/gitattributes
+!/.config/dotfiles/gitattributes.vcs
 !/.config/dotfiles/gitignore
 !/.config/dotfiles/gitignore.vcs
 !/.config/dotfiles/install.sh
@@ -78,7 +79,6 @@
 !/.config/dotfiles/woodpecker.yml
 !/.config/zsh.dots/.zshenv
 !/.config/zsh/_.zsh
-!/.config/zsh/_wip/enclave.zsh.wip
 !/.config/zsh/alias.zsh
 !/.config/zsh/alias/containers.zsh
 !/.config/zsh/alias/diff.zsh
