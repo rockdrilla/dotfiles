@@ -29,6 +29,7 @@ $build_environment = {
 ## CROSS_ARCHS - for use with binutils
 ## DEB_STAGE - for use with gcc
 ## KRDEB_ENABLE - backports from deb.krd.sh
+## KRDEB_GCC_VER - backports from deb.krd.sh
 ## KRDEB_KEYRING - backports from deb.krd.sh
 ## KRDEB_ROOT_URI - backports from deb.krd.sh
 ## KRDEB_URI - backports from deb.krd.sh
@@ -40,6 +41,7 @@ $environment_filter = [
 	'^CROSS_ARCHS$',
 	'^DEB_STAGE$',
 	'^KRDEB_ENABLE$',
+	'^KRDEB_GCC_VER$',
 	'^KRDEB_KEYRING$',
 	'^KRDEB_ROOT_URI$',
 	'^KRDEB_URI$',
@@ -49,20 +51,18 @@ my $script_krdeb_setup = do { local(@ARGV, $/) = "$HOME/.config/sbuild/krdeb-set
 $script_krdeb_setup =~ s/\s+/ /g;
 my $script_apt_update = do { local(@ARGV, $/) = "$HOME/.config/sbuild/apt-upgrade.sh"; <> };
 $script_apt_update =~ s/\s+/ /g;
+my $script_gcc_fresh = do { local(@ARGV, $/) = "$HOME/.config/sbuild/gcc-fresh.sh"; <> };
+$script_gcc_fresh =~ s/\s+/ /g;
 
 ## handled by $script_apt_update
 $apt_distupgrade = 0;
 $apt_upgrade = 0;
 
-my $script_gcc_fresh = do { local(@ARGV, $/) = "$HOME/.config/sbuild/gcc-fresh.sh"; <> };
-$script_gcc_fresh =~ s/\s+/ /g;
-
 $external_commands = {
 	'chroot-setup-commands' => [
 		$script_krdeb_setup,
 		$script_apt_update,
-
-#		$script_gcc_fresh,
+		$script_gcc_fresh,
 
 ## examples:
 

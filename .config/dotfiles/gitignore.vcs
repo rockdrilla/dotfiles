@@ -7,6 +7,8 @@
 
 /**/*.zwc
 
+/.vscode/
+
 /.cache/zsh/compcache/*
 /.cache/zsh/compdump
 /.cache/zsh/completion/*
