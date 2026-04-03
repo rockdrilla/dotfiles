@@ -28,11 +28,10 @@ $build_environment = {
 ## GOMAXPROCS - generic
 ## CROSS_ARCHS - for use with binutils
 ## DEB_STAGE - for use with gcc
-## KRDEB_ENABLE - backports from deb.krd.sh
-## KRDEB_GCC_VER - backports from deb.krd.sh
-## KRDEB_KEYRING - backports from deb.krd.sh
-## KRDEB_ROOT_URI - backports from deb.krd.sh
-## KRDEB_URI - backports from deb.krd.sh
+## KRDEB_ENABLE - packages from deb.krd.sh
+## KRDEB_GCC_VER - packages from deb.krd.sh
+## KRDEB_KEYRING - packages from deb.krd.sh
+## KRDEB_ROOT_URI - packages from deb.krd.sh
 use Dpkg::BuildInfo;
 $environment_filter = [
 	(sort (map "^$_\$", Dpkg::BuildInfo::get_build_env_allowed())),
@@ -44,7 +43,6 @@ $environment_filter = [
 	'^KRDEB_GCC_VER$',
 	'^KRDEB_KEYRING$',
 	'^KRDEB_ROOT_URI$',
-	'^KRDEB_URI$',
 ];
 
 my $script_krdeb_setup = do { local(@ARGV, $/) = "$HOME/.config/sbuild/krdeb-setup.sh"; <> };
