@@ -7,4 +7,12 @@ defscrollback 8192
 defflow off
 deflogin off
 # defshell -zsh
-hardstatus alwaysfirstline "%{= ky}%y.%m.%d%{= kK}|%{= kY}%c:%s%{= kK}|%{= kB}%H%{= kK}|%{= kG}%S%{= kK}|%{= kM}#%w%{-}%= %{= kK}|%{= kr}%l%{= kG}"
+
+## < 5.0.0
+# hardstatus alwaysfirstline "%{= ky}%y.%m.%d%{= kK}|%{= kY}%c:%s%{= kK}|%{= kB}%H%{= kK}|%{= kG}%S%{= kK}|%{= kM}#%w%{-}%= %{= kK}|%{= kr}%l%{-}"
+
+## >= 5.0.0
+backtick 1 1 1 date +'%H:%M:%S'
+backtick 2 1 1 cut -d' ' -f1-3 /proc/loadavg
+
+hardstatus alwaysfirstline "%{-}%{3}%y.%m.%d%{8}|%{11}%1`%{8}|%{12}%H%{8}|%{10}%S%{8}|%{13}#%w%{-}%= %{8}|%{1}%2`%{-}"
