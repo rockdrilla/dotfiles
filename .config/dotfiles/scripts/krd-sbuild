@@ -40,10 +40,16 @@ _append_args() {
 		_sbuild_args="${_sbuild_args}${_sbuild_args:+ }$(env printf '%q' "${__i}" )"
 	done ; unset __i
 }
+_prepend_args() {
+	for __i ; do
+		_sbuild_args="$(env printf '%q' "${__i}" )${_sbuild_args:+ }${_sbuild_args}"
+	done ; unset __i
+}
 
+unset arch host_arch build_arch
 case "$2" in
 *:* )
-	unset host_arch build_arch _xtra
+	unset _xtra
 	IFS=: read -r host_arch build_arch _xtra <<-EOF
 	$i
 	EOF
@@ -60,23 +66,46 @@ case "$2" in
 		env printf "%q: warning: extra data in 'host-arch:build-arch' specifier: %q\\n" "${me}" "${_xtra}" >&2
 	fi
 	unset _xtra
-
-	arch=${host_arch}
-	_append_args "--host=${host_arch}"
-	_append_args "--build=${build_arch}"
 ;;
 * )
-	arch=$2
-	_append_args "--arch=$2"
+	host_arch="$2"
+	build_arch="$2"
 ;;
 esac
 
 ## done with args
 shift 2
 
+## manual handling of several options
+arch_all=1
+arch_any=1
+enable_network=
+
 for i ; do
 	## naive splitting args and env
 	case "$i" in
+
+	## FAIL immediately when these options arrive
+	--arch | --arch=* | --build | --build=* | --host | --host=* )
+		env printf "%q: error: option is already handled: %q\\n" "${me}" "$i" >&2
+		exit 1
+	;;
+
+	-A | --arch-all ) arch_all=1 ;;
+	--no-arch-all ) arch_all= ;;
+
+	--arch-any ) arch_any=1 ;;
+	--no-arch-any ) arch_any= ;;
+
+	--enable-network) enable_network=1 ;;
+	--no-enable-network ) enable_network= ;;
+
+	## implies "--no-arch-all"
+	--append-to-version | --append-to-version=* | --make-binNMU | --make-binNMU=* )
+		_append_args "$i"
+		arch_all=
+	;;
+
 	-*  ) _append_args "$i" ;;
 	=*  ) _append_args "$i" ;;
 	*=  ) unset "$i" ;;
@@ -84,6 +113,33 @@ for i ; do
 	*   ) _append_args "$i" ;;
 	esac
 done ; unset i
+
+## prepend args (so option order is opposite to "native")
+
+if [ -n "${enable_network}" ] ; then
+	_prepend_args --enable-network
+fi
+
+if [ -n "${arch_all}" ] ; then
+	_prepend_args --arch-all
+else
+	_prepend_args --no-arch-all
+fi
+
+if [ -n "${arch_any}" ] ; then
+	_prepend_args --arch-any
+else
+	_prepend_args --no-arch-any
+fi
+
+## TODO: verify later all this mess
+arch="${host_arch}"
+if [ "${host_arch}" = "${build_arch}" ] ; then
+	_prepend_args "--arch=${arch}"
+else
+	_prepend_args "--build=${build_arch}"
+	_prepend_args "--host=${host_arch}"
+fi
 
 builddir="${topdir}/${arch}"
 mkdir -p "${topdir}/all" "${builddir}" "${builddir}-all" "${builddir}-debug"
@@ -93,7 +149,7 @@ cd "${builddir}"
 set +f
 for i in "${srcdir}"/*.dsc ; do
 	## I'm NOT proud of using "eval" here :(
-	eval "idle sbuild --arch-all --arch-any ${_sbuild_args} $i" || exit $?
+	eval "idle sbuild ${_sbuild_args} $i" || exit $?
 	find -name '*.build' -type l -exec rm -f {} +
 	find -name '*.build' -type f -exec xz -9vv {} +
 done
